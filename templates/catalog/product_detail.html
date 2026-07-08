@@ -173,9 +173,9 @@
                     </video>
                     {% endif %}
                     {% if product.main_image %}
-                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="main-image" id="mainImage" style="{% if product.video %}display: none;{% endif %}">
+                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="main-image" id="mainImage"{% if product.video %} style="display: none;"{% endif %}>
                     {% else %}
-                    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="main-image" id="mainImage" style="{% if product.video %}display: none;{% endif %}">
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="main-image" id="mainImage"{% if product.video %} style="display: none;"{% endif %}>
                     {% endif %}
                 </div>
             </div>
