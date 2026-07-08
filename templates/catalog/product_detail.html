@@ -286,10 +286,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Store all image URLs for carousel navigation
-    const imageUrls = [
-        {% if product.main_image %}"{{ product.main_image.url }}",{% endif %}
-        {% for image in product.images.all %}"{{ image.image.url }}",{% endfor %}
-    ].filter(url => url !== undefined);
+    const imageUrlsString = "{% if product.main_image %}{{ product.main_image.url }}{% endif %}{% for image in product.images.all %},{{ image.image.url }}{% endfor %}";
+    const imageUrls = imageUrlsString ? imageUrlsString.split(',').filter(url => url) : [];
 
     let currentImageIndex = 0;
 
