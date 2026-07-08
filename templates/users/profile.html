@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Sierra Luxe{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-body text-center">
+                {% if user.profile.profile_image %}
+                    <img src="{{ user.profile.profile_image.url }}" alt="Profile" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-4x text-white"></i>
+                    </div>
+                {% endif %}
+                <h4>{{ user.username }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                <hr>
+                <a href="{% url 'users:profile_edit' %}" class="btn btn-primary w-100">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-info-circle"></i> Profile Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>First Name:</strong>
+                        <p>{{ user.first_name|default:"Not provided" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Last Name:</strong>
+                        <p>{{ user.last_name|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Phone:</strong>
+                        <p>{{ user.profile.phone|default:"Not provided" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>City:</strong>
+                        <p>{{ user.profile.city|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Country:</strong>
+                        <p>{{ user.profile.country|default:"Not provided" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Postal Code:</strong>
+                        <p>{{ user.profile.postal_code|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Address:</strong>
+                        <p>{{ user.profile.address|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Member Since:</strong>
+                        <p>{{ user.date_joined|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
