@@ -6,6 +6,7 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
     verbose_name_plural = 'Profile'
+    fk_name = 'user'
 
 class UserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
@@ -14,5 +15,11 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Role', {'fields': ('role',)}),
     )
+    
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return []
+        return super().get_inline_instances(request, obj)
 
 admin.site.register(User, UserAdmin)
+admin.site.register(UserProfile)

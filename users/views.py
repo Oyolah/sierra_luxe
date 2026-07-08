@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, UserUpdateForm
+from sierra_luxe.decorators import admin_required, customer_required
 
 def register(request):
     if request.user.is_authenticated:
@@ -46,11 +47,17 @@ def user_logout(request):
     return redirect('catalog:home')
 
 @login_required
+@customer_required
 def profile(request):
+    # Data isolation: users can only view their own profile
+    # No need to filter since we're using request.user
     return render(request, 'users/profile.html')
 
 @login_required
+@customer_required
 def profile_edit(request):
+    # Data isolation: users can only edit their own profile
+    # Using request.user ensures they can only modify their own data
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)

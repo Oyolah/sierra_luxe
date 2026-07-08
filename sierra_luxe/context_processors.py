@@ -1,5 +1,4 @@
 from django.conf import settings
-from .models import User
 
 def site_settings(request):
     """Global site settings available in all templates"""
