@@ -35,6 +35,8 @@ class Product(models.Model):
     colors = models.CharField(max_length=100, help_text='Comma-separated colors')
     material = models.CharField(max_length=100, blank=True)
     care_instructions = models.TextField(blank=True)
+    main_image = models.ImageField(upload_to='products/', blank=True, null=True)
+    video = models.FileField(upload_to='products/', blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

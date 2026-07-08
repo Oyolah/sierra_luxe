@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - Sierra Luxe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-image {
+        height: 300px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+    }
+    
+    .filter-section h5 {
+        color: #d4a017;
+        margin-bottom: 15px;
+    }
+    
+    .filter-btn {
+        background: linear-gradient(45deg, #d4a017, #f4d03f);
+        border: none;
+        color: #1a1a2e;
+        font-weight: bold;
+    }
+    
+    .filter-btn:hover {
+        background: linear-gradient(45deg, #c49417, #e4d02f);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="filter-section">
+                <h5>Filters</h5>
+                <form method="GET">
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.slug }}" {% if request.GET.category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price Range</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" name="min_price" class="form-control" value="{{ request.GET.min_price }}" placeholder="Min">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" name="max_price" class="form-control" value="{{ request.GET.max_price }}" placeholder="Max">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Size</label>
+                        <input type="text" name="size" class="form-control" value="{{ request.GET.size }}" placeholder="S, M, L">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <input type="text" name="color" class="form-control" value="{{ request.GET.color }}" placeholder="Red, Blue">
+                    </div>
+                    <button type="submit" class="btn filter-btn w-100">Apply Filters</button>
+                    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        <div class="col-lg-9">
+            <h1 class="mb-4">All Products</h1>
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-4">
+                    <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
+                        <div class="card product-card h-100">
+                            {% if product.main_image %}
+                            <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-image">
+                            {% else %}
+                            <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="product-image">
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title text-dark">{{ product.name }}</h6>
+                                <p class="card-text text-muted small">{{ product.description|truncatechars:80 }}</p>
+                                <p class="price mb-0">${{ product.price }}</p>
+                                {% if product.discount_price %}
+                                <p class="text-muted small mb-0"><s>${{ product.discount_price }}</s></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No products found matching your criteria.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

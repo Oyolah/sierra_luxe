@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'catalog:home' %}">
-            <i class="fas fa-crown"></i> Sierra Luxe
+        <a class="navbar-brand" href="{% url 'catalog:home' %}" style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.8rem; letter-spacing: 1px;">
+            Sierra Luxe
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -9,17 +9,32 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'catalog:home' %}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Shop</a>
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#categoriesModal">
+                        <i class="fas fa-bars me-2"></i>Categories
+                    </a>
                 </li>
             </ul>
+            
+            <!-- Search Bar -->
+            <form class="d-flex flex-grow-1 me-3" action="{% url 'catalog:product_list' %}" method="GET">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search products...">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="#">
-                            <i class="fas fa-shopping-cart"></i> Cart
+                            <i class="fas fa-heart"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-shopping-cart"></i>
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -40,13 +55,115 @@
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-heart"></i>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</a>
                     </li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
+
+<!-- Categories Modal -->
+<div class="modal fade" id="categoriesModal" tabindex="-1" aria-labelledby="categoriesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoriesModalLabel">Categories</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <a href="{% url 'catalog:category_detail' 'women' %}" class="text-decoration-none">
+                            <div class="card h-100">
+                                <img src="/media/products/African Lace Maxi Dress 1.webp" alt="Women" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                <div class="card-body text-center">
+                                    <h6 class="text-dark mb-0">Women</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'catalog:category_detail' 'men' %}" class="text-decoration-none">
+                            <div class="card h-100">
+                                <img src="/media/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif" alt="Men" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                <div class="card-body text-center">
+                                    <h6 class="text-dark mb-0">Men</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'catalog:category_detail' 'kids' %}" class="text-decoration-none">
+                            <div class="card h-100">
+                                <img src="/media/products/baby-girl-ankara-ball-gown-dress-1.webp" alt="Kids" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                <div class="card-body text-center">
+                                    <h6 class="text-dark mb-0">Kids</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'catalog:category_detail' 'wedding' %}" class="text-decoration-none">
+                            <div class="card h-100">
+                                <img src="/media/products/aso-oke-couple-outfits-1.webp" alt="Wedding" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                <div class="card-body text-center">
+                                    <h6 class="text-dark mb-0">Wedding</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'catalog:category_detail' 'traditional' %}" class="text-decoration-none">
+                            <div class="card h-100">
+                                <img src="/media/products/red-beaded-african-dress-1.webp" alt="Traditional" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                <div class="card-body text-center">
+                                    <h6 class="text-dark mb-0">Traditional</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sign In Modal -->
+<div class="modal fade" id="signInModal" tabindex="-1" aria-labelledby="signInModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signInModalLabel">Sign In</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'users:login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p class="mb-0">Don't have an account? <a href="{% url 'users:register' %}">Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
