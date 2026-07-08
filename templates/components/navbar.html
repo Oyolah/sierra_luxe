@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="{% url 'catalog:home' %}" style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.8rem; letter-spacing: 1px;">
-            Sierra Luxe
+            {{ site_name }}
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -16,10 +16,13 @@
             </ul>
             
             <!-- Search Bar -->
-            <form class="d-flex flex-grow-1 me-3" action="{% url 'catalog:product_list' %}" method="GET">
+            <form class="d-flex flex-grow-1 me-3" action="{% url 'catalog:product_list' %}" method="GET" id="searchForm">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search products...">
-                    <button class="btn btn-outline-light" type="submit">
+                    <input type="text" class="form-control" name="search" placeholder="Search products..." id="searchInput" value="{{ request.GET.search }}">
+                    <button class="btn btn-outline-light" type="button" id="clearSearch" style="display: {% if request.GET.search %}block{% else %}none{% endif %};">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="btn btn-outline-light" type="submit" id="searchButton">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
@@ -84,7 +87,7 @@
             <div class="modal-body">
                 <div class="row g-4">
                     <div class="col-md-4">
-                        <a href="{% url 'catalog:category_detail' 'women' %}" class="text-decoration-none">
+                        <a href="{% url 'catalog:product_list' %}?category=women" class="text-decoration-none">
                             <div class="card h-100">
                                 <img src="/media/products/African Lace Maxi Dress 1.webp" alt="Women" class="card-img-top" style="height: 250px; object-fit: cover;">
                                 <div class="card-body text-center">
@@ -94,7 +97,7 @@
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="{% url 'catalog:category_detail' 'men' %}" class="text-decoration-none">
+                        <a href="{% url 'catalog:product_list' %}?category=men" class="text-decoration-none">
                             <div class="card h-100">
                                 <img src="/media/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif" alt="Men" class="card-img-top" style="height: 250px; object-fit: cover;">
                                 <div class="card-body text-center">
@@ -104,7 +107,7 @@
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="{% url 'catalog:category_detail' 'kids' %}" class="text-decoration-none">
+                        <a href="{% url 'catalog:product_list' %}?category=kids" class="text-decoration-none">
                             <div class="card h-100">
                                 <img src="/media/products/baby-girl-ankara-ball-gown-dress-1.webp" alt="Kids" class="card-img-top" style="height: 250px; object-fit: cover;">
                                 <div class="card-body text-center">
@@ -114,7 +117,7 @@
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="{% url 'catalog:category_detail' 'wedding' %}" class="text-decoration-none">
+                        <a href="{% url 'catalog:product_list' %}?category=wedding" class="text-decoration-none">
                             <div class="card h-100">
                                 <img src="/media/products/aso-oke-couple-outfits-1.webp" alt="Wedding" class="card-img-top" style="height: 250px; object-fit: cover;">
                                 <div class="card-body text-center">
@@ -124,7 +127,7 @@
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="{% url 'catalog:category_detail' 'traditional' %}" class="text-decoration-none">
+                        <a href="{% url 'catalog:product_list' %}?category=traditional" class="text-decoration-none">
                             <div class="card h-100">
                                 <img src="/media/products/red-beaded-african-dress-1.webp" alt="Traditional" class="card-img-top" style="height: 250px; object-fit: cover;">
                                 <div class="card-body text-center">
@@ -167,3 +170,52 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+    const searchForm = document.getElementById('searchForm');
+    
+    // Show/hide clear button based on input
+    searchInput.addEventListener('input', function() {
+        clearSearch.style.display = this.value ? 'block' : 'none';
+    });
+    
+    // Clear search
+    clearSearch.addEventListener('click', function() {
+        searchInput.value = '';
+        clearSearch.style.display = 'none';
+        
+        // If on products page, use AJAX to clear search
+        if (window.location.pathname === '/products/') {
+            performSearch('');
+        } else {
+            searchForm.submit();
+        }
+    });
+    
+    // Handle search form submission with AJAX if on products page
+    searchForm.addEventListener('submit', function(e) {
+        if (window.location.pathname === '/products/') {
+            e.preventDefault();
+            performSearch(searchInput.value);
+        }
+    });
+    
+    // Function to perform AJAX search using centralized utilities
+    function performSearch(searchTerm) {
+        const params = UrlUtils.getParams();
+        params.search = searchTerm || '';
+        UrlUtils.updateUrl(params);
+        
+        // Trigger the products page AJAX filter
+        if (typeof window.fetchProducts === 'function') {
+            window.fetchProducts();
+        } else {
+            // Fallback: reload page
+            window.location.href = window.location.pathname + '?' + UrlUtils.buildQueryString(params);
+        }
+    }
+});
+</script>

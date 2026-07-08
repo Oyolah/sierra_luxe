@@ -1,17 +1,15 @@
 from django.conf import settings
+from .constants import CURRENCY_SYMBOL, SITE_NAME, SITE_DESCRIPTION, CONTACT_EMAIL, CONTACT_PHONE, SOCIAL_MEDIA
 
 def site_settings(request):
     """Global site settings available in all templates"""
     return {
-        'site_name': 'Sierra Luxe',
-        'site_description': 'Authentic African Fashion for Women, Men & Kids',
-        'contact_email': 'info@sierraluxe.com',
-        'contact_phone': '+1 (555) 123-4567',
-        'social_media': {
-            'facebook': 'https://facebook.com/sierraluxe',
-            'instagram': 'https://instagram.com/sierraluxe',
-            'twitter': 'https://twitter.com/sierraluxe',
-        }
+        'site_name': SITE_NAME,
+        'site_description': SITE_DESCRIPTION,
+        'contact_email': CONTACT_EMAIL,
+        'contact_phone': CONTACT_PHONE,
+        'social_media': SOCIAL_MEDIA,
+        'currency_symbol': CURRENCY_SYMBOL,
     }
 
 def cart_count(request):

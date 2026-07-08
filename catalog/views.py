@@ -1,13 +1,9 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
 from .models import Category, Product
 
 def home(request):
     return render(request, 'catalog/home.html')
-
-def category_detail(request, slug):
-    category = get_object_or_404(Category, slug=slug)
-    products = category.products.filter(is_active=True)
-    return render(request, 'catalog/category_detail.html', {'category': category, 'products': products})
 
 def product_list(request):
     products = Product.objects.filter(is_active=True)
@@ -39,6 +35,25 @@ def product_list(request):
         products = products.filter(colors__icontains=color)
     
     categories = Category.objects.all()
+    
+    # AJAX request - return JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        products_data = []
+        for product in products:
+            products_data.append({
+                'id': product.id,
+                'name': product.name,
+                'slug': product.slug,
+                'price': str(product.price),
+                'discount_price': str(product.discount_price) if product.discount_price else None,
+                'description': product.description[:80],
+                'image': product.main_image.url if product.main_image else None,
+            })
+        return JsonResponse({
+            'products': products_data,
+            'count': products.count()
+        })
+    
     return render(request, 'catalog/product_list.html', {'products': products, 'categories': categories})
 
 def product_detail(request, slug):
