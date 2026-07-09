@@ -97,15 +97,9 @@ WSGI_APPLICATION = 'sierra_luxe.wsgi.application'
 import dj_database_url
 
 if os.getenv('DATABASE_URL'):
-    # Use Supabase pooler for IPv4 connection
-    db_url = os.getenv('DATABASE_URL')
-    # Replace direct connection with pooler connection for IPv4
-    if 'db.drtamonxatronleyvmpc.supabase.co' in db_url:
-        db_url = db_url.replace('db.drtamonxatronleyvmpc.supabase.co:5432', 'aws-0-us-east-1.pooler.supabase.com:6543')
-    
     DATABASES = {
         'default': dj_database_url.config(
-            default=db_url,
+            default=os.getenv('DATABASE_URL'),
             conn_max_age=600,
             conn_health_checks=True,
             ssl_require=True
