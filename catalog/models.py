@@ -1,12 +1,13 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
+from cloudinary.models import CloudinaryField
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='categories/', blank=True, null=True)
+    image = CloudinaryField('categories/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -35,8 +36,8 @@ class Product(models.Model):
     colors = models.CharField(max_length=100, help_text='Comma-separated colors')
     material = models.CharField(max_length=100, blank=True)
     care_instructions = models.TextField(blank=True)
-    main_image = models.ImageField(upload_to='products/', blank=True, null=True)
-    video = models.FileField(upload_to='products/', blank=True, null=True)
+    main_image = CloudinaryField('products/', blank=True, null=True)
+    video = CloudinaryField('products/', resource_type='video', blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -70,7 +71,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='products/')
+    image = CloudinaryField('products/')
     is_primary = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
