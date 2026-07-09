@@ -15,7 +15,12 @@ def get_product_rating_data(product):
     return round(average, 1), count
 
 def home(request):
-    return render(request, 'catalog/home.html')
+    categories = Category.objects.filter(is_active=True)
+    featured_products = Product.objects.filter(is_active=True, is_featured=True)[:8]
+    return render(request, 'catalog/home.html', {
+        'categories': categories,
+        'featured_products': featured_products,
+    })
 
 def product_list(request):
     products = Product.objects.filter(is_active=True)

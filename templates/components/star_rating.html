@@ -1,0 +1,17 @@
+{% load static %}
+<div class="star-rating-display" data-rating="{{ rating }}">
+    <span class="stars">
+        {% for _ in full_stars %}
+        <i class="fas fa-star text-warning"></i>
+        {% endfor %}
+        {% if has_half %}
+        <i class="fas fa-star-half-alt text-warning"></i>
+        {% endif %}
+        {% for _ in empty_stars %}
+        <i class="far fa-star text-warning"></i>
+        {% endfor %}
+    </span>
+    {% if review_count %}
+    <span class="text-muted small ms-1">({{ review_count }})</span>
+    {% endif %}
+</div>

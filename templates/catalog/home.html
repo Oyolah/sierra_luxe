@@ -5,72 +5,299 @@
 
 {% block extra_css %}
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-    }
-    
-    main {
-        margin: 0;
-        padding: 0;
-    }
-    
-    .hero-banner {
-        width: 100%;
-        height: 600px;
-        object-fit: cover;
-        display: block;
-    }
-    
-    .hero-overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    }
-    
-    .hero-overlay h1 {
-        font-size: 4rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        letter-spacing: 3px;
-    }
-    
-    .hero-overlay h2 {
-        font-size: 2rem;
-        font-weight: 300;
-        margin-bottom: 2rem;
-        letter-spacing: 2px;
-    }
-    
-    .btn-shop {
+    .btn-gold {
         background: linear-gradient(45deg, #d4a017, #f4d03f);
         border: none;
         padding: 15px 40px;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: bold;
         color: #1a1a2e;
         border-radius: 30px;
         transition: all 0.3s ease;
     }
     
-    .btn-shop:hover {
+    .btn-gold:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(212, 160, 23, 0.4);
+    }
+    
+    .category-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .category-card:hover {
+        transform: scale(1.05);
+    }
+    
+    .category-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    
+    .category-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px;
+        color: white;
+        z-index: 2;
+    }
+    
+    .category-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+    
+    .featured-product {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .featured-product:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(45deg, #d4a017, #f4d03f);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="position-relative">
-    <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/landing-page-banner/website-banner.jpg" alt="Sierra Luxe Banner" class="hero-banner">
-    <div class="hero-overlay">
-        <h1>SIERRA LUXE</h1>
-        <h2>Authentic African Fashion</h2>
-        <a href="{% url 'catalog:product_list' %}" class="btn btn-shop">SHOP NOW</a>
+<!-- Categories Section -->
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="section-title">Shop by Category</h2>
+        </div>
     </div>
-</div>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'catalog:product_list' %}?category={{ category.slug }}" class="text-decoration-none">
+                <div class="category-card">
+                    {% if category.name|lower == 'women' %}
+                    <img src="/media/products/African Lace Maxi Dress 1.webp" alt="{{ category.name }}">
+                    {% elif category.name|lower == 'men' %}
+                    <img src="/media/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif" alt="{{ category.name }}">
+                    {% elif category.name|lower == 'kids' %}
+                    <img src="/media/products/baby-girl-ankara-ball-gown-dress-1.webp" alt="{{ category.name }}">
+                    {% elif category.name|lower == 'wedding' %}
+                    <img src="/media/products/aso-oke-couple-outfits-1.webp" alt="{{ category.name }}">
+                    {% elif category.name|lower == 'traditional' %}
+                    <img src="/media/products/red-beaded-african-dress-1.webp" alt="{{ category.name }}">
+                    {% elif category.image %}
+                    <img src="{{ category.image }}" alt="{{ category.name }}">
+                    {% else %}
+                    <div class="category-placeholder">
+                        <h3 class="text-white">{{ category.name }}</h3>
+                    </div>
+                    {% endif %}
+                    <div class="category-overlay">
+                        <h4>{{ category.name }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-muted">No categories available yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title mb-0">Featured Products</h2>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">View All</a>
+            </div>
+        </div>
+    </div>
+    {% if featured_products %}
+    <div id="productsCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            {% for product in featured_products %}
+            {% if forloop.counter0|divisibleby:4 %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
+                            <div class="card featured-product h-100">
+                                {% if product.main_image %}
+                                <img src="{{ product.main_image }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ product.name|urlencode }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title text-dark">{{ product.name }}</h6>
+                                    <p class="price mb-2">{{ currency_symbol }}{{ product.price }}</p>
+                                    {% if product.discount_price %}
+                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ product.discount_price }}</s></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% if forloop.counter < featured_products|length %}
+                    {% with next_product=featured_products|slice:forloop.counter|first %}
+                    {% if next_product %}
+                    <div class="col-md-3">
+                        <a href="{% url 'catalog:product_detail' next_product.slug %}" class="text-decoration-none">
+                            <div class="card featured-product h-100">
+                                {% if next_product.main_image %}
+                                <img src="{{ next_product.main_image }}" alt="{{ next_product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ next_product.name|urlencode }}" alt="{{ next_product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title text-dark">{{ next_product.name }}</h6>
+                                    <p class="price mb-2">{{ currency_symbol }}{{ next_product.price }}</p>
+                                    {% if next_product.discount_price %}
+                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ next_product.discount_price }}</s></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                    {% if forloop.counter|add:1 < featured_products|length %}
+                    {% with next_product2=featured_products|slice:forloop.counter|add:1|first %}
+                    {% if next_product2 %}
+                    <div class="col-md-3">
+                        <a href="{% url 'catalog:product_detail' next_product2.slug %}" class="text-decoration-none">
+                            <div class="card featured-product h-100">
+                                {% if next_product2.main_image %}
+                                <img src="{{ next_product2.main_image }}" alt="{{ next_product2.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ next_product2.name|urlencode }}" alt="{{ next_product2.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title text-dark">{{ next_product2.name }}</h6>
+                                    <p class="price mb-2">{{ currency_symbol }}{{ next_product2.price }}</p>
+                                    {% if next_product2.discount_price %}
+                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ next_product2.discount_price }}</s></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                    {% if forloop.counter|add:2 < featured_products|length %}
+                    {% with next_product3=featured_products|slice:forloop.counter|add:2|first %}
+                    {% if next_product3 %}
+                    <div class="col-md-3">
+                        <a href="{% url 'catalog:product_detail' next_product3.slug %}" class="text-decoration-none">
+                            <div class="card featured-product h-100">
+                                {% if next_product3.main_image %}
+                                <img src="{{ next_product3.main_image }}" alt="{{ next_product3.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ next_product3.name|urlencode }}" alt="{{ next_product3.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title text-dark">{{ next_product3.name }}</h6>
+                                    <p class="price mb-2">{{ currency_symbol }}{{ next_product3.price }}</p>
+                                    {% if next_product3.discount_price %}
+                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ next_product3.discount_price }}</s></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% if featured_products|length > 4 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#productsCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#productsCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <p class="text-muted">No featured products available yet.</p>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Promotional Banner Section -->
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-md-6 d-flex align-items-center" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                        <div class="card-body p-5 text-white">
+                            <h3 class="mb-3">New Collection Available</h3>
+                            <p class="mb-4 opacity-75">Discover our latest arrivals with exclusive designs and premium quality.</p>
+                            <a href="{% url 'catalog:product_list' %}" class="btn btn-gold">SHOP NOW</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="position: relative; min-height: 300px;">
+                        {% if featured_products and featured_products.0.main_image %}
+                        <img src="{{ featured_products.0.main_image }}" alt="New Collection" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                        {% else %}
+                        <img src="/media/products/African Lace Maxi Dress 1.webp" alt="New Collection" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
