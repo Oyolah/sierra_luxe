@@ -48,6 +48,10 @@ def user_login(request):
     if request.user.is_authenticated:
         return redirect('catalog:home')
     
+    # Check if user was logged out due to session timeout
+    if request.GET.get('session_timeout') == 'true':
+        messages.warning(request, 'You were logged out due to inactivity. Please log in again.')
+    
     if request.method == 'POST':
         form = UserLoginForm(request, data=request.POST)
         if form.is_valid():
@@ -66,6 +70,11 @@ def user_login(request):
 
 def user_logout(request):
     logout(request)
+    
+    # Check if logout was due to session timeout
+    if request.GET.get('session_timeout') == 'true':
+        return redirect('users:login') + '?session_timeout=true'
+    
     messages.info(request, 'You have been logged out.')
     return redirect('catalog:home')
 

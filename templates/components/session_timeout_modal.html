@@ -1,0 +1,52 @@
+<!-- Session Timeout Warning Modal -->
+<div id="session-timeout-warning" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock text-warning me-2"></i>
+                    Session Expiring Soon
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">
+                    Your session will expire in <strong><span id="session-countdown">60</span> seconds</strong> due to inactivity.
+                </p>
+                <p class="text-muted mb-0">
+                    For your security, you will be automatically logged out if you remain inactive.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="window.location.href='/logout/'">
+                    Log Out Now
+                </button>
+                <button type="button" id="extend-session-btn" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Stay Signed In
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#session-timeout-warning {
+    z-index: 9999;
+}
+
+#session-timeout-warning .modal-content {
+    border: 2px solid #ffc107;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#session-timeout-warning .modal-header {
+    background-color: #fff3cd;
+    border-bottom: 1px solid #ffc107;
+}
+
+#session-countdown {
+    font-size: 1.5em;
+    color: #dc3545;
+    font-weight: bold;
+}
+</style>

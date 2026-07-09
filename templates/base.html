@@ -13,10 +13,14 @@
     
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if request.user.is_authenticated %}user-authenticated{% endif %}" data-user-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}">
     {% include 'components/navbar.html' %}
     
     {% include 'components/messages.html' %}
+    
+    {% if request.user.is_authenticated %}
+        {% include 'components/session_timeout_modal.html' %}
+    {% endif %}
 
     <main class="container my-4">
         {% block content %}{% endblock %}
@@ -28,6 +32,10 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/utils.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    
+    {% if request.user.is_authenticated %}
+        <script src="{% static 'js/session-timeout.js' %}"></script>
+    {% endif %}
     
     {% block extra_js %}{% endblock %}
 </body>
