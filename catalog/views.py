@@ -114,10 +114,14 @@ def product_detail(request, slug):
     
     # Track recently viewed for authenticated users
     if request.user.is_authenticated:
-        RecentlyViewed.objects.update_or_create(
-            user=request.user,
-            product=product
-        )
+        try:
+            RecentlyViewed.objects.update_or_create(
+                user=request.user,
+                product=product
+            )
+        except:
+            # RecentlyViewed table doesn't exist yet, skip tracking
+            pass
     
     return render(request, 'catalog/product_detail.html', {
         'product': product,
