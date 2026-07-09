@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "manage.py",
+      "src": "sierra_luxe/wsgi.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
@@ -21,7 +21,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "manage.py"
+      "dest": "sierra_luxe/wsgi.py"
     }
   ],
   "env": {
