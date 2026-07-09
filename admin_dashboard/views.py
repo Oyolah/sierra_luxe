@@ -238,9 +238,9 @@ def product_images(request, product_id):
             messages.success(request, f'{len(image_files)} image(s) added successfully.')
             
         elif action == 'update_video':
-            video_file = request.FILES.get('video')
-            if video_file:
-                product.video = video_file
+            video_url = request.POST.get('video', '')
+            if video_url:
+                product.video = video_url
                 product.save()
                 messages.success(request, 'Video updated successfully.')
             

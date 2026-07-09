@@ -103,23 +103,23 @@
             <div class="page-card-body">
                 {% if product.video %}
                 <div class="ratio ratio-16x9 mb-3">
-                    <video src="{{ product.video.url }}" controls class="rounded"></video>
+                    <video src="{{ product.video }}" controls class="rounded"></video>
                 </div>
                 {% endif %}
-                <form method="post" enctype="multipart/form-data">
+                <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="update_video">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Video File</label>
-                        <input type="file" name="video" class="form-control form-control-admin" accept="video/*" id="videoFile">
+                        <label class="form-label fw-bold">Video URL</label>
+                        <input type="url" name="video" class="form-control form-control-admin" value="{{ product.video|default:'' }}" placeholder="https://res.cloudinary.com/..." id="videoFile">
                         <div class="mt-2">
                             <p class="small text-muted mb-1">Preview:</p>
                             <div id="videoFilePreview">
                                 {% if product.video %}
-                                <video src="{{ product.video.url }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                                <video src="{{ product.video }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
                                 {% else %}
                                 <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
-                                    <span class="text-muted small">No video selected</span>
+                                    <span class="text-muted small">No video URL provided</span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -171,25 +171,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Video preview
     if (videoFileInput && videoFilePreview) {
-        videoFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    videoFilePreview.innerHTML = `
-                        <video src="${e.target.result}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
-                    `;
-                };
-                reader.readAsDataURL(file);
+        videoFileInput.addEventListener('input', function(e) {
+            const url = e.target.value;
+            if (url) {
+                videoFilePreview.innerHTML = `
+                    <video src="${url}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                `;
             } else {
                 {% if product.video %}
                 videoFilePreview.innerHTML = `
-                    <video src="{{ product.video.url }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                    <video src="{{ product.video }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
                 `;
                 {% else %}
                 videoFilePreview.innerHTML = `
                     <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
-                        <span class="text-muted small">No video selected</span>
+                        <span class="text-muted small">No video URL provided</span>
                     </div>
                 `;
                 {% endif %}
