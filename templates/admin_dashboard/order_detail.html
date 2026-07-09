@@ -1,4 +1,5 @@
 {% extends 'admin_dashboard/base.html' %}
+{% load ratings_review_tags %}
 
 {% block title %}Order {{ order.order_number }}{% endblock %}
 {% block page_title %}Order {{ order.order_number }}{% endblock %}
@@ -28,20 +29,20 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="{{ item.product.main_image }}" alt="{{ item.product.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
+                                    <img src="{{ item.product.main_image|image_url }}" alt="{{ item.product.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
                                     <span>{{ item.product.name }}</span>
                                 </div>
                             </td>
                             <td>{{ item.size|default:"-" }}</td>
                             <td>{{ item.color|default:"-" }}</td>
-                            <td>€{{ item.price|floatformat:2 }}</td>
+                            <td>{{ currency_symbol }}{{ item.price|floatformat:2 }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>€{{ item.subtotal|floatformat:2 }}</td>
+                            <td>{{ currency_symbol }}{{ item.subtotal|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         <tr class="bg-light">
                             <td colspan="5" class="text-end fw-bold">Total:</td>
-                            <td class="fw-bold">€{{ order.total_amount|floatformat:2 }}</td>
+                            <td class="fw-bold">{{ currency_symbol }}{{ order.total_amount|floatformat:2 }}</td>
                         </tr>
                     </tbody>
                 </table>

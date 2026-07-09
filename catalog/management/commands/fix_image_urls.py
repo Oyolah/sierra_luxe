@@ -117,8 +117,12 @@ class Command(BaseCommand):
         
         for category in Category.objects.all():
             if category.image:
-                fixed_url = self.fix_url(category.image, 'image')
-                if fixed_url != category.image:
+                # CloudinaryField stores Cloudinary resource, get URL
+                image_url = category.image.url if hasattr(category.image, 'url') else str(category.image)
+                fixed_url = self.fix_url(image_url, 'image')
+                if fixed_url != image_url:
+                    # For CloudinaryField, we need to set the URL directly
+                    # This will trigger Cloudinary to fetch from the fixed URL
                     category.image = fixed_url
                     category.save()
                     fixed_count += 1

@@ -10,7 +10,7 @@
         <a href="{% url 'admin_dashboard:product_list' %}" class="btn btn-sm btn-admin-outline">Cancel</a>
     </div>
     <div class="page-card-body">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-8">
@@ -26,11 +26,11 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Price (€)</label>
+                            <label class="form-label fw-bold">Price ({{ currency_symbol }})</label>
                             <input type="number" name="price" step="0.01" min="0" class="form-control form-control-admin" value="{{ product.price|default:'' }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Discount Price (€)</label>
+                            <label class="form-label fw-bold">Discount Price ({{ currency_symbol }})</label>
                             <input type="number" name="discount_price" step="0.01" min="0" class="form-control form-control-admin" value="{{ product.discount_price|default:'' }}">
                         </div>
                     </div>
@@ -75,16 +75,37 @@
                 
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Main Image URL</label>
-                        <input type="url" name="main_image" class="form-control form-control-admin" value="{{ product.main_image|default:'' }}" placeholder="https://...">
-                        {% if product.main_image %}
-                        <img src="{{ product.main_image }}" alt="Preview" class="img-fluid mt-2 rounded" style="max-height: 150px;">
-                        {% endif %}
+                        <label class="form-label fw-bold">Main Image</label>
+                        <input type="file" name="main_image" class="form-control form-control-admin" accept="image/*" id="mainImage">
+                        <div class="mt-2">
+                            <p class="small text-muted mb-1">Preview:</p>
+                            <div id="mainImagePreview">
+                                {% if product.main_image %}
+                                <img src="{{ product.main_image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                    <span class="text-muted small">No image selected</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Video URL</label>
-                        <input type="url" name="video" class="form-control form-control-admin" value="{{ product.video|default:'' }}" placeholder="https://...">
+                        <label class="form-label fw-bold">Video (optional)</label>
+                        <input type="file" name="video" class="form-control form-control-admin" accept="video/*" id="productVideo">
+                        <div class="mt-2">
+                            <p class="small text-muted mb-1">Preview:</p>
+                            <div id="videoPreview">
+                                {% if product.video %}
+                                <video src="{{ product.video.url }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                    <span class="text-muted small">No video selected</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -110,4 +131,69 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mainImageInput = document.getElementById('mainImage');
+    const mainImagePreview = document.getElementById('mainImagePreview');
+    const videoInput = document.getElementById('productVideo');
+    const videoPreview = document.getElementById('videoPreview');
+    
+    // Main image preview
+    if (mainImageInput && mainImagePreview) {
+        mainImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    mainImagePreview.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="max-height: 150px;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                {% if product.main_image %}
+                mainImagePreview.innerHTML = `
+                    <img src="{{ product.main_image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
+                `;
+                {% else %}
+                mainImagePreview.innerHTML = `
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                        <span class="text-muted small">No image selected</span>
+                    </div>
+                `;
+                {% endif %}
+            }
+        });
+    }
+    
+    // Video preview
+    if (videoInput && videoPreview) {
+        videoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    videoPreview.innerHTML = `
+                        <video src="${e.target.result}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                {% if product.video %}
+                videoPreview.innerHTML = `
+                    <video src="{{ product.video.url }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                `;
+                {% else %}
+                videoPreview.innerHTML = `
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                        <span class="text-muted small">No video selected</span>
+                    </div>
+                `;
+                {% endif %}
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

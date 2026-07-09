@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load ratings_review_tags %}
 
 {% block title %}Home - {{ site_name }}{% endblock %}
 
@@ -221,7 +222,7 @@
                 <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
                     <div class="card featured-product h-100">
                         {% if product.main_image %}
-                        <img src="{{ product.main_image }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
                         {% else %}
                         <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ product.name|urlencode }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
                         {% endif %}

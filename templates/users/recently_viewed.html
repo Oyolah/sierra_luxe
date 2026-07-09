@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load ratings_review_tags %}
 
 {% block title %}Recently Viewed - Sierra Luxe{% endblock %}
 
@@ -16,7 +17,7 @@
             <div class="card h-100 shadow-sm">
                 <a href="{% url 'catalog:product_detail' item.product.slug %}">
                     {% if item.product.main_image %}
-                    <img src="{{ item.product.main_image }}" class="card-img-top" alt="{{ item.product.name }}" 
+                    <img src="{{ item.product.main_image|image_url }}" class="card-img-top" alt="{{ item.product.name }}" 
                          style="height: 250px; object-fit: cover;">
                     {% else %}
                     <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="{{ item.product.name }}" 

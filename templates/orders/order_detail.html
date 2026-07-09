@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load ratings_review_tags %}
 
 {% block title %}Order #{{ order.id }} - Sierra Luxe{% endblock %}
 
@@ -54,7 +55,7 @@
                 
                 {% for item in order.items.all %}
                 <div class="d-flex gap-3 pb-3 mb-3 {% if not forloop.last %}border-bottom{% endif %}">
-                    <img src="{{ item.product.main_image }}" 
+                    <img src="{{ item.product.main_image|image_url }}" 
                          alt="{{ item.product.name }}"
                          style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
                     <div class="flex-grow-1">

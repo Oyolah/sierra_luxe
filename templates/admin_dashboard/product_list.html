@@ -1,4 +1,5 @@
 {% extends 'admin_dashboard/base.html' %}
+{% load ratings_review_tags %}
 
 {% block title %}Products{% endblock %}
 {% block page_title %}Products{% endblock %}
@@ -23,14 +24,22 @@
                 <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
             </select>
         </div>
-        <a href="{% url 'admin_dashboard:product_create' %}" class="btn-admin">
-            <i class="fas fa-plus me-2"></i>Add Product
-        </a>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-danger" id="bulkDeleteBtn" style="display: none;" onclick="bulkDelete()">
+                <i class="fas fa-trash me-2"></i>Delete Selected
+            </button>
+            <a href="{% url 'admin_dashboard:product_create' %}" class="btn-admin">
+                <i class="fas fa-plus me-2"></i>Add Product
+            </a>
+        </div>
     </div>
     <div class="page-card-body p-0">
         <table class="table table-admin mb-0">
             <thead>
                 <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleSelectAll()">
+                    </th>
                     <th>Image</th>
                     <th>Product</th>
                     <th>Category</th>
@@ -44,7 +53,10 @@
                 {% for product in products %}
                 <tr>
                     <td>
-                        <img src="{{ product.main_image }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        <input type="checkbox" class="form-check-input product-checkbox" value="{{ product.id }}" onchange="updateBulkDeleteButton()">
+                    </td>
+                    <td>
+                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                     </td>
                     <td>
                         <h6 class="mb-0">{{ product.name }}</h6>
@@ -53,10 +65,10 @@
                     <td>{{ product.category.name|default:"-" }}</td>
                     <td>
                         {% if product.discount_price %}
-                        <span class="text-decoration-line-through text-muted">€{{ product.price|floatformat:2 }}</span>
-                        <span class="text-danger fw-bold">€{{ product.discount_price|floatformat:2 }}</span>
+                        <span class="text-decoration-line-through text-muted">{{ currency_symbol }}{{ product.price|floatformat:2 }}</span>
+                        <span class="text-danger fw-bold">{{ currency_symbol }}{{ product.discount_price|floatformat:2 }}</span>
                         {% else %}
-                        €{{ product.price|floatformat:2 }}
+                        {{ currency_symbol }}{{ product.price|floatformat:2 }}
                         {% endif %}
                     </td>
                     <td>
@@ -88,7 +100,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-5">No products found</td>
+                    <td colspan="8" class="text-center text-muted py-5">No products found</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -110,6 +122,53 @@ function applyFilters() {
     if (status) params.set('status', status);
     
     window.location.href = '{% url 'admin_dashboard:product_list' %}' + (params.toString() ? '?' + params.toString() : '');
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    updateBulkDeleteButton();
+}
+
+function updateBulkDeleteButton() {
+    const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    if (checkboxes.length > 0) {
+        bulkDeleteBtn.style.display = 'inline-block';
+    } else {
+        bulkDeleteBtn.style.display = 'none';
+    }
+}
+
+function bulkDelete() {
+    const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+    if (checkboxes.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${checkboxes.length} product(s)?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url 'admin_dashboard:product_bulk_delete' %}';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        form.appendChild(csrfToken);
+        
+        checkboxes.forEach(checkbox => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'product_ids';
+            input.value = checkbox.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 document.getElementById('searchInput').addEventListener('keypress', function(e) {

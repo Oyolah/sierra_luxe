@@ -28,7 +28,7 @@
                 <tr>
                     <td>
                         {% if category.image %}
-                        <img src="{{ category.image }}" alt="{{ category.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                         {% else %}
                         <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                             <i class="fas fa-image text-muted"></i>

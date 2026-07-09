@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load ratings_review_tags %}
 
 {% block title %}Your Cart - Sierra Luxe{% endblock %}
 
@@ -107,7 +108,7 @@
                     <!-- Product Image -->
                     <div class="col-md-3">
                         <a href="{% url 'catalog:product_detail' item.product.slug %}">
-                            <img src="{{ item.product.main_image }}" 
+                            <img src="{{ item.product.main_image|image_url }}" 
                                  alt="{{ item.product.name }}"
                                  class="product-thumbnail w-100">
                         </a>
@@ -249,7 +250,7 @@
                 <div class="row">
                     <div class="col-md-3">
                         <a href="{% url 'catalog:product_detail' item.product.slug %}">
-                            <img src="{{ item.product.main_image }}" 
+                            <img src="{{ item.product.main_image|image_url }}" 
                                  alt="{{ item.product.name }}"
                                  class="product-thumbnail w-100">
                         </a>

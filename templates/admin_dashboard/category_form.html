@@ -10,7 +10,7 @@
         <a href="{% url 'admin_dashboard:category_list' %}" class="btn btn-sm btn-admin-outline">Cancel</a>
     </div>
     <div class="page-card-body">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-8">
@@ -25,11 +25,20 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Image URL</label>
-                        <input type="url" name="image" class="form-control form-control-admin" value="{{ category.image|default:'' }}" placeholder="https://...">
-                        {% if category.image %}
-                        <img src="{{ category.image }}" alt="Preview" class="img-fluid mt-2 rounded" style="max-height: 150px;">
-                        {% endif %}
+                        <label class="form-label fw-bold">Category Image</label>
+                        <input type="file" name="image" class="form-control form-control-admin" accept="image/*" id="categoryImage">
+                        <div class="mt-2">
+                            <p class="small text-muted mb-1">Preview:</p>
+                            <div id="imagePreview">
+                                {% if category.image %}
+                                <img src="{{ category.image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                    <span class="text-muted small">No image selected</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -48,4 +57,38 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('categoryImage');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    if (imageInput && imagePreview) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="max-height: 150px;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                {% if category.image %}
+                imagePreview.innerHTML = `
+                    <img src="{{ category.image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
+                `;
+                {% else %}
+                imagePreview.innerHTML = `
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                        <span class="text-muted small">No image selected</span>
+                    </div>
+                `;
+                {% endif %}
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

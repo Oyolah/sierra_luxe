@@ -44,4 +44,18 @@ def category_image(category):
         'traditional': 'https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/red-beaded-african-dress-1.webp',
     }
     category_name_lower = category.name.lower() if hasattr(category, 'name') else str(category).lower()
-    return category_images.get(category_name_lower, category.image if hasattr(category, 'image') else None)
+    
+    # If category has an image, return its URL (handle CloudinaryField)
+    if hasattr(category, 'image') and category.image:
+        return category.image.url if hasattr(category.image, 'url') else str(category.image)
+    
+    # Fallback to hardcoded images
+    return category_images.get(category_name_lower)
+
+
+@register.filter
+def image_url(image_field):
+    """Get URL from image field, handling both CloudinaryField and string URLs"""
+    if not image_field:
+        return None
+    return image_field.url if hasattr(image_field, 'url') else str(image_field)

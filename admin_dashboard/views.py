@@ -96,8 +96,8 @@ def product_create(request):
         colors = request.POST.get('colors', '')
         material = request.POST.get('material', '')
         care_instructions = request.POST.get('care_instructions', '')
-        main_image = request.POST.get('main_image', '')
-        video = request.POST.get('video', '')
+        main_image = request.FILES.get('main_image')
+        video = request.FILES.get('video')
         is_featured = request.POST.get('is_featured') == 'on'
         is_active = request.POST.get('is_active') == 'on'
         
@@ -147,8 +147,12 @@ def product_edit(request, product_id):
         product.colors = request.POST.get('colors', '')
         product.material = request.POST.get('material', '')
         product.care_instructions = request.POST.get('care_instructions', '')
-        product.main_image = request.POST.get('main_image', '')
-        product.video = request.POST.get('video', '')
+        main_image = request.FILES.get('main_image')
+        video = request.FILES.get('video')
+        if main_image:
+            product.main_image = main_image
+        if video:
+            product.video = video
         product.is_featured = request.POST.get('is_featured') == 'on'
         product.is_active = request.POST.get('is_active') == 'on'
         
@@ -179,6 +183,21 @@ def product_delete(request, product_id):
 
 @login_required
 @admin_required
+@require_POST
+def product_bulk_delete(request):
+    """Bulk delete products"""
+    product_ids = request.POST.getlist('product_ids')
+    if product_ids:
+        products = Product.objects.filter(id__in=product_ids)
+        count = products.count()
+        products.delete()
+        messages.success(request, f'{count} product(s) deleted successfully.')
+    else:
+        messages.warning(request, 'No products selected for deletion.')
+    return redirect('admin_dashboard:product_list')
+
+@login_required
+@admin_required
 def product_images(request, product_id):
     """Manage product images and video"""
     product = get_object_or_404(Product, id=product_id)
@@ -187,36 +206,49 @@ def product_images(request, product_id):
     if request.method == 'POST':
         action = request.POST.get('action')
         
-        if action == 'add_image':
-            image_url = request.POST.get('image_url')
+        if action == 'add_images':
+            image_files = request.FILES.getlist('images')
             is_primary = request.POST.get('is_primary') == 'on'
             
             if is_primary:
                 product.images.update(is_primary=False)
             
-            ProductImage.objects.create(
-                product=product,
-                image=image_url,
-                is_primary=is_primary,
-                alt_text=request.POST.get('alt_text', '')
-            )
+            for image_file in image_files:
+                ProductImage.objects.create(
+                    product=product,
+                    image=image_file,
+                    is_primary=is_primary,
+                    alt_text=request.POST.get('alt_text', '')
+                )
             
-            if is_primary:
-                product.main_image = image_url
+            if is_primary and image_files:
+                product.main_image = image_files[0]
                 product.save()
             
-            messages.success(request, 'Image added successfully.')
+            messages.success(request, f'{len(image_files)} image(s) added successfully.')
             
         elif action == 'update_video':
-            product.video = request.POST.get('video_url', '')
-            product.save()
-            messages.success(request, 'Video URL updated successfully.')
+            video_file = request.FILES.get('video')
+            if video_file:
+                product.video = video_file
+                product.save()
+                messages.success(request, 'Video updated successfully.')
             
         elif action == 'delete_image':
             image_id = request.POST.get('image_id')
             image = get_object_or_404(ProductImage, id=image_id, product=product)
             image.delete()
             messages.success(request, 'Image deleted successfully.')
+            
+        elif action == 'set_primary':
+            image_id = request.POST.get('image_id')
+            image = get_object_or_404(ProductImage, id=image_id, product=product)
+            product.images.update(is_primary=False)
+            image.is_primary = True
+            image.save()
+            product.main_image = image.image
+            product.save()
+            messages.success(request, 'Primary image updated successfully.')
             
         return redirect('admin_dashboard:product_images', product_id=product.id)
     
@@ -240,7 +272,7 @@ def category_create(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description', '')
-        image = request.POST.get('image', '')
+        image = request.FILES.get('image')
         is_active = request.POST.get('is_active') == 'on'
         
         try:
@@ -266,7 +298,9 @@ def category_edit(request, category_id):
     if request.method == 'POST':
         category.name = request.POST.get('name')
         category.description = request.POST.get('description', '')
-        category.image = request.POST.get('image', '')
+        image = request.FILES.get('image')
+        if image:
+            category.image = image
         category.is_active = request.POST.get('is_active') == 'on'
         
         try:

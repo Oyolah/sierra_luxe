@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load ratings_review_tags %}
 
 {% block title %}{{ product.name }} - {{ site_name }}{% endblock %}
 
@@ -183,17 +184,17 @@
                 <div class="d-flex flex-column gap-2">
                     {% if product.video %}
                     <div class="video-thumbnail" onclick="showVideo()" style="cursor: pointer; position: relative;">
-                        <video src="{{ product.video }}" muted preload="metadata" style="width: 80px; height: 80px; object-fit: cover;" onloadedmetadata="this.currentTime = 0.1"></video>
+                        <video src="{{ product.video|image_url }}" muted preload="metadata" style="width: 80px; height: 80px; object-fit: cover;" onloadedmetadata="this.currentTime = 0.1"></video>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
                     {% endif %}
                     {% if product.main_image %}
-                    <img src="{{ product.main_image }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ product.main_image }}')">
+                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ product.main_image|image_url }}')">
                     {% endif %}
                     {% for image in product.images.all %}
-                    <img src="{{ image.image }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ image.image }}')">
+                    <img src="{{ image.image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ image.image|image_url }}')">
                     {% endfor %}
                 </div>
                 
@@ -207,12 +208,12 @@
                     </button>
                     {% if product.video %}
                     <video autoplay muted loop playsinline class="main-image" id="mainVideo" style="max-width: 100%; height: 720px; object-fit: cover;" preload="auto">
-                        <source src="{{ product.video }}" type="video/mp4">
+                        <source src="{{ product.video|image_url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                     {% endif %}
                     {% if product.main_image %}
-                    <img src="{{ product.main_image }}" alt="{{ product.name }}" class="main-image" id="mainImage" style="{% if product.video %}display: none;{% endif %} max-width: 100%; height: 720px; object-fit: cover;">
+                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="main-image" id="mainImage" style="{% if product.video %}display: none;{% endif %} max-width: 100%; height: 720px; object-fit: cover;">
                     {% elif not product.video %}
                     <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="main-image" id="mainImage" style="max-width: 100%; height: 720px; object-fit: cover;">
                     {% endif %}
@@ -535,8 +536,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Store all media URLs for carousel navigation (video + images)
-    const videoUrl = "{% if product.video %}{{ product.video }}{% endif %}";
-    const imageUrlsString = "{% if product.main_image %}{{ product.main_image }}{% endif %}{% for image in product.images.all %},{{ image.image }}{% endfor %}";
+    const videoUrl = "{% if product.video %}{{ product.video|image_url }}{% endif %}";
+    const imageUrlsString = "{% if product.main_image %}{{ product.main_image|image_url }}{% endif %}{% for image in product.images.all %},{{ image.image|image_url }}{% endfor %}";
     const imageUrls = imageUrlsString ? imageUrlsString.split(',').filter(url => url) : [];
     
     // Combine video and images for carousel

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load ratings_review_tags %}
 
 {% block title %}Order History - Sierra Luxe{% endblock %}
 
@@ -35,7 +36,7 @@
                             {% for item in order.items.all %}
                             <div class="d-flex align-items-center mb-2">
                                 {% if item.product.main_image %}
-                                <img src="{{ item.product.main_image }}" alt="{{ item.product.name }}" 
+                                <img src="{{ item.product.main_image|image_url }}" alt="{{ item.product.name }}" 
                                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" class="me-3">
                                 {% endif %}
                                 <div>

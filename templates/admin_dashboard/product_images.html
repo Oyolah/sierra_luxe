@@ -16,20 +16,30 @@
                     {% for image in images %}
                     <div class="col-md-4">
                         <div class="card h-100">
-                            <img src="{{ image.image }}" class="card-img-top" alt="{{ image.alt_text }}" style="height: 180px; object-fit: cover;">
+                            <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.alt_text }}" style="height: 180px; object-fit: cover;">
                             <div class="card-body">
-                                <div class="form-check mb-3">
+                                <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" disabled {% if image.is_primary %}checked{% endif %}>
                                     <label class="form-check-label">Primary Image</label>
                                 </div>
-                                <form method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="delete_image">
-                                    <input type="hidden" name="image_id" value="{{ image.id }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this image?')">
-                                        <i class="fas fa-trash me-1"></i> Delete
-                                    </button>
-                                </form>
+                                <div class="d-flex gap-2">
+                                    <form method="post" class="flex-grow-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="set_primary">
+                                        <input type="hidden" name="image_id" value="{{ image.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary w-100" {% if image.is_primary %}disabled{% endif %}>
+                                            <i class="fas fa-star me-1"></i> Set Primary
+                                        </button>
+                                    </form>
+                                    <form method="post" class="flex-grow-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_image">
+                                        <input type="hidden" name="image_id" value="{{ image.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this image?')">
+                                            <i class="fas fa-trash me-1"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -47,16 +57,26 @@
     <div class="col-lg-4">
         <div class="page-card mb-4">
             <div class="page-card-header">
-                <h5 class="mb-0">Add New Image</h5>
+                <h5 class="mb-0">Add New Images</h5>
             </div>
             <div class="page-card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="add_image">
+                    <input type="hidden" name="action" value="add_images">
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Image URL</label>
-                        <input type="url" name="image_url" class="form-control form-control-admin" required placeholder="https://...">
+                        <label class="form-label fw-bold">Images (multiple)</label>
+                        <input type="file" name="images" class="form-control form-control-admin" accept="image/*" multiple id="imageFiles">
+                        <div class="mt-2">
+                            <p class="small text-muted mb-1">Preview:</p>
+                            <div id="imageFilesPreview" class="row g-2">
+                                <div class="col-12">
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
+                                        <span class="text-muted small">No images selected</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -71,7 +91,7 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn-admin w-100">Add Image</button>
+                    <button type="submit" class="btn-admin w-100">Add Images</button>
                 </form>
             </div>
         </div>
@@ -83,15 +103,27 @@
             <div class="page-card-body">
                 {% if product.video %}
                 <div class="ratio ratio-16x9 mb-3">
-                    <video src="{{ product.video }}" controls class="rounded"></video>
+                    <video src="{{ product.video.url }}" controls class="rounded"></video>
                 </div>
                 {% endif %}
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="update_video">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Video URL</label>
-                        <input type="url" name="video_url" class="form-control form-control-admin" value="{{ product.video|default:'' }}" placeholder="https://...">
+                        <label class="form-label fw-bold">Video File</label>
+                        <input type="file" name="video" class="form-control form-control-admin" accept="video/*" id="videoFile">
+                        <div class="mt-2">
+                            <p class="small text-muted mb-1">Preview:</p>
+                            <div id="videoFilePreview">
+                                {% if product.video %}
+                                <video src="{{ product.video.url }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
+                                    <span class="text-muted small">No video selected</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                     <button type="submit" class="btn-admin w-100">Update Video</button>
                 </form>
@@ -99,4 +131,71 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageFilesInput = document.getElementById('imageFiles');
+    const imageFilesPreview = document.getElementById('imageFilesPreview');
+    const videoFileInput = document.getElementById('videoFile');
+    const videoFilePreview = document.getElementById('videoFilePreview');
+    
+    // Multiple images preview
+    if (imageFilesInput && imageFilesPreview) {
+        imageFilesInput.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                imageFilesPreview.innerHTML = '';
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const col = document.createElement('div');
+                        col.className = 'col-4';
+                        col.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="height: 80px; object-fit: cover;">
+                        `;
+                        imageFilesPreview.appendChild(col);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                imageFilesPreview.innerHTML = `
+                    <div class="col-12">
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <span class="text-muted small">No images selected</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    // Video preview
+    if (videoFileInput && videoFilePreview) {
+        videoFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    videoFilePreview.innerHTML = `
+                        <video src="${e.target.result}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                {% if product.video %}
+                videoFilePreview.innerHTML = `
+                    <video src="{{ product.video.url }}" controls class="img-fluid rounded" style="max-height: 150px;"></video>
+                `;
+                {% else %}
+                videoFilePreview.innerHTML = `
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
+                        <span class="text-muted small">No video selected</span>
+                    </div>
+                `;
+                {% endif %}
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
