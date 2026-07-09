@@ -7,7 +7,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = CloudinaryField('sierra_luxe/categories/', blank=True, null=True)
+    image = models.CharField(max_length=500, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -36,8 +36,8 @@ class Product(models.Model):
     colors = models.CharField(max_length=100, help_text='Comma-separated colors')
     material = models.CharField(max_length=100, blank=True)
     care_instructions = models.TextField(blank=True)
-    main_image = CloudinaryField('sierra_luxe/products/', blank=True, null=True)
-    video = CloudinaryField('sierra_luxe/products/', resource_type='video', blank=True, null=True)
+    main_image = models.CharField(max_length=500, blank=True, null=True)
+    video = models.CharField(max_length=500, blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -71,7 +71,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = CloudinaryField('sierra_luxe/products/')
+    image = models.CharField(max_length=500)
     is_primary = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
