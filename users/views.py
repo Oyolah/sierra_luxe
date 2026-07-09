@@ -2,10 +2,31 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.cache import cache
+from django.http import HttpResponseForbidden
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, UserUpdateForm
 from sierra_luxe.decorators import admin_required, customer_required
 from .models import RecentlyViewed
 
+
+def rate_limit(max_attempts=5, timeout=300):
+    """Rate limiting decorator to prevent brute force attacks"""
+    def decorator(view_func):
+        def wrapper(request, *args, **kwargs):
+            # Get client IP
+            ip = request.META.get('REMOTE_ADDR')
+            cache_key = f'rate_limit_{ip}_{view_func.__name__}'
+            attempts = cache.get(cache_key, 0)
+            
+            if attempts >= max_attempts:
+                return HttpResponseForbidden('Too many attempts. Please try again later.')
+            
+            cache.set(cache_key, attempts + 1, timeout)
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+@rate_limit(max_attempts=5, timeout=300)
 def register(request):
     if request.user.is_authenticated:
         return redirect('catalog:home')
@@ -22,6 +43,7 @@ def register(request):
     
     return render(request, 'users/register.html', {'form': form})
 
+@rate_limit(max_attempts=5, timeout=300)
 def user_login(request):
     if request.user.is_authenticated:
         return redirect('catalog:home')

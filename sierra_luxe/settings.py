@@ -189,3 +189,64 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
+
+# Security Settings
+if not DEBUG:
+    # HTTPS Settings
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # HSTS Settings
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Cookie Settings
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    
+    # Security Headers
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Content Security Policy (basic)
+    SECURE_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: https://res.cloudinary.com; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://res.cloudinary.com;"
+
+# Session Security
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Password Validation (Enhanced)
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'OPTIONS': {
+            'max_similarity': 0.7,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# File Upload Security
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
+# Security Middleware Settings
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
