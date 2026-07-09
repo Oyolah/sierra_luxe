@@ -81,15 +81,25 @@ def product_detail(request, slug):
     related_products = Product.objects.filter(category=product.category, is_active=True).exclude(id=product.id)[:4]
     
     # Get store data
-    store, _ = Store.objects.get_or_create(
-        name='Sierra Luxe',
-        defaults={
-            'smooth_shipping': True,
-            'speedy_replies': True,
-            'average_rating': 4.8,
-            'total_reviews': 0
-        }
-    )
+    try:
+        store, _ = Store.objects.get_or_create(
+            name='Sierra Luxe',
+            defaults={
+                'smooth_shipping': True,
+                'speedy_replies': True,
+                'average_rating': 4.8,
+                'total_reviews': 0
+            }
+        )
+    except:
+        # Store table doesn't exist yet, use default values
+        class DefaultStore:
+            name = 'Sierra Luxe'
+            smooth_shipping = True
+            speedy_replies = True
+            average_rating = 4.8
+            total_reviews = 0
+        store = DefaultStore()
     
     # Get review and rating data
     reviews = product.reviews.filter(is_approved=True).select_related('customer')
