@@ -236,7 +236,25 @@
             
             <!-- Action Buttons -->
             <div class="d-grid gap-3 mb-4">
-                <button class="add-to-cart-btn">Add to Cart</button>
+                <form method="post" action="{% url 'cart:add_to_cart' product.id %}" id="add-to-cart-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1" id="cart-quantity">
+                    <input type="hidden" name="size" id="cart-size">
+                    <input type="hidden" name="color" id="cart-color">
+                    {% if user.is_authenticated %}
+                        <button type="submit" class="add-to-cart-btn" {% if product.stock == 0 %}disabled{% endif %}>
+                            {% if product.stock > 0 %}
+                                Add to Cart
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </button>
+                    {% else %}
+                        <a href="{% url 'users:login' %}?next={{ request.path }}" class="add-to-cart-btn text-center d-block text-decoration-none">
+                            Login to Add to Cart
+                        </a>
+                    {% endif %}
+                </form>
                 <button class="btn btn-outline-dark">
                     <i class="far fa-heart me-2"></i>Add to Wishlist
                 </button>
@@ -391,11 +409,15 @@ document.addEventListener('DOMContentLoaded', function() {
 function selectSize(btn) {
     document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    // Update hidden form field
+    document.getElementById('cart-size').value = btn.textContent.trim();
 }
 
 function selectColor(div) {
     document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
     div.classList.add('active');
+    // Update hidden form field
+    document.getElementById('cart-color').value = div.dataset.color || div.title;
 }
 
 function changeQuantity(delta) {
@@ -406,6 +428,125 @@ function changeQuantity(delta) {
     if (newValue >= 1 && newValue <= max) {
         input.value = newValue;
     }
+    // Update hidden form field
+    document.getElementById('cart-quantity').value = input.value;
+}
+
+// Handle add to cart form submission
+const addToCartForm = document.getElementById('add-to-cart-form');
+if (addToCartForm) {
+    addToCartForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Update quantity before submit
+        const quantity = document.getElementById('quantity');
+        if (quantity) {
+            document.getElementById('cart-quantity').value = quantity.value;
+        }
+        
+        // Validate size selection if product has sizes
+        const hasSizes = "{{ product.sizes }}" !== "";
+        if (hasSizes) {
+            const selectedSize = document.querySelector('.size-btn.active');
+            if (!selectedSize) {
+                showModal('validationModal', 'Selection Required', 'Please select a size before adding to cart.');
+                return false;
+            }
+            document.getElementById('cart-size').value = selectedSize.textContent.trim();
+        }
+        
+        // Validate color selection if product has colors
+        const hasColors = "{{ product.colors }}" !== "";
+        if (hasColors) {
+            const selectedColor = document.querySelector('.color-option.active');
+            if (!selectedColor) {
+                showModal('validationModal', 'Selection Required', 'Please select a color before adding to cart.');
+                return false;
+            }
+            document.getElementById('cart-color').value = selectedColor.dataset.color || selectedColor.title;
+        }
+        
+        // Submit via AJAX
+        const formData = new FormData(this);
+        const csrftoken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Add to cart response:', data);
+            if (data.success) {
+                // Show success message
+                showSuccessMessage(data.message);
+                
+                // Update cart count in navbar
+                updateCartCount(data.cart_count);
+            } else {
+                alert(data.message || 'Error adding to cart. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error adding to cart:', error);
+            alert('Error adding to cart. Please try again.');
+        });
+    });
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-success position-fixed';
+    toast.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+    toast.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div class="flex-grow-1">${message}</div>
+            <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Update cart count in navbar
+function updateCartCount(count) {
+    const cartBadge = document.querySelector('.cart-count');
+    if (cartBadge) {
+        cartBadge.textContent = count;
+        if (count === 0) {
+            cartBadge.classList.add('d-none');
+        } else {
+            cartBadge.classList.remove('d-none');
+        }
+    }
+}
+
+// Update quantity input on change
+const quantityInput = document.getElementById('quantity');
+if (quantityInput) {
+    quantityInput.addEventListener('change', function() {
+        document.getElementById('cart-quantity').value = this.value;
+    });
 }
 </script>
+
+<!-- Include Reusable Modal -->
+{% include 'components/modal.html' with modal_id='validationModal' %}
+
 {% endblock %}

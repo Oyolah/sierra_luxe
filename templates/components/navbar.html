@@ -35,10 +35,36 @@
                             <i class="fas fa-heart"></i>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
+                    <li class="nav-item position-relative" id="cart-dropdown">
+                        <a class="nav-link position-relative" href="{% url 'cart:cart_view' %}" id="cartDropdown">
                             <i class="fas fa-shopping-cart"></i>
+                            {% if user.cart.get_item_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                                {{ user.cart.get_item_count }}
+                            </span>
+                            {% endif %}
                         </a>
+                        <!-- Cart Dropdown -->
+                        <div id="cart-dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; z-index: 1050; min-width: 350px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-top: 0.5rem;">
+                            <div class="p-3 border-bottom">
+                                <h6 class="mb-0">Shopping Cart</h6>
+                            </div>
+                            <div id="cart-items-preview" style="max-height: 300px; overflow-y: auto;">
+                                <!-- Cart items will be loaded here -->
+                                <div class="text-center py-4">
+                                    <div class="spinner-border spinner-border-sm" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 border-top">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>Total:</strong>
+                                    <strong id="cart-dropdown-total">€0.00</strong>
+                                </div>
+                                <a href="{% url 'cart:cart_view' %}" class="btn btn-dark w-100 rounded-pill">View Cart</a>
+                            </div>
+                        </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -63,7 +89,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="{% url 'users:login' %}?next={% url 'cart:cart_view' %}">
                             <i class="fas fa-shopping-cart"></i>
                         </a>
                     </li>
@@ -211,6 +237,92 @@ document.addEventListener('DOMContentLoaded', function() {
             performSearch(searchInput.value);
         }
     });
+    
+    // Cart dropdown hover functionality
+    {% if user.is_authenticated %}
+    const cartDropdown = document.getElementById('cart-dropdown');
+    const cartDropdownMenu = document.getElementById('cart-dropdown-menu');
+    let cartHoverTimeout;
+    
+    if (cartDropdown && cartDropdownMenu) {
+        cartDropdown.addEventListener('mouseenter', function() {
+            clearTimeout(cartHoverTimeout);
+            cartDropdownMenu.style.display = 'block';
+            loadCartPreview();
+        });
+        
+        cartDropdown.addEventListener('mouseleave', function() {
+            cartHoverTimeout = setTimeout(() => {
+                cartDropdownMenu.style.display = 'none';
+            }, 300);
+        });
+        
+        cartDropdownMenu.addEventListener('mouseenter', function() {
+            clearTimeout(cartHoverTimeout);
+        });
+        
+        cartDropdownMenu.addEventListener('mouseleave', function() {
+            cartDropdownMenu.style.display = 'none';
+        });
+    }
+    
+    function loadCartPreview() {
+        fetch('/cart/preview/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Cart preview data:', data);
+                const cartItemsPreview = document.getElementById('cart-items-preview');
+                const cartDropdownTotal = document.getElementById('cart-dropdown-total');
+                
+                if (!cartItemsPreview || !cartDropdownTotal) {
+                    console.error('Cart preview elements not found');
+                    return;
+                }
+                
+                if (data.success) {
+                    if (data.items.length === 0) {
+                        cartItemsPreview.innerHTML = '<div class="text-center py-4 text-muted">Your cart is empty</div>';
+                        cartDropdownTotal.textContent = '€0.00';
+                    } else {
+                        let itemsHTML = '';
+                        data.items.forEach(item => {
+                            itemsHTML += `
+                                <div class="d-flex gap-2 p-3 border-bottom">
+                                    <img src="${item.product_image}" alt="${item.product_name}" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 small">${item.product_name}</h6>
+                                        <p class="text-muted small mb-0">Qty: ${item.quantity}</p>
+                                        ${item.size ? `<p class="text-muted small mb-0">Size: ${item.size}</p>` : ''}
+                                    </div>
+                                    <div class="text-end">
+                                        <p class="mb-0 fw-bold small">${data.currency_symbol}${item.subtotal.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        cartItemsPreview.innerHTML = itemsHTML;
+                        cartDropdownTotal.textContent = `${data.currency_symbol}${data.cart_total.toFixed(2)}`;
+                    }
+                } else {
+                    cartItemsPreview.innerHTML = '<div class="text-center py-4 text-danger">Error loading cart</div>';
+                    console.error('Cart preview error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading cart preview:', error);
+                const cartItemsPreview = document.getElementById('cart-items-preview');
+                if (cartItemsPreview) {
+                    cartItemsPreview.innerHTML = '<div class="text-center py-4 text-danger">Failed to load cart</div>';
+                }
+            });
+    }
+    {% endif %}
     
     // Function to perform AJAX search using centralized utilities
     function performSearch(searchTerm) {

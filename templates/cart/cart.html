@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Cart - Sierra Luxe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-item-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+    }
+    .cart-summary {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        position: sticky;
+        top: 20px;
+    }
+    .quantity-control {
+        display: inline-flex;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .quantity-control button {
+        background: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .quantity-control button:hover {
+        background: #f8f9fa;
+    }
+    .quantity-control input {
+        border: none;
+        border-left: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        width: 60px;
+        text-align: center;
+        padding: 0.5rem;
+    }
+    .checkout-btn {
+        background: #2d2d2d;
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        width: 100%;
+        transition: background 0.3s;
+    }
+    .checkout-btn:hover {
+        background: #1a1a1a;
+        color: white;
+    }
+    .payment-icons img {
+        height: 32px;
+        margin-right: 8px;
+    }
+    .remove-btn {
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+    .remove-btn:hover {
+        color: #dc3545;
+    }
+    .product-thumbnail {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Your cart</h1>
+    
+    {% if cart_items %}
+    <div class="row">
+        <!-- Cart Items Section -->
+        <div class="col-lg-8">
+            {% for item in cart_items %}
+            <div class="cart-item-card" id="cart-item-{{ item.id }}">
+                <div class="row">
+                    <!-- Product Image -->
+                    <div class="col-md-3">
+                        <a href="{% url 'catalog:product_detail' item.product.slug %}">
+                            <img src="{{ item.product.main_image }}" 
+                                 alt="{{ item.product.name }}"
+                                 class="product-thumbnail w-100">
+                        </a>
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-1">
+                                    <a href="{% url 'catalog:product_detail' item.product.slug %}" 
+                                       class="text-decoration-none text-dark">
+                                        {{ item.product.name }}
+                                    </a>
+                                </h5>
+                                {% if item.size %}
+                                <p class="text-muted small mb-0">Size: <strong>{{ item.size }}</strong></p>
+                                {% endif %}
+                                {% if item.color %}
+                                <p class="text-muted small mb-0">Color: <strong>{{ item.color }}</strong></p>
+                                {% endif %}
+                            </div>
+                            <h5 class="mb-0" id="item-subtotal-{{ item.id }}">{{ currency_symbol }}{{ item.get_subtotal|floatformat:2 }}</h5>
+                        </div>
+                        
+                        <!-- Quantity Controls -->
+                        <div class="d-flex align-items-center gap-3 mt-3">
+                            <div class="quantity-control">
+                                <button type="button" 
+                                        class="quantity-btn"
+                                        data-action="decrease"
+                                        data-item-id="{{ item.id }}"
+                                        data-current-qty="{{ item.quantity }}">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" 
+                                       value="{{ item.quantity }}" 
+                                       min="1"
+                                       class="quantity-input"
+                                       data-item-id="{{ item.id }}"
+                                       id="qty-{{ item.id }}"
+                                       readonly>
+                                <button type="button" 
+                                        class="quantity-btn"
+                                        data-action="increase"
+                                        data-item-id="{{ item.id }}"
+                                        data-current-qty="{{ item.quantity }}">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            
+                            <a href="#" 
+                               class="remove-btn"
+                               data-item-id="{{ item.id }}"
+                               onclick="return confirmRemove({{ item.id }})">
+                                <i class="fas fa-trash-alt me-1"></i> Remove
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Order Summary Section -->
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h5 class="mb-4">How you'll pay</h5>
+                
+                <!-- Payment Methods -->
+                <div class="payment-icons mb-4">
+                    <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa">
+                    <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard">
+                    <img src="https://img.icons8.com/color/48/000000/amex.png" alt="Amex">
+                    <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal">
+                </div>
+                
+                <!-- Price Breakdown -->
+                <div class="border-bottom pb-3 mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Item(s) total</span>
+                        <span id="subtotal-amount">{{ currency_symbol }}{{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Shipping</span>
+                        <span>{{ currency_symbol }}{{ shipping|floatformat:2 }}</span>
+                    </div>
+                </div>
+                
+                <!-- Total -->
+                <div class="d-flex justify-content-between mb-4">
+                    <h5 class="mb-0">Total ({{ cart_items.count }} item{{ cart_items.count|pluralize }})</h5>
+                    <h5 class="mb-0" id="total-amount">{{ currency_symbol }}{{ total|floatformat:2 }}</h5>
+                </div>
+                
+                <!-- Checkout Button -->
+                <a href="{% url 'cart:checkout' %}" class="checkout-btn text-decoration-none d-block text-center">
+                    Proceed to checkout
+                </a>
+                
+                <!-- Coupon Code -->
+                <button type="button" class="btn btn-link w-100 mt-3 text-decoration-none">
+                    <i class="fas fa-tag text-success me-2"></i>
+                    Apply coupon code
+                </button>
+                
+                <p class="text-muted small text-center mt-3 mb-0">
+                    Local taxes included (where applicable)
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
+        <h2 class="mb-3">Your cart is empty</h2>
+        <p class="text-muted mb-4">Add some items to get started!</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+            Continue Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% csrf_token %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Quantity buttons
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            const action = this.dataset.action;
+            const input = document.getElementById(`qty-${itemId}`);
+            let quantity = parseInt(input.value);
+            
+            if (action === 'increase') {
+                quantity++;
+            } else if (action === 'decrease' && quantity > 1) {
+                quantity--;
+            }
+            
+            input.value = quantity;
+            updateCartItem(itemId, quantity);
+        });
+    });
+    
+    function updateCartItem(itemId, quantity) {
+        fetch(`/cart/update/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update subtotal for this item
+                document.getElementById(`item-subtotal-${itemId}`).textContent = `{{ currency_symbol }}${data.subtotal.toFixed(2)}`;
+                
+                // Update cart totals
+                document.getElementById('subtotal-amount').textContent = `{{ currency_symbol }}${data.cart_total.toFixed(2)}`;
+                document.getElementById('total-amount').textContent = `{{ currency_symbol }}${data.total.toFixed(2)}`;
+                
+                // Update cart count in navbar
+                updateCartCount(data.cart_count);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    window.confirmRemove = function(itemId) {
+        showModal(
+            'confirmModal',
+            'Remove Item',
+            'Remove this item from cart?',
+            function() {
+                removeCartItem(itemId);
+            }
+        );
+        return false;
+    };
+    
+    function removeCartItem(itemId) {
+        fetch(`/cart/remove/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove item from DOM
+                const itemElement = document.getElementById(`cart-item-${itemId}`);
+                itemElement.remove();
+                
+                // Update cart totals
+                document.getElementById('subtotal-amount').textContent = `{{ currency_symbol }}${data.cart_total.toFixed(2)}`;
+                document.getElementById('total-amount').textContent = `{{ currency_symbol }}${data.total.toFixed(2)}`;
+                
+                // Update cart count in navbar
+                updateCartCount(data.cart_count);
+                
+                // Reload if cart is empty
+                if (data.cart_count === 0) {
+                    location.reload();
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.cart-count');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            if (count === 0) {
+                cartBadge.classList.add('d-none');
+            } else {
+                cartBadge.classList.remove('d-none');
+            }
+        }
+    }
+});
+</script>
+
+<!-- Include Reusable Modal -->
+{% include 'components/modal.html' with modal_id='confirmModal' %}
+
+{% endblock %}
