@@ -76,7 +76,12 @@ class Product(SlugModel):
         # Delete all related ProductImage objects (which will delete their Cloudinary images)
         for image in self.images.all():
             image.delete()
-        super().delete(*args, **kwargs)
+        # Delete product from database (handle cascade errors from missing tables)
+        try:
+            super().delete(*args, **kwargs)
+        except:
+            # If cascade delete fails due to missing tables, try direct delete
+            Product.objects.filter(id=self.id).delete()
     
     def __str__(self):
         return self.name
