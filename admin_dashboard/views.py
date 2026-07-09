@@ -109,7 +109,7 @@ def product_create(request):
         material = request.POST.get('material', '')
         care_instructions = request.POST.get('care_instructions', '')
         main_image = request.FILES.get('main_image')
-        video = request.FILES.get('video')
+        video = request.POST.get('video', '')
         is_featured = get_bool_from_post(request, 'is_featured')
         is_active = get_bool_from_post(request, 'is_active')
         
@@ -160,7 +160,7 @@ def product_edit(request, product_id):
         product.material = request.POST.get('material', '')
         product.care_instructions = request.POST.get('care_instructions', '')
         main_image = request.FILES.get('main_image')
-        video = request.FILES.get('video')
+        video = request.POST.get('video', '')
         if main_image:
             product.main_image = main_image
         if video:

@@ -45,7 +45,7 @@ class Product(SlugModel):
     material = models.CharField(max_length=100, blank=True)
     care_instructions = models.TextField(blank=True)
     main_image = CloudinaryField('product_images', blank=True, null=True)
-    video = CloudinaryField('product_videos', resource_type='video', blank=True, null=True)
+    video = models.URLField(blank=True, null=True, help_text='Cloudinary video URL')
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -71,14 +71,6 @@ class Product(SlugModel):
                 public_id = getattr(self.main_image, 'public_id', None)
                 if public_id:
                     cloudinary.uploader.destroy(public_id, resource_type='image')
-            except:
-                pass
-        # Delete video from Cloudinary
-        if self.video:
-            try:
-                public_id = getattr(self.video, 'public_id', None)
-                if public_id:
-                    cloudinary.uploader.destroy(public_id, resource_type='video')
             except:
                 pass
         # Delete all related ProductImage objects (which will delete their Cloudinary images)
