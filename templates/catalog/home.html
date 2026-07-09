@@ -96,6 +96,73 @@
         height: 3px;
         background: linear-gradient(45deg, #d4a017, #f4d03f);
     }
+    
+    .carousel-container {
+        overflow: hidden;
+        position: relative;
+        padding: 0 40px;
+    }
+    
+    .carousel-track {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+    }
+    
+    .carousel-slide {
+        flex: 0 0 25%;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease;
+    }
+    
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .carousel-control-prev {
+        left: 0;
+    }
+    
+    .carousel-control-next {
+        right: 0;
+    }
+    
+    .carousel-control-prev:disabled,
+    .carousel-control-next:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    
+    @media (max-width: 768px) {
+        .carousel-slide {
+            flex: 0 0 50%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .carousel-slide {
+            flex: 0 0 100%;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -147,48 +214,82 @@
         </div>
     </div>
     {% if featured_products %}
-    <div id="productsCarousel" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
+    <div class="carousel-container">
+        <div class="carousel-track" id="carouselTrack">
             {% for product in featured_products %}
-            {% if forloop.counter0|divisibleby:4 %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <div class="row">
-            {% endif %}
-                    <div class="col-md-3">
-                        <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
-                            <div class="card featured-product h-100">
-                                {% if product.main_image %}
-                                <img src="{{ product.main_image }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% else %}
-                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ product.name|urlencode }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h6 class="card-title text-dark">{{ product.name }}</h6>
-                                    <p class="price mb-2">{{ currency_symbol }}{{ product.price }}</p>
-                                    {% if product.discount_price %}
-                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ product.discount_price }}</s></p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </a>
+            <div class="carousel-slide">
+                <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
+                    <div class="card featured-product h-100">
+                        {% if product.main_image %}
+                        <img src="{{ product.main_image }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ product.name|urlencode }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title text-dark">{{ product.name }}</h6>
+                            <p class="price mb-2">{{ currency_symbol }}{{ product.price }}</p>
+                            {% if product.discount_price %}
+                            <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ product.discount_price }}</s></p>
+                            {% endif %}
+                        </div>
                     </div>
-            {% if forloop.counter|divisibleby:4 or forloop.last %}
-                </div>
+                </a>
             </div>
-            {% endif %}
             {% endfor %}
         </div>
         {% if featured_products|length > 4 %}
-        <button class="carousel-control-prev" type="button" data-bs-target="#productsCarousel" data-bs-slide="prev">
+        <button class="carousel-control-prev" type="button" id="prevBtn">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#productsCarousel" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" id="nextBtn">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
         </button>
         {% endif %}
     </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const track = document.getElementById('carouselTrack');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (track && prevBtn && nextBtn) {
+            let currentIndex = 0;
+            const slides = track.children;
+            const totalSlides = slides.length;
+            const slidesPerView = 4;
+            
+            function updateCarousel() {
+                const slideWidth = 100 / slidesPerView;
+                const translateX = -(currentIndex * slideWidth);
+                track.style.transform = `translateX(${translateX}%)`;
+                
+                // Disable buttons at boundaries
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex >= totalSlides - slidesPerView;
+            }
+            
+            prevBtn.addEventListener('click', function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCarousel();
+                }
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                if (currentIndex < totalSlides - slidesPerView) {
+                    currentIndex++;
+                    updateCarousel();
+                }
+            });
+            
+            // Initial state
+            updateCarousel();
+        }
+    });
+    </script>
     {% else %}
     <div class="row">
         <div class="col-12">
