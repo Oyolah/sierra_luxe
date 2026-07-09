@@ -76,7 +76,23 @@ class Product(SlugModel):
         # Delete all related ProductImage objects (which will delete their Cloudinary images)
         for image in self.images.all():
             image.delete()
-        # Use raw SQL to completely bypass Django CASCADE mechanism
+        # Delete related records to satisfy PostgreSQL foreign key constraints
+        try:
+            from cart.models import CartItem
+            CartItem.objects.filter(product=self).delete()
+        except:
+            pass
+        try:
+            from reviews.models import Review
+            Review.objects.filter(product=self).delete()
+        except:
+            pass
+        try:
+            from users.models import RecentlyViewed
+            RecentlyViewed.objects.filter(product=self).delete()
+        except:
+            pass
+        # Delete product using raw SQL
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM catalog_product WHERE id = %s", [self.id])
