@@ -40,3 +40,12 @@ def admin_or_customer_required(view_func):
             return redirect('users:login')
         return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+# Combined decorators to reduce repetition
+def login_admin_required(view_func):
+    """Combined decorator for login required + admin required"""
+    return login_required(admin_required(view_func))
+
+def login_customer_required(view_func):
+    """Combined decorator for login required + customer required"""
+    return login_required(customer_required(view_func))

@@ -8,8 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from decimal import Decimal
-
-from sierra_luxe.decorators import admin_required
+from sierra_luxe.decorators import login_admin_required, admin_required
 from catalog.models import Category, Product, ProductImage
 from orders.models import Order
 from users.models import User
@@ -29,8 +28,7 @@ def delete_model_instance(request, model_class, instance_id, redirect_url, name_
     messages.success(request, f'{model_class.__name__} "{instance_name}" deleted successfully.')
     return redirect(redirect_url)
 
-@login_required
-@admin_required
+@login_admin_required
 def dashboard(request):
     """Admin dashboard home with statistics"""
     total_products = Product.objects.count()
@@ -62,8 +60,7 @@ def dashboard(request):
     }
     return render(request, 'admin_dashboard/dashboard.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 def product_list(request):
     """List all products with search and filter"""
     products = Product.objects.select_related('category').all()
@@ -91,8 +88,7 @@ def product_list(request):
     }
     return render(request, 'admin_dashboard/product_list.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 def product_create(request):
     """Create new product"""
     categories = Category.objects.all()
@@ -141,8 +137,7 @@ def product_create(request):
     }
     return render(request, 'admin_dashboard/product_form.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 def product_edit(request, product_id):
     """Edit product"""
     product = get_object_or_404(Product, id=product_id)
@@ -182,15 +177,13 @@ def product_edit(request, product_id):
     }
     return render(request, 'admin_dashboard/product_form.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def product_delete(request, product_id):
     """Delete product"""
     return delete_model_instance(request, Product, product_id, 'admin_dashboard:product_list')
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def product_bulk_delete(request):
     """Bulk delete products"""
@@ -206,8 +199,7 @@ def product_bulk_delete(request):
         messages.warning(request, 'No products selected for deletion.')
     return redirect('admin_dashboard:product_list')
 
-@login_required
-@admin_required
+@login_admin_required
 def product_images(request, product_id):
     """Manage product images and video"""
     product = get_object_or_404(Product, id=product_id)
@@ -268,15 +260,13 @@ def product_images(request, product_id):
     }
     return render(request, 'admin_dashboard/product_images.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 def category_list(request):
     """List all categories"""
     categories = Category.objects.annotate(product_count=Count('products'))
     return render(request, 'admin_dashboard/category_list.html', {'categories': categories})
 
-@login_required
-@admin_required
+@login_admin_required
 def category_create(request):
     """Create category"""
     if request.method == 'POST':
@@ -299,8 +289,7 @@ def category_create(request):
     
     return render(request, 'admin_dashboard/category_form.html', {'action': 'Create'})
 
-@login_required
-@admin_required
+@login_admin_required
 def category_edit(request, category_id):
     """Edit category"""
     category = get_object_or_404(Category, id=category_id)
@@ -325,8 +314,7 @@ def category_edit(request, category_id):
         'action': 'Edit'
     })
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def category_delete(request, category_id):
     """Delete category"""
@@ -343,8 +331,7 @@ def get_available_permissions():
         grouped[app_label].append(perm)
     return grouped
 
-@login_required
-@admin_required
+@login_admin_required
 def user_list(request):
     """List all users"""
     users = User.objects.all().order_by('-date_joined')
@@ -367,8 +354,7 @@ def user_list(request):
         'role_choices': User.ROLE_CHOICES,
     })
 
-@login_required
-@admin_required
+@login_admin_required
 def user_create(request):
     """Create new user"""
     if request.method == 'POST':
@@ -412,8 +398,7 @@ def user_create(request):
     }
     return render(request, 'admin_dashboard/user_form.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 def user_edit(request, user_id):
     """Edit user"""
     user = get_object_or_404(User, id=user_id)
@@ -453,15 +438,13 @@ def user_edit(request, user_id):
     }
     return render(request, 'admin_dashboard/user_form.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def user_delete(request, user_id):
     """Delete user"""
     return delete_model_instance(request, User, user_id, 'admin_dashboard:user_list', 'username')
 
-@login_required
-@admin_required
+@login_admin_required
 def order_list(request):
     """List all orders"""
     orders = Order.objects.select_related('customer').order_by('-created_at')
@@ -484,8 +467,7 @@ def order_list(request):
     }
     return render(request, 'admin_dashboard/order_list.html', context)
 
-@login_required
-@admin_required
+@login_admin_required
 def order_detail(request, order_id):
     """View order details"""
     order = get_object_or_404(Order, id=order_id)
@@ -494,8 +476,7 @@ def order_detail(request, order_id):
         'status_choices': Order.STATUS_CHOICES,
     })
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def order_status_update(request, order_id):
     """Update order status"""
@@ -512,8 +493,7 @@ def order_status_update(request, order_id):
     return redirect('admin_dashboard:order_detail', order_id=order.id)
 
 
-@login_required
-@admin_required
+@login_admin_required
 def featured_products(request):
     """Manage featured products"""
     featured = Product.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
@@ -526,8 +506,7 @@ def featured_products(request):
     return render(request, 'admin_dashboard/featured_products.html', context)
 
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def add_featured(request, product_id):
     """Add product to featured"""
@@ -543,8 +522,7 @@ def add_featured(request, product_id):
     return redirect('admin_dashboard:featured_products')
 
 
-@login_required
-@admin_required
+@login_admin_required
 @require_POST
 def remove_featured(request, product_id):
     """Remove product from featured"""
