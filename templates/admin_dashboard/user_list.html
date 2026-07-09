@@ -44,13 +44,13 @@
                     <td>{{ user.get_full_name|default:"-" }}</td>
                     <td>{{ user.email }}</td>
                     <td>
-                        <span class="status-badge bg-{% if user.role == 'ADMIN' %}danger{% else %}info{% endif %}-subtle text-{% if user.role == 'ADMIN' %}danger{% else %}info{% endif %}">
+                        <span class="status-badge bg-{{ user.role|status_badge_class:'user_role' }}-subtle text-{{ user.role|status_badge_class:'user_role' }}">
                             {{ user.get_role_display }}
                         </span>
                     </td>
                     <td>{{ user.date_joined|date:"M d, Y" }}</td>
                     <td>
-                        <span class="status-badge bg-{% if user.is_active %}success{% else %}danger{% endif %}-subtle text-{% if user.is_active %}success{% else %}danger{% endif %}">
+                        <span class="status-badge bg-{{ user.is_active|status_badge_class:'user_active' }}-subtle text-{{ user.is_active|status_badge_class:'user_active' }}">
                             {% if user.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
                     </td>

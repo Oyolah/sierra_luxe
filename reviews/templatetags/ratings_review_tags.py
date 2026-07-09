@@ -59,3 +59,23 @@ def image_url(image_field):
     if not image_field:
         return None
     return image_field.url if hasattr(image_field, 'url') else str(image_field)
+
+
+@register.filter
+def status_badge_class(status, type='default'):
+    """Get Bootstrap badge classes for different status types"""
+    if type == 'order':
+        status_map = {
+            'DELIVERED': 'success',
+            'CANCELLED': 'danger',
+            'SHIPPED': 'info',
+            'PENDING': 'warning',
+        }
+        return status_map.get(status, 'primary')
+    elif type == 'product':
+        return 'success' if status else 'secondary'
+    elif type == 'user_role':
+        return 'danger' if status == 'ADMIN' else 'info'
+    elif type == 'user_active':
+        return 'success' if status else 'danger'
+    return 'primary'

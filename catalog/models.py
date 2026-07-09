@@ -3,18 +3,26 @@ from django.conf import settings
 from django.utils.text import slugify
 from cloudinary.models import CloudinaryField
 
-class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True)
-    description = models.TextField(blank=True)
-    image = CloudinaryField('category_images', blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+class SlugModel(models.Model):
+    """Abstract base model for models with auto-generated slugs"""
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+    
+    class Meta:
+        abstract = True
+
+
+class Category(SlugModel):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    image = CloudinaryField('category_images', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.name
@@ -24,9 +32,8 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
         ordering = ['name']
 
-class Product(models.Model):
+class Product(SlugModel):
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -43,11 +50,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-    
     def get_price(self):
         if self.discount_price:
             return self.discount_price
@@ -60,6 +62,18 @@ class Product(models.Model):
     
     def is_in_stock(self):
         return self.stock > 0
+    
+    def delete(self, *args, **kwargs):
+        # Delete main image from Cloudinary
+        if self.main_image:
+            self.main_image.delete()
+        # Delete video from Cloudinary
+        if self.video:
+            self.video.delete()
+        # Delete all related ProductImage objects (which will delete their Cloudinary images)
+        for image in self.images.all():
+            image.delete()
+        super().delete(*args, **kwargs)
     
     def __str__(self):
         return self.name
@@ -75,6 +89,12 @@ class ProductImage(models.Model):
     is_primary = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def delete(self, *args, **kwargs):
+        # Delete image from Cloudinary
+        if self.image:
+            self.image.delete()
+        super().delete(*args, **kwargs)
     
     def __str__(self):
         return f"Image for {self.product.name}"

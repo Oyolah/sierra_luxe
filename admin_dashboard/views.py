@@ -17,6 +17,18 @@ from cart.models import Cart
 
 User = get_user_model()
 
+def get_bool_from_post(request, field_name):
+    """Helper to convert checkbox POST value to boolean"""
+    return request.POST.get(field_name) == 'on'
+
+def delete_model_instance(request, model_class, instance_id, redirect_url, name_field='name'):
+    """Helper function for deleting model instances with consistent messaging"""
+    instance = get_object_or_404(model_class, id=instance_id)
+    instance_name = getattr(instance, name_field)
+    instance.delete()
+    messages.success(request, f'{model_class.__name__} "{instance_name}" deleted successfully.')
+    return redirect(redirect_url)
+
 @login_required
 @admin_required
 def dashboard(request):
@@ -98,8 +110,8 @@ def product_create(request):
         care_instructions = request.POST.get('care_instructions', '')
         main_image = request.FILES.get('main_image')
         video = request.FILES.get('video')
-        is_featured = request.POST.get('is_featured') == 'on'
-        is_active = request.POST.get('is_active') == 'on'
+        is_featured = get_bool_from_post(request, 'is_featured')
+        is_active = get_bool_from_post(request, 'is_active')
         
         try:
             product = Product.objects.create(
@@ -153,8 +165,8 @@ def product_edit(request, product_id):
             product.main_image = main_image
         if video:
             product.video = video
-        product.is_featured = request.POST.get('is_featured') == 'on'
-        product.is_active = request.POST.get('is_active') == 'on'
+        product.is_featured = get_bool_from_post(request, 'is_featured')
+        product.is_active = get_bool_from_post(request, 'is_active')
         
         try:
             product.save()
@@ -175,11 +187,7 @@ def product_edit(request, product_id):
 @require_POST
 def product_delete(request, product_id):
     """Delete product"""
-    product = get_object_or_404(Product, id=product_id)
-    product_name = product.name
-    product.delete()
-    messages.success(request, f'Product "{product_name}" deleted successfully.')
-    return redirect('admin_dashboard:product_list')
+    return delete_model_instance(request, Product, product_id, 'admin_dashboard:product_list')
 
 @login_required
 @admin_required
@@ -190,7 +198,9 @@ def product_bulk_delete(request):
     if product_ids:
         products = Product.objects.filter(id__in=product_ids)
         count = products.count()
-        products.delete()
+        # Iterate through products to trigger custom delete method for Cloudinary cleanup
+        for product in products:
+            product.delete()
         messages.success(request, f'{count} product(s) deleted successfully.')
     else:
         messages.warning(request, 'No products selected for deletion.')
@@ -273,7 +283,7 @@ def category_create(request):
         name = request.POST.get('name')
         description = request.POST.get('description', '')
         image = request.FILES.get('image')
-        is_active = request.POST.get('is_active') == 'on'
+        is_active = get_bool_from_post(request, 'is_active')
         
         try:
             category = Category.objects.create(
@@ -301,7 +311,7 @@ def category_edit(request, category_id):
         image = request.FILES.get('image')
         if image:
             category.image = image
-        category.is_active = request.POST.get('is_active') == 'on'
+        category.is_active = get_bool_from_post(request, 'is_active')
         
         try:
             category.save()
@@ -320,11 +330,7 @@ def category_edit(request, category_id):
 @require_POST
 def category_delete(request, category_id):
     """Delete category"""
-    category = get_object_or_404(Category, id=category_id)
-    category_name = category.name
-    category.delete()
-    messages.success(request, f'Category "{category_name}" deleted successfully.')
-    return redirect('admin_dashboard:category_list')
+    return delete_model_instance(request, Category, category_id, 'admin_dashboard:category_list')
 
 def get_available_permissions():
     """Get permissions grouped by app for user management"""
@@ -372,9 +378,9 @@ def user_create(request):
         first_name = request.POST.get('first_name', '')
         last_name = request.POST.get('last_name', '')
         role = request.POST.get('role', 'CUSTOMER')
-        is_active = request.POST.get('is_active') == 'on'
-        is_staff = request.POST.get('is_staff') == 'on'
-        is_superuser = request.POST.get('is_superuser') == 'on'
+        is_active = get_bool_from_post(request, 'is_active')
+        is_staff = get_bool_from_post(request, 'is_staff')
+        is_superuser = get_bool_from_post(request, 'is_superuser')
         
         try:
             user = User.objects.create_user(
@@ -418,9 +424,9 @@ def user_edit(request, user_id):
         user.last_name = request.POST.get('last_name', '')
         user.email = request.POST.get('email', '')
         user.role = request.POST.get('role', 'CUSTOMER')
-        user.is_active = request.POST.get('is_active') == 'on'
-        user.is_staff = request.POST.get('is_staff') == 'on'
-        user.is_superuser = request.POST.get('is_superuser') == 'on'
+        user.is_active = get_bool_from_post(request, 'is_active')
+        user.is_staff = get_bool_from_post(request, 'is_staff')
+        user.is_superuser = get_bool_from_post(request, 'is_superuser')
         
         password = request.POST.get('password')
         if password:
@@ -452,11 +458,7 @@ def user_edit(request, user_id):
 @require_POST
 def user_delete(request, user_id):
     """Delete user"""
-    user = get_object_or_404(User, id=user_id)
-    username = user.username
-    user.delete()
-    messages.success(request, f'User "{username}" deleted successfully.')
-    return redirect('admin_dashboard:user_list')
+    return delete_model_instance(request, User, user_id, 'admin_dashboard:user_list', 'username')
 
 @login_required
 @admin_required

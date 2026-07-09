@@ -77,7 +77,7 @@
                         </span>
                     </td>
                     <td>
-                        <span class="status-badge bg-{% if product.is_active %}success{% else %}secondary{% endif %}-subtle text-{% if product.is_active %}success{% else %}secondary{% endif %}">
+                        <span class="status-badge bg-{{ product.is_active|status_badge_class:'product' }}-subtle text-{{ product.is_active|status_badge_class:'product' }}">
                             {% if product.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
                     </td>

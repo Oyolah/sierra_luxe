@@ -46,7 +46,7 @@
                     <td>{{ order.items.count }}</td>
                     <td>{{ currency_symbol }}{{ order.total_amount|floatformat:2 }}</td>
                     <td>
-                        <span class="status-badge bg-{% if order.status == 'DELIVERED' %}success{% elif order.status == 'CANCELLED' %}danger{% elif order.status == 'SHIPPED' %}info{% elif order.status == 'PENDING' %}warning{% else %}primary{% endif %}-subtle text-{% if order.status == 'DELIVERED' %}success{% elif order.status == 'CANCELLED' %}danger{% elif order.status == 'SHIPPED' %}info{% elif order.status == 'PENDING' %}warning{% else %}primary{% endif %}">
+                        <span class="status-badge bg-{{ order.status|status_badge_class:'order' }}-subtle text-{{ order.status|status_badge_class:'order' }}">
                             {{ order.get_status_display }}
                         </span>
                     </td>
