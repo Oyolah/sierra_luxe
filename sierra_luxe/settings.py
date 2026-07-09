@@ -31,8 +31,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-qul)bs3v$5*llr8^em(3ya^g)c
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
-# Add Vercel domain for deployment
+# Add Vercel domains for deployment (main domain and preview URLs)
 ALLOWED_HOSTS.append('sierra-luxe.vercel.app')
+ALLOWED_HOSTS.append('*.vercel.app')
 
 
 # Application definition
@@ -96,9 +97,15 @@ WSGI_APPLICATION = 'sierra_luxe.wsgi.application'
 import dj_database_url
 
 if os.getenv('DATABASE_URL'):
+    # Use Supabase pooler for IPv4 connection
+    db_url = os.getenv('DATABASE_URL')
+    # Replace direct connection with pooler connection for IPv4
+    if 'db.drtamonxatronleyvmpc.supabase.co' in db_url:
+        db_url = db_url.replace('db.drtamonxatronleyvmpc.supabase.co:5432', 'aws-0-us-east-1.pooler.supabase.com:6543')
+    
     DATABASES = {
         'default': dj_database_url.config(
-            default='postgres://user:password@localhost:5432/dbname',
+            default=db_url,
             conn_max_age=600,
             conn_health_checks=True,
             ssl_require=True
