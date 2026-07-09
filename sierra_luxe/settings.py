@@ -95,7 +95,11 @@ import dj_database_url
 
 if os.getenv('DATABASE_URL'):
     DATABASES = {
-        'default': dj_database_url.config(default='postgres://user:password@localhost:5432/dbname')
+        'default': dj_database_url.config(
+            default='postgres://user:password@localhost:5432/dbname',
+            conn_max_age=600,
+            conn_health_checks=True
+        )
     }
 else:
     DATABASES = {
