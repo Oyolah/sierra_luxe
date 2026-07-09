@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from cloudinary.models import CloudinaryField
+import cloudinary
 
 
 class SlugModel(models.Model):
@@ -65,11 +66,11 @@ class Product(SlugModel):
     
     def delete(self, *args, **kwargs):
         # Delete main image from Cloudinary
-        if self.main_image:
-            self.main_image.delete()
+        if self.main_image and hasattr(self.main_image, 'public_id'):
+            cloudinary.uploader.destroy(self.main_image.public_id, resource_type='image')
         # Delete video from Cloudinary
-        if self.video:
-            self.video.delete()
+        if self.video and hasattr(self.video, 'public_id'):
+            cloudinary.uploader.destroy(self.video.public_id, resource_type='video')
         # Delete all related ProductImage objects (which will delete their Cloudinary images)
         for image in self.images.all():
             image.delete()
@@ -92,8 +93,8 @@ class ProductImage(models.Model):
     
     def delete(self, *args, **kwargs):
         # Delete image from Cloudinary
-        if self.image:
-            self.image.delete()
+        if self.image and hasattr(self.image, 'public_id'):
+            cloudinary.uploader.destroy(self.image.public_id, resource_type='image')
         super().delete(*args, **kwargs)
     
     def __str__(self):
