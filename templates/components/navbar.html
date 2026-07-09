@@ -206,7 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to perform AJAX search using centralized utilities
     function performSearch(searchTerm) {
         const params = UrlUtils.getParams();
-        params.search = searchTerm || '';
+        
+        // Remove search param if empty, otherwise set it
+        if (searchTerm && searchTerm.trim()) {
+            params.search = searchTerm;
+        } else {
+            delete params.search;
+        }
+        
         UrlUtils.updateUrl(params);
         
         // Trigger the products page AJAX filter
@@ -214,7 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
             window.fetchProducts();
         } else {
             // Fallback: reload page
-            window.location.href = window.location.pathname + '?' + UrlUtils.buildQueryString(params);
+            const queryString = UrlUtils.buildQueryString(params);
+            window.location.href = window.location.pathname + (queryString ? '?' + queryString : '');
         }
     }
 });

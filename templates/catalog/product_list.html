@@ -161,22 +161,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const params = {};
         
         // Include search from URL if present
-        const urlParams = UrlUtils.getParams();
-        if (urlParams.search) {
-            params.search = urlParams.search;
+        if (typeof UrlUtils !== 'undefined') {
+            const urlParams = UrlUtils.getParams();
+            if (urlParams.search && urlParams.search.trim()) {
+                params.search = urlParams.search;
+            }
         }
         
-        if (categoryFilter.value) params.category = categoryFilter.value;
-        if (minPrice.value) params.min_price = minPrice.value;
-        if (maxPrice.value) params.max_price = maxPrice.value;
-        if (sizeFilter.value) params.size = sizeFilter.value;
-        if (colorFilter.value) params.color = colorFilter.value;
+        if (categoryFilter && categoryFilter.value) params.category = categoryFilter.value;
+        if (minPrice && minPrice.value) params.min_price = minPrice.value;
+        if (maxPrice && maxPrice.value) params.max_price = maxPrice.value;
+        if (sizeFilter && sizeFilter.value) params.size = sizeFilter.value;
+        if (colorFilter && colorFilter.value) params.color = colorFilter.value;
         
         return params;
     }
     
     // Function to fetch filtered products using centralized utility
     window.fetchProducts = function() {
+        // Check if utilities are available
+        if (typeof UrlUtils === 'undefined' || typeof AjaxUtils === 'undefined' || 
+            typeof DomUtils === 'undefined' || typeof ProductUtils === 'undefined') {
+            console.error('Utilities not loaded. Reloading page...');
+            window.location.reload();
+            return;
+        }
+        
         const params = getFilterParams();
         const queryString = UrlUtils.buildQueryString(params);
         const url = `{% url 'catalog:product_list' %}?${queryString}`;
@@ -206,14 +216,10 @@ document.addEventListener('DOMContentLoaded', function() {
         colorFilter.value = '';
         
         // Clear all URL parameters
-        UrlUtils.updateUrl({
-            category: '',
-            min_price: '',
-            max_price: '',
-            size: '',
-            color: '',
-            search: ''
-        });
+        if (typeof UrlUtils !== 'undefined') {
+            // Clear URL completely
+            window.history.pushState({}, '', window.location.pathname);
+        }
         
         fetchProducts();
     });

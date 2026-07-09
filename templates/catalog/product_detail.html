@@ -333,24 +333,42 @@ document.addEventListener('DOMContentLoaded', function() {
     window.navigateCarousel = function(direction) {
         if (allMedia.length === 0) return;
         
-        currentMediaIndex = CarouselUtils.navigate(
-            allMedia, 
-            currentMediaIndex, 
-            direction, 
-            (media, index) => {
-                currentMediaIndex = index;
-                if (media.type === 'video') {
-                    showVideo();
-                } else {
-                    changeImage(media.url);
+        // Check if CarouselUtils is available
+        if (typeof CarouselUtils !== 'undefined') {
+            currentMediaIndex = CarouselUtils.navigate(
+                allMedia, 
+                currentMediaIndex, 
+                direction, 
+                (media, index) => {
+                    currentMediaIndex = index;
+                    if (media.type === 'video') {
+                        showVideo();
+                    } else {
+                        changeImage(media.url);
+                    }
                 }
+            );
+        } else {
+            // Fallback carousel navigation
+            currentMediaIndex = currentMediaIndex + direction;
+            if (currentMediaIndex < 0) {
+                currentMediaIndex = allMedia.length - 1;
+            } else if (currentMediaIndex >= allMedia.length) {
+                currentMediaIndex = 0;
             }
-        );
+            
+            const media = allMedia[currentMediaIndex];
+            if (media.type === 'video') {
+                showVideo();
+            } else {
+                changeImage(media.url);
+            }
+        }
     };
 
     // Populate size options using centralized utility
     const sizeContainer = document.getElementById('size-options');
-    if (sizeContainer && "{{ product.sizes }}") {
+    if (sizeContainer && "{{ product.sizes }}" && typeof FormUtils !== 'undefined') {
         FormUtils.createOptionButtons(
             "{{ product.sizes }}",
             sizeContainer,
@@ -361,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Populate color options using centralized utility
     const colorContainer = document.getElementById('color-options');
-    if (colorContainer && "{{ product.colors }}") {
+    if (colorContainer && "{{ product.colors }}" && typeof FormUtils !== 'undefined') {
         FormUtils.createColorOptions(
             "{{ product.colors }}",
             colorContainer,
