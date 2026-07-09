@@ -100,8 +100,13 @@ if os.getenv('DATABASE_URL'):
         'default': dj_database_url.config(
             default='postgres://user:password@localhost:5432/dbname',
             conn_max_age=600,
-            conn_health_checks=True
+            conn_health_checks=True,
+            ssl_require=True
         )
+    }
+    # Additional SSL options for Supabase
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require',
     }
 else:
     DATABASES = {
