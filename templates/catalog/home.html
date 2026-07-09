@@ -112,23 +112,16 @@
         <div class="col-md-4 mb-4">
             <a href="{% url 'catalog:product_list' %}?category={{ category.slug }}" class="text-decoration-none">
                 <div class="category-card">
-                    {% if category.name|lower == 'women' %}
-                    <img src="/media/products/African Lace Maxi Dress 1.webp" alt="{{ category.name }}">
-                    {% elif category.name|lower == 'men' %}
-                    <img src="/media/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif" alt="{{ category.name }}">
-                    {% elif category.name|lower == 'kids' %}
-                    <img src="/media/products/baby-girl-ankara-ball-gown-dress-1.webp" alt="{{ category.name }}">
-                    {% elif category.name|lower == 'wedding' %}
-                    <img src="/media/products/aso-oke-couple-outfits-1.webp" alt="{{ category.name }}">
-                    {% elif category.name|lower == 'traditional' %}
-                    <img src="/media/products/red-beaded-african-dress-1.webp" alt="{{ category.name }}">
-                    {% elif category.image %}
-                    <img src="{{ category.image }}" alt="{{ category.name }}">
+                    {% load ratings_review_tags %}
+                    {% with category_image=category|category_image %}
+                    {% if category_image %}
+                    <img src="{{ category_image }}" alt="{{ category.name }}">
                     {% else %}
                     <div class="category-placeholder">
                         <h3 class="text-white">{{ category.name }}</h3>
                     </div>
                     {% endif %}
+                    {% endwith %}
                     <div class="category-overlay">
                         <h4>{{ category.name }}</h4>
                     </div>
