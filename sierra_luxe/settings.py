@@ -32,7 +32,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
 # Add Vercel domain for deployment
-ALLOWED_HOSTS.append('sierra-luxe-lx4vkoht9-oyolah-projects.vercel.app')
+ALLOWED_HOSTS.append('sierra-luxe.vercel.app')
 
 
 # Application definition
