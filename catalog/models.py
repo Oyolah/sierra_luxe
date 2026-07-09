@@ -76,12 +76,24 @@ class Product(SlugModel):
         # Delete all related ProductImage objects (which will delete their Cloudinary images)
         for image in self.images.all():
             image.delete()
-        # Delete product from database (handle cascade errors from missing tables)
+        # Manually delete all CASCADE related objects to avoid cascade errors
         try:
-            super().delete(*args, **kwargs)
+            from users.models import RecentlyViewed
+            RecentlyViewed.objects.filter(product=self).delete()
         except:
-            # If cascade delete fails due to missing tables, try direct delete
-            Product.objects.filter(id=self.id).delete()
+            pass
+        try:
+            from reviews.models import Review
+            Review.objects.filter(product=self).delete()
+        except:
+            pass
+        try:
+            from cart.models import CartItem
+            CartItem.objects.filter(product=self).delete()
+        except:
+            pass
+        # Delete product using QuerySet.delete() which handles cascades differently
+        Product.objects.filter(id=self.id).delete()
     
     def __str__(self):
         return self.name
