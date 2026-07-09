@@ -49,7 +49,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 class RecentlyViewed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recently_viewed')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='viewed_by')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='viewed_by')
     viewed_at = models.DateTimeField(auto_now=True)
     
     class Meta:
