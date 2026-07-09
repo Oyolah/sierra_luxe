@@ -47,7 +47,7 @@ def product_list(request):
                 'price': str(product.price),
                 'discount_price': str(product.discount_price) if product.discount_price else None,
                 'description': product.description[:80],
-                'image': product.main_image.url if product.main_image else None,
+                'image': product.main_image if product.main_image else None,
             })
         return JsonResponse({
             'products': products_data,

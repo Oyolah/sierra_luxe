@@ -285,19 +285,26 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Store all image URLs for carousel navigation
+    // Store all media URLs for carousel navigation (video + images)
+    const videoUrl = "{% if product.video %}{{ product.video }}{% endif %}";
     const imageUrlsString = "{% if product.main_image %}{{ product.main_image }}{% endif %}{% for image in product.images.all %},{{ image.image }}{% endfor %}";
     const imageUrls = imageUrlsString ? imageUrlsString.split(',').filter(url => url) : [];
+    
+    // Combine video and images for carousel
+    const allMedia = [];
+    if (videoUrl) allMedia.push({type: 'video', url: videoUrl});
+    imageUrls.forEach(url => allMedia.push({type: 'image', url: url}));
 
-    let currentImageIndex = 0;
+    let currentMediaIndex = 0;
 
-    // Function to change main image
+    // Function to change main media (image or video)
     window.changeImage = function(src) {
         const mainImage = document.getElementById('mainImage');
         const mainVideo = document.getElementById('mainVideo');
         
         if (mainVideo) {
             mainVideo.style.display = 'none';
+            mainVideo.pause();
         }
         if (mainImage) {
             mainImage.style.display = 'block';
@@ -305,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Update current index
-        currentImageIndex = imageUrls.indexOf(src);
+        currentMediaIndex = allMedia.findIndex(m => m.url === src);
     }
 
     // Function to show video
@@ -324,13 +331,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Navigate carousel using centralized utility
     window.navigateCarousel = function(direction) {
-        currentImageIndex = CarouselUtils.navigate(
-            imageUrls, 
-            currentImageIndex, 
+        if (allMedia.length === 0) return;
+        
+        currentMediaIndex = CarouselUtils.navigate(
+            allMedia, 
+            currentMediaIndex, 
             direction, 
-            (url, index) => {
-                currentImageIndex = index;
-                changeImage(url);
+            (media, index) => {
+                currentMediaIndex = index;
+                if (media.type === 'video') {
+                    showVideo();
+                } else {
+                    changeImage(media.url);
+                }
             }
         );
     };
