@@ -1,0 +1,18 @@
+{% load static %}
+<div class="page-card">
+    <div class="page-card-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">{{ title }}</h5>
+            {% if actions %}
+            <div class="d-flex gap-2">
+                {% for action in actions %}
+                    {{ action }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="page-card-body{% if body_class %} {{ body_class }}{% endif %}">
+        {% block content %}{% endblock %}
+    </div>
+</div>
