@@ -1,0 +1,102 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block title %}Product Images - {{ product.name }}{% endblock %}
+{% block page_title %}Product Images: {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Images</h5>
+                <a href="{% url 'admin_dashboard:product_list' %}" class="btn btn-sm btn-admin-outline">Back to Products</a>
+            </div>
+            <div class="page-card-body">
+                <div class="row g-3">
+                    {% for image in images %}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <img src="{{ image.image }}" class="card-img-top" alt="{{ image.alt_text }}" style="height: 180px; object-fit: cover;">
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" disabled {% if image.is_primary %}checked{% endif %}>
+                                    <label class="form-check-label">Primary Image</label>
+                                </div>
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_image">
+                                    <input type="hidden" name="image_id" value="{{ image.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this image?')">
+                                        <i class="fas fa-trash me-1"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center text-muted py-5">
+                        <i class="fas fa-images fa-3x mb-3"></i>
+                        <p>No images yet. Add one below.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="page-card mb-4">
+            <div class="page-card-header">
+                <h5 class="mb-0">Add New Image</h5>
+            </div>
+            <div class="page-card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_image">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Image URL</label>
+                        <input type="url" name="image_url" class="form-control form-control-admin" required placeholder="https://...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Alt Text</label>
+                        <input type="text" name="alt_text" class="form-control form-control-admin" placeholder="Product image description">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_primary" id="isPrimary">
+                            <label class="form-check-label" for="isPrimary">Set as Primary</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-admin w-100">Add Image</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Product Video</h5>
+            </div>
+            <div class="page-card-body">
+                {% if product.video %}
+                <div class="ratio ratio-16x9 mb-3">
+                    <video src="{{ product.video }}" controls class="rounded"></video>
+                </div>
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_video">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Video URL</label>
+                        <input type="url" name="video_url" class="form-control form-control-admin" value="{{ product.video|default:'' }}" placeholder="https://...">
+                    </div>
+                    <button type="submit" class="btn-admin w-100">Update Video</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="page-card-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" class="form-control" placeholder="Search products..." id="searchInput" value="{{ request.GET.search }}">
+            </div>
+            <select class="form-select" style="width: auto;" id="categoryFilter">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <select class="form-select" style="width: auto;" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <a href="{% url 'admin_dashboard:product_create' %}" class="btn-admin">
+            <i class="fas fa-plus me-2"></i>Add Product
+        </a>
+    </div>
+    <div class="page-card-body p-0">
+        <table class="table table-admin mb-0">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <img src="{{ product.main_image }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                    </td>
+                    <td>
+                        <h6 class="mb-0">{{ product.name }}</h6>
+                        <small class="text-muted">{{ product.sizes }}</small>
+                    </td>
+                    <td>{{ product.category.name|default:"-" }}</td>
+                    <td>
+                        {% if product.discount_price %}
+                        <span class="text-decoration-line-through text-muted">€{{ product.price|floatformat:2 }}</span>
+                        <span class="text-danger fw-bold">€{{ product.discount_price|floatformat:2 }}</span>
+                        {% else %}
+                        €{{ product.price|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="{% if product.stock < 10 %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                            {{ product.stock }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge bg-{% if product.is_active %}success{% else %}secondary{% endif %}-subtle text-{% if product.is_active %}success{% else %}secondary{% endif %}">
+                            {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_dashboard:product_images' product.id %}" class="btn btn-sm btn-outline-info" title="Manage Images">
+                                <i class="fas fa-images"></i>
+                            </a>
+                            <a href="{% url 'admin_dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" action="{% url 'admin_dashboard:product_delete' product.id %}" class="d-inline" onsubmit="return confirm('Delete this product?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">No products found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function applyFilters() {
+    const params = new URLSearchParams();
+    const search = document.getElementById('searchInput').value;
+    const category = document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    
+    if (search) params.set('search', search);
+    if (category) params.set('category', category);
+    if (status) params.set('status', status);
+    
+    window.location.href = '{% url 'admin_dashboard:product_list' %}' + (params.toString() ? '?' + params.toString() : '');
+}
+
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') applyFilters();
+});
+document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+</script>
+{% endblock %}

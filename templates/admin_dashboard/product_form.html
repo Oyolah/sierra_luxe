@@ -1,0 +1,113 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block title %}{{ action }} Product{% endblock %}
+{% block page_title %}{{ action }} Product{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="page-card-header">
+        <h5 class="mb-0">{{ action }} Product</h5>
+        <a href="{% url 'admin_dashboard:product_list' %}" class="btn btn-sm btn-admin-outline">Cancel</a>
+    </div>
+    <div class="page-card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Product Name</label>
+                        <input type="text" name="name" class="form-control form-control-admin" value="{{ product.name|default:'' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea name="description" class="form-control form-control-admin" rows="5" required>{{ product.description|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Price (€)</label>
+                            <input type="number" name="price" step="0.01" min="0" class="form-control form-control-admin" value="{{ product.price|default:'' }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Discount Price (€)</label>
+                            <input type="number" name="discount_price" step="0.01" min="0" class="form-control form-control-admin" value="{{ product.discount_price|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Stock</label>
+                            <input type="number" name="stock" min="0" class="form-control form-control-admin" value="{{ product.stock|default:0 }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Category</label>
+                            <select name="category" class="form-select form-control-admin" required>
+                                <option value="">Select Category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if product.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sizes (comma-separated)</label>
+                            <input type="text" name="sizes" class="form-control form-control-admin" value="{{ product.sizes|default:'' }}" placeholder="S, M, L, XL">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Colors (comma-separated)</label>
+                            <input type="text" name="colors" class="form-control form-control-admin" value="{{ product.colors|default:'' }}" placeholder="Red, Blue, Black">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Material</label>
+                        <input type="text" name="material" class="form-control form-control-admin" value="{{ product.material|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Care Instructions</label>
+                        <textarea name="care_instructions" class="form-control form-control-admin" rows="3">{{ product.care_instructions|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Main Image URL</label>
+                        <input type="url" name="main_image" class="form-control form-control-admin" value="{{ product.main_image|default:'' }}" placeholder="https://...">
+                        {% if product.main_image %}
+                        <img src="{{ product.main_image }}" alt="Preview" class="img-fluid mt-2 rounded" style="max-height: 150px;">
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Video URL</label>
+                        <input type="url" name="video" class="form-control form-control-admin" value="{{ product.video|default:'' }}" placeholder="https://...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured" {% if product.is_featured %}checked{% endif %}>
+                            <label class="form-check-label" for="isFeatured">Featured Product</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if product.is_active|default:True %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">Active</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="{% url 'admin_dashboard:product_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn-admin">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
