@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from cloudinary.models import CloudinaryField
+from catalog.models import Product
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -45,3 +46,17 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+class RecentlyViewed(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recently_viewed')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='viewed_by')
+    viewed_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Recently Viewed'
+        verbose_name_plural = 'Recently Viewed'
+        unique_together = ('user', 'product')
+        ordering = ['-viewed_at']
+    
+    def __str__(self):
+        return f"{self.user.username} viewed {self.product.name}"

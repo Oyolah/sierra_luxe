@@ -71,11 +71,23 @@
     .remove-btn:hover {
         color: #dc3545;
     }
+    .save-for-later-btn {
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+    .save-for-later-btn:hover {
+        color: #0d6efd;
+    }
     .product-thumbnail {
         width: 120px;
         height: 120px;
         object-fit: cover;
         border-radius: 8px;
+    }
+    .saved-item-card {
+        border: 1px dashed #dee2e6;
     }
 </style>
 {% endblock %}
@@ -84,10 +96,11 @@
 <div class="container py-4">
     <h1 class="mb-4">Your cart</h1>
     
-    {% if cart_items %}
+    {% if cart_items or saved_items %}
     <div class="row">
         <!-- Cart Items Section -->
         <div class="col-lg-8">
+            {% if cart_items %}
             {% for item in cart_items %}
             <div class="cart-item-card" id="cart-item-{{ item.id }}">
                 <div class="row">
@@ -152,14 +165,29 @@
                                onclick="return confirmRemove({{ item.id }})">
                                 <i class="fas fa-trash-alt me-1"></i> Remove
                             </a>
+                            <span class="text-muted">|</span>
+                            <a href="#" 
+                               class="save-for-later-btn"
+                               data-item-id="{{ item.id }}"
+                               onclick="return saveForLater({{ item.id }})">
+                                <i class="fas fa-bookmark me-1"></i> Save for later
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% else %}
+            <div class="text-center py-5 mb-4">
+                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                <h4>No active items in cart</h4>
+                <p class="text-muted">Your active cart is empty. Move items from saved for later to proceed with checkout.</p>
+            </div>
+            {% endif %}
         </div>
         
         <!-- Order Summary Section -->
+        {% if cart_items %}
         <div class="col-lg-4">
             <div class="cart-summary">
                 <h5 class="mb-4">How you'll pay</h5>
@@ -206,6 +234,63 @@
                 </p>
             </div>
         </div>
+        {% endif %}
+        
+        <!-- Saved for Later Section -->
+        {% if saved_items %}
+        <div class="col-12 mt-5">
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-bookmark text-muted me-2"></i>
+                <h3 class="mb-0">Saved for later</h3>
+                <span class="text-muted ms-2">({{ saved_items.count }})</span>
+            </div>
+            {% for item in saved_items %}
+            <div class="cart-item-card saved-item-card" id="saved-item-{{ item.id }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="{% url 'catalog:product_detail' item.product.slug %}">
+                            <img src="{{ item.product.main_image }}" 
+                                 alt="{{ item.product.name }}"
+                                 class="product-thumbnail w-100">
+                        </a>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-1">
+                                    <a href="{% url 'catalog:product_detail' item.product.slug %}" 
+                                       class="text-decoration-none text-dark">
+                                        {{ item.product.name }}
+                                    </a>
+                                </h5>
+                                {% if item.size %}
+                                <p class="text-muted small mb-0">Size: <strong>{{ item.size }}</strong></p>
+                                {% endif %}
+                                {% if item.color %}
+                                <p class="text-muted small mb-0">Color: <strong>{{ item.color }}</strong></p>
+                                {% endif %}
+                            </div>
+                            <h5 class="mb-0">{{ currency_symbol }}{{ item.get_subtotal|floatformat:2 }}</h5>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mt-3">
+                            <button class="btn btn-dark btn-sm rounded-pill move-to-cart-btn"
+                                    data-item-id="{{ item.id }}"
+                                    onclick="return moveToCart({{ item.id }})">
+                                <i class="fas fa-shopping-cart me-1"></i> Add to cart
+                            </button>
+                            <a href="#" 
+                               class="remove-btn"
+                               data-item-id="{{ item.id }}"
+                               onclick="return confirmRemoveSaved({{ item.id }})">
+                                <i class="fas fa-trash-alt me-1"></i> Remove
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
     
     {% else %}
@@ -259,14 +344,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Update subtotal for this item
                 document.getElementById(`item-subtotal-${itemId}`).textContent = `{{ currency_symbol }}${data.subtotal.toFixed(2)}`;
-                
-                // Update cart totals
                 document.getElementById('subtotal-amount').textContent = `{{ currency_symbol }}${data.cart_total.toFixed(2)}`;
                 document.getElementById('total-amount').textContent = `{{ currency_symbol }}${data.total.toFixed(2)}`;
-                
-                // Update cart count in navbar
                 updateCartCount(data.cart_count);
             }
         })
@@ -297,18 +377,14 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Remove item from DOM
                 const itemElement = document.getElementById(`cart-item-${itemId}`);
                 itemElement.remove();
                 
-                // Update cart totals
                 document.getElementById('subtotal-amount').textContent = `{{ currency_symbol }}${data.cart_total.toFixed(2)}`;
                 document.getElementById('total-amount').textContent = `{{ currency_symbol }}${data.total.toFixed(2)}`;
                 
-                // Update cart count in navbar
                 updateCartCount(data.cart_count);
                 
-                // Reload if cart is empty
                 if (data.cart_count === 0) {
                     location.reload();
                 }
@@ -317,8 +393,103 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error:', error));
     }
     
+    window.saveForLater = function(itemId) {
+        showModal(
+            'confirmModal',
+            'Save for Later',
+            'Save this item for later? It will be removed from your active cart.',
+            function() {
+                moveToSavedForLater(itemId);
+            }
+        );
+        return false;
+    };
+    
+    function moveToSavedForLater(itemId) {
+        fetch(`/cart/save-for-later/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    window.moveToCart = function(itemId) {
+        fetch(`/cart/move-to-cart/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+        return false;
+    };
+    
+    window.confirmRemoveSaved = function(itemId) {
+        showModal(
+            'confirmModal',
+            'Remove Saved Item',
+            'Remove this item from saved for later?',
+            function() {
+                removeSavedItem(itemId);
+            }
+        );
+        return false;
+    };
+    
+    function removeSavedItem(itemId) {
+        fetch(`/cart/remove-saved/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const itemElement = document.getElementById(`saved-item-${itemId}`);
+                itemElement.remove();
+                
+                updateCartCount(data.cart_count);
+                
+                if (data.saved_count === 0) {
+                    location.reload();
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
     function updateCartCount(count) {
-        const cartBadge = document.querySelector('.cart-count');
+        let cartBadge = document.querySelector('.cart-count');
+        const cartDropdown = document.getElementById('cartDropdown');
+        
+        if (!cartBadge && cartDropdown && count > 0) {
+            // Create badge if it doesn't exist
+            cartBadge = document.createElement('span');
+            cartBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count';
+            cartDropdown.appendChild(cartBadge);
+        }
+        
         if (cartBadge) {
             cartBadge.textContent = count;
             if (count === 0) {
@@ -326,6 +497,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 cartBadge.classList.remove('d-none');
             }
+        }
+        
+        // Reload cart dropdown preview if function exists
+        if (typeof loadCartPreview === 'function') {
+            loadCartPreview();
         }
     }
 });

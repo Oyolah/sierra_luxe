@@ -101,7 +101,7 @@
         
         <!-- Products Grid -->
         <div class="col-lg-9">
-            <h1 class="mb-4">All Products <span id="productCount" class="badge bg-secondary"></span></h1>
+            <h1 class="mb-4">All Products</h1>
             
             <div class="loading-spinner" id="loadingSpinner">
                 <div class="spinner-border text-primary" role="status">
@@ -154,7 +154,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearFiltersBtn = document.getElementById('clearFilters');
     const productsGrid = document.getElementById('productsGrid');
     const loadingSpinner = document.getElementById('loadingSpinner');
-    const productCount = document.getElementById('productCount');
     
     // Function to get filter parameters including search
     function getFilterParams() {
@@ -196,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingSpinner,
             function(data) {
                 DomUtils.setContent(productsGrid, ProductUtils.renderProductCards(data.products, '{{ currency_symbol }}'));
-                DomUtils.setContent(productCount, `(${data.count})`);
             },
             function(error) {
                 console.error('Error fetching products:', error);
@@ -226,9 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Auto-filter on change
     categoryFilter.addEventListener('change', fetchProducts);
-    
-    // Initial product count
-    productCount.textContent = `({{ products|length }})`;
     
     // If search parameter is in URL, trigger initial fetch
     const urlParams = UrlUtils.getParams();

@@ -84,16 +84,3 @@ class ProductImage(models.Model):
         verbose_name_plural = 'Product Images'
         ordering = ['-is_primary', 'created_at']
 
-class Wishlist(models.Model):
-    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlisted_by')
-    added_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.customer.username} - {self.product.name}"
-    
-    class Meta:
-        verbose_name = 'Wishlist Item'
-        verbose_name_plural = 'Wishlist Items'
-        unique_together = ('customer', 'product')
-        ordering = ['-added_at']

@@ -8,10 +8,13 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def get_total(self):
-        return sum(item.get_subtotal() for item in self.items.all())
+        return sum(item.get_subtotal() for item in self.items.filter(saved_for_later=False))
     
     def get_item_count(self):
-        return sum(item.quantity for item in self.items.all())
+        return sum(item.quantity for item in self.items.filter(saved_for_later=False))
+    
+    def get_saved_items(self):
+        return self.items.filter(saved_for_later=True)
     
     def __str__(self):
         return f"Cart of {self.customer.username}"
@@ -26,6 +29,7 @@ class CartItem(models.Model):
     quantity = models.IntegerField(default=1)
     size = models.CharField(max_length=20)
     color = models.CharField(max_length=50)
+    saved_for_later = models.BooleanField(default=False)
     added_at = models.DateTimeField(auto_now_add=True)
     
     def get_subtotal(self):

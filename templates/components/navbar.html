@@ -30,11 +30,6 @@
             
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-heart"></i>
-                        </a>
-                    </li>
                     <li class="nav-item position-relative" id="cart-dropdown">
                         <a class="nav-link position-relative" href="{% url 'cart:cart_view' %}" id="cartDropdown">
                             <i class="fas fa-shopping-cart"></i>
@@ -71,15 +66,15 @@
                             <i class="fas fa-user"></i> {{ user.username }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Orders</a></li>
-                            <li><a class="dropdown-item" href="#">Wishlist</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'orders:order_history' %}"><i class="fas fa-shopping-bag me-2"></i>Orders</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:recently_viewed' %}"><i class="fas fa-history me-2"></i>Recently Viewed</a></li>
                             <li><hr class="dropdown-divider"></li>
                             {% if user.role == 'ADMIN' %}
-                                <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Panel</a></li>
+                                <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-cog me-2"></i>Admin Panel</a></li>
                                 <li><hr class="dropdown-divider"></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 {% else %}
@@ -266,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function loadCartPreview() {
+    window.loadCartPreview = function() {
         fetch('/cart/preview/')
             .then(response => {
                 if (!response.ok) {

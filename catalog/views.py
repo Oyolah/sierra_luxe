@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import Category, Product
+from users.models import RecentlyViewed
 
 def home(request):
     return render(request, 'catalog/home.html')
@@ -59,4 +60,12 @@ def product_list(request):
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
     related_products = Product.objects.filter(category=product.category, is_active=True).exclude(id=product.id)[:4]
+    
+    # Track recently viewed for authenticated users
+    if request.user.is_authenticated:
+        RecentlyViewed.objects.update_or_create(
+            user=request.user,
+            product=product
+        )
+    
     return render(request, 'catalog/product_detail.html', {'product': product, 'related_products': related_products})

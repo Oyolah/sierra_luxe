@@ -11,11 +11,13 @@ from catalog.models import Product
 def cart_view(request):
     """Display the shopping cart"""
     cart, created = Cart.objects.get_or_create(customer=request.user)
-    cart_items = cart.items.select_related('product').all()
+    cart_items = cart.items.select_related('product').filter(saved_for_later=False)
+    saved_items = cart.items.select_related('product').filter(saved_for_later=True)
     
     context = {
         'cart': cart,
         'cart_items': cart_items,
+        'saved_items': saved_items,
         'subtotal': cart.get_total(),
         'shipping': Decimal('7.95'),  # Fixed shipping cost
         'total': cart.get_total() + Decimal('7.95'),
@@ -144,7 +146,7 @@ def cart_preview(request):
     
     try:
         cart, created = Cart.objects.get_or_create(customer=request.user)
-        cart_items = cart.items.select_related('product').all()[:5]  # Show max 5 items
+        cart_items = cart.items.select_related('product').filter(saved_for_later=False)[:5]  # Show max 5 active items
         
         items_data = []
         for item in cart_items:
@@ -185,11 +187,73 @@ def cart_preview(request):
         })
 
 @login_required
+@require_POST
+def save_for_later(request, item_id):
+    """Move an active cart item to saved for later"""
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__customer=request.user)
+    cart_item.saved_for_later = True
+    cart_item.save()
+    
+    cart = cart_item.cart
+    messages.success(request, f'{cart_item.product.name} saved for later.')
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'cart_count': cart.get_item_count(),
+            'cart_total': float(cart.get_total()),
+            'total': float(cart.get_total() + Decimal('7.95'))
+        })
+    
+    return redirect('cart:cart_view')
+
+@login_required
+@require_POST
+def move_to_cart(request, item_id):
+    """Move a saved for later item back to active cart"""
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__customer=request.user)
+    cart_item.saved_for_later = False
+    cart_item.save()
+    
+    cart = cart_item.cart
+    messages.success(request, f'{cart_item.product.name} moved to cart.')
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'cart_count': cart.get_item_count(),
+            'cart_total': float(cart.get_total()),
+            'total': float(cart.get_total() + Decimal('7.95'))
+        })
+    
+    return redirect('cart:cart_view')
+
+@login_required
+@require_POST
+def remove_saved_item(request, item_id):
+    """Remove a saved for later item"""
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__customer=request.user)
+    product_name = cart_item.product.name
+    cart_item.delete()
+    
+    cart = Cart.objects.get(customer=request.user)
+    messages.success(request, f'Removed {product_name} from saved items.')
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'cart_count': cart.get_item_count(),
+            'saved_count': cart.get_saved_items().count()
+        })
+    
+    return redirect('cart:cart_view')
+
+@login_required
 def checkout(request):
     """Checkout simulation (no real payment)"""
     cart = get_object_or_404(Cart, customer=request.user)
     
-    if not cart.items.exists():
+    if not cart.items.filter(saved_for_later=False).exists():
         messages.warning(request, 'Your cart is empty.')
         return redirect('catalog:product_list')
     
@@ -205,8 +269,9 @@ def checkout(request):
             status='pending'
         )
         
-        # Create order items from cart
-        for cart_item in cart.items.all():
+        # Create order items from active cart items only
+        active_items = cart.items.filter(saved_for_later=False)
+        for cart_item in active_items:
             OrderItem.objects.create(
                 order=order,
                 product=cart_item.product,
@@ -216,15 +281,15 @@ def checkout(request):
                 price=cart_item.product.get_price()
             )
         
-        # Clear cart
-        cart.items.all().delete()
+        # Clear active cart items (keep saved for later)
+        active_items.delete()
         
         messages.success(request, f'Order #{order.id} placed successfully! (Simulation)')
         return redirect('orders:order_detail', order_id=order.id)
     
     context = {
         'cart': cart,
-        'cart_items': cart.items.select_related('product').all(),
+        'cart_items': cart.items.select_related('product').filter(saved_for_later=False),
         'subtotal': cart.get_total(),
         'shipping': Decimal('7.95'),
         'total': cart.get_total() + Decimal('7.95'),

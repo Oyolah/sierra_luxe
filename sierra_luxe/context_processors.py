@@ -22,8 +22,3 @@ def cart_count(request):
             return {'cart_count': 0}
     return {'cart_count': 0}
 
-def user_wishlist_count(request):
-    """Get wishlist count for authenticated users"""
-    if request.user.is_authenticated:
-        return {'wishlist_count': request.user.wishlist.count()}
-    return {'wishlist_count': 0}

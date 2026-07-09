@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, UserUpdateForm
 from sierra_luxe.decorators import admin_required, customer_required
+from .models import RecentlyViewed
 
 def register(request):
     if request.user.is_authenticated:
@@ -76,3 +77,11 @@ def profile_edit(request):
         'profile_form': profile_form
     }
     return render(request, 'users/profile_edit.html', context)
+
+@login_required
+def recently_viewed(request):
+    """Display recently viewed products"""
+    recent_items = RecentlyViewed.objects.filter(user=request.user).select_related('product')[:20]
+    return render(request, 'users/recently_viewed.html', {
+        'recent_items': recent_items
+    })

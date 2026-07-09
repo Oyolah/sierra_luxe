@@ -255,9 +255,6 @@
                         </a>
                     {% endif %}
                 </form>
-                <button class="btn btn-outline-dark">
-                    <i class="far fa-heart me-2"></i>Add to Wishlist
-                </button>
             </div>
             
             <!-- Product Info -->
@@ -526,7 +523,16 @@ function showSuccessMessage(message) {
 
 // Update cart count in navbar
 function updateCartCount(count) {
-    const cartBadge = document.querySelector('.cart-count');
+    let cartBadge = document.querySelector('.cart-count');
+    const cartDropdown = document.getElementById('cartDropdown');
+    
+    if (!cartBadge && cartDropdown && count > 0) {
+        // Create badge if it doesn't exist
+        cartBadge = document.createElement('span');
+        cartBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count';
+        cartDropdown.appendChild(cartBadge);
+    }
+    
     if (cartBadge) {
         cartBadge.textContent = count;
         if (count === 0) {
@@ -534,6 +540,11 @@ function updateCartCount(count) {
         } else {
             cartBadge.classList.remove('d-none');
         }
+    }
+    
+    // Reload cart dropdown preview if function exists
+    if (typeof loadCartPreview === 'function') {
+        loadCartPreview();
     }
 }
 
@@ -544,6 +555,7 @@ if (quantityInput) {
         document.getElementById('cart-quantity').value = this.value;
     });
 }
+
 </script>
 
 <!-- Include Reusable Modal -->

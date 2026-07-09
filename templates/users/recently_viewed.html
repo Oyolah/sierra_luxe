@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recently Viewed - Sierra Luxe{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">
+        <i class="fas fa-history"></i> Recently Viewed
+    </h1>
+    
+    {% if recent_items %}
+    <div class="row g-4">
+        {% for item in recent_items %}
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+                <a href="{% url 'catalog:product_detail' item.product.slug %}">
+                    {% if item.product.main_image %}
+                    <img src="{{ item.product.main_image }}" class="card-img-top" alt="{{ item.product.name }}" 
+                         style="height: 250px; object-fit: cover;">
+                    {% else %}
+                    <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="{{ item.product.name }}" 
+                         style="height: 250px; object-fit: cover;">
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <h6 class="card-title">{{ item.product.name }}</h6>
+                    <p class="card-text fw-bold">€{{ item.product.price }}</p>
+                    <small class="text-muted">Viewed {{ item.viewed_at|timesince }} ago</small>
+                    <div class="d-grid mt-2">
+                        <a href="{% url 'catalog:product_detail' item.product.slug %}" class="btn btn-dark btn-sm">View Again</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-eye-slash fa-3x text-muted mb-3"></i>
+        <h4>No Recently Viewed Items</h4>
+        <p class="text-muted">Products you view will appear here.</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn btn-dark rounded-pill px-4">Browse Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
