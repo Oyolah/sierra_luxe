@@ -26,7 +26,7 @@ class UserProfile(models.Model):
     city = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100, blank=True)
     postal_code = models.CharField(max_length=20, blank=True)
-    profile_image = CloudinaryField('profiles/', blank=True, null=True)
+    profile_image = CloudinaryField('sierra_luxe/profiles/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
