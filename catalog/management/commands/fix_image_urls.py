@@ -21,12 +21,24 @@ class Command(BaseCommand):
         if not url:
             return url
             
-        # Already correct
-        if url.startswith(f'https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/v'):
+        # Already correct with version and sierra_luxe
+        if url.startswith(f'https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/v') and (not include_sierra_luxe or '/sierra_luxe/' in url):
+            return url
+        
+        # Has full URL with /resource_type/upload/ but missing version or sierra_luxe
+        if url.startswith(f'https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/'):
             # Check if needs sierra_luxe folder
-            if include_sierra_luxe and '/sierra_luxe/' not in url:
+            if include_sierra_luxe:
+                # Has /v1/products/ but needs /v1/sierra_luxe/products/
                 if f'/{resource_type}/upload/v1/products/' in url:
                     return url.replace(f'/{resource_type}/upload/v1/products/', f'/{resource_type}/upload/v1/sierra_luxe/products/')
+                # Has /products/ but missing version and sierra_luxe
+                elif f'/{resource_type}/upload/products/' in url:
+                    return url.replace(f'/{resource_type}/upload/products/', f'/{resource_type}/upload/v1/sierra_luxe/products/')
+                # Has /resource_type/upload/ but missing version and sierra_luxe
+                elif f'/{resource_type}/upload/v' not in url:
+                    path = url.split(f'/{resource_type}/upload/')[-1]
+                    return f"https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/v1/sierra_luxe/{path}"
             return url
         
         # Has full URL but missing /resource_type/upload/
