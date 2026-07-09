@@ -474,3 +474,51 @@ def order_status_update(request, order_id):
         messages.error(request, 'Invalid status.')
     
     return redirect('admin_dashboard:order_detail', order_id=order.id)
+
+
+@login_required
+@admin_required
+def featured_products(request):
+    """Manage featured products"""
+    featured = Product.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+    all_products = Product.objects.filter(is_active=True).order_by('-created_at')
+    
+    context = {
+        'featured': featured,
+        'all_products': all_products,
+    }
+    return render(request, 'admin_dashboard/featured_products.html', context)
+
+
+@login_required
+@admin_required
+@require_POST
+def add_featured(request, product_id):
+    """Add product to featured"""
+    product = get_object_or_404(Product, id=product_id)
+    
+    if product.is_featured:
+        messages.warning(request, f'{product.name} is already featured.')
+    else:
+        product.is_featured = True
+        product.save()
+        messages.success(request, f'{product.name} has been added to featured products.')
+    
+    return redirect('admin_dashboard:featured_products')
+
+
+@login_required
+@admin_required
+@require_POST
+def remove_featured(request, product_id):
+    """Remove product from featured"""
+    product = get_object_or_404(Product, id=product_id)
+    
+    if not product.is_featured:
+        messages.warning(request, f'{product.name} is not featured.')
+    else:
+        product.is_featured = False
+        product.save()
+        messages.success(request, f'{product.name} has been removed from featured products.')
+    
+    return redirect('admin_dashboard:featured_products')

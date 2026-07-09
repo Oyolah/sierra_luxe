@@ -153,6 +153,7 @@
             {% if forloop.counter0|divisibleby:4 %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
                 <div class="row">
+            {% endif %}
                     <div class="col-md-3">
                         <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
                             <div class="card featured-product h-100">
@@ -171,78 +172,7 @@
                             </div>
                         </a>
                     </div>
-                    {% if forloop.counter < featured_products|length %}
-                    {% with next_product=featured_products|slice:forloop.counter|first %}
-                    {% if next_product %}
-                    <div class="col-md-3">
-                        <a href="{% url 'catalog:product_detail' next_product.slug %}" class="text-decoration-none">
-                            <div class="card featured-product h-100">
-                                {% if next_product.main_image %}
-                                <img src="{{ next_product.main_image }}" alt="{{ next_product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% else %}
-                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ next_product.name|urlencode }}" alt="{{ next_product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h6 class="card-title text-dark">{{ next_product.name }}</h6>
-                                    <p class="price mb-2">{{ currency_symbol }}{{ next_product.price }}</p>
-                                    {% if next_product.discount_price %}
-                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ next_product.discount_price }}</s></p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    {% endif %}
-                    {% if forloop.counter|add:1 < featured_products|length %}
-                    {% with next_product2=featured_products|slice:forloop.counter|add:1|first %}
-                    {% if next_product2 %}
-                    <div class="col-md-3">
-                        <a href="{% url 'catalog:product_detail' next_product2.slug %}" class="text-decoration-none">
-                            <div class="card featured-product h-100">
-                                {% if next_product2.main_image %}
-                                <img src="{{ next_product2.main_image }}" alt="{{ next_product2.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% else %}
-                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ next_product2.name|urlencode }}" alt="{{ next_product2.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h6 class="card-title text-dark">{{ next_product2.name }}</h6>
-                                    <p class="price mb-2">{{ currency_symbol }}{{ next_product2.price }}</p>
-                                    {% if next_product2.discount_price %}
-                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ next_product2.discount_price }}</s></p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    {% endif %}
-                    {% if forloop.counter|add:2 < featured_products|length %}
-                    {% with next_product3=featured_products|slice:forloop.counter|add:2|first %}
-                    {% if next_product3 %}
-                    <div class="col-md-3">
-                        <a href="{% url 'catalog:product_detail' next_product3.slug %}" class="text-decoration-none">
-                            <div class="card featured-product h-100">
-                                {% if next_product3.main_image %}
-                                <img src="{{ next_product3.main_image }}" alt="{{ next_product3.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% else %}
-                                <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ next_product3.name|urlencode }}" alt="{{ next_product3.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h6 class="card-title text-dark">{{ next_product3.name }}</h6>
-                                    <p class="price mb-2">{{ currency_symbol }}{{ next_product3.price }}</p>
-                                    {% if next_product3.discount_price %}
-                                    <p class="text-muted small mb-0"><s>{{ currency_symbol }}{{ next_product3.discount_price }}</s></p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    {% endif %}
+            {% if forloop.counter|divisibleby:4 or forloop.last %}
                 </div>
             </div>
             {% endif %}
