@@ -187,9 +187,18 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.value = '';
         clearSearch.style.display = 'none';
         
-        // If on products page, use AJAX to clear search
-        if (window.location.pathname === '/products/') {
-            performSearch('');
+        // If on products page, clear everything like Clear Filters does
+        if (window.location.pathname === '/products/' || window.location.pathname.startsWith('/products')) {
+            // Clear URL completely (removes all parameters including search and filters)
+            window.history.pushState({}, '', window.location.pathname);
+            
+            // Trigger fetch to reload all products
+            if (typeof window.fetchProducts === 'function') {
+                window.fetchProducts();
+            } else {
+                // Fallback: reload page without any parameters
+                window.location.href = window.location.pathname;
+            }
         } else {
             searchForm.submit();
         }

@@ -7,56 +7,59 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("Fixing corrupted image and video URLs...")
+        self.cloud_name = settings.CLOUDINARY_STORAGE['CLOUD_NAME']
         
-        # Fix Product main_image
         self.fix_product_images()
-        
-        # Fix Product videos
         self.fix_product_videos()
-        
-        # Fix ProductImage images
         self.fix_product_gallery_images()
-        
-        # Fix Category images
         self.fix_category_images()
         
         self.stdout.write(self.style.SUCCESS("Image and video URLs fixed successfully!"))
 
+    def fix_url(self, url, resource_type='image', include_sierra_luxe=False):
+        """Generic URL fixer for Cloudinary URLs"""
+        if not url:
+            return url
+            
+        # Already correct
+        if url.startswith(f'https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/v'):
+            # Check if needs sierra_luxe folder
+            if include_sierra_luxe and '/sierra_luxe/' not in url:
+                if f'/{resource_type}/upload/v1/products/' in url:
+                    return url.replace(f'/{resource_type}/upload/v1/products/', f'/{resource_type}/upload/v1/sierra_luxe/products/')
+            return url
+        
+        # Has full URL but missing /resource_type/upload/
+        if url.startswith('https://res.cloudinary.com/') and f'/{resource_type}/upload/' not in url:
+            parts = url.split('/')
+            if len(parts) >= 5:
+                path = '/'.join(parts[4:])
+                prefix = f'/v1/sierra_luxe/' if include_sierra_luxe else '/'
+                return f"https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload{prefix}{path}"
+        
+        # Has partial path with resource_type/upload/
+        if f'{resource_type}/upload/' in url and not url.startswith('https://'):
+            path = url.split(f'{resource_type}/upload/')[-1]
+            prefix = f'v1/sierra_luxe/' if include_sierra_luxe else ''
+            return f"https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/{prefix}{path}"
+        
+        # Just a path
+        if not url.startswith('https://'):
+            prefix = f'v1/sierra_luxe/' if include_sierra_luxe else ''
+            return f"https://res.cloudinary.com/{self.cloud_name}/{resource_type}/upload/{prefix}{url}"
+        
+        return url
+
     def fix_product_images(self):
         """Fix Product main_image URLs"""
         self.stdout.write("\nFixing Product main_image fields...")
-        
-        products = Product.objects.all()
         fixed_count = 0
         
-        for product in products:
+        for product in Product.objects.all():
             if product.main_image:
-                original = product.main_image
-                # If it's missing /image/upload/, add it
-                if original.startswith('https://res.cloudinary.com/') and '/image/upload/' not in original:
-                    # Extract the path after cloud name
-                    parts = original.split('/')
-                    if len(parts) >= 5:
-                        cloud_name = parts[3]
-                        path = '/'.join(parts[4:])
-                        product.main_image = f"https://res.cloudinary.com/{cloud_name}/image/upload/{path}"
-                        product.save()
-                        fixed_count += 1
-                        self.stdout.write(f"✓ Fixed: {product.name}")
-                elif 'image/upload/' in original:
-                    # Extract the path after image/upload/
-                    if original.startswith('image/upload/'):
-                        path = original.replace('image/upload/', '')
-                    else:
-                        path = original.split('image/upload/')[-1]
-                    # Reconstruct proper Cloudinary URL
-                    product.main_image = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/image/upload/{path}"
-                    product.save()
-                    fixed_count += 1
-                    self.stdout.write(f"✓ Fixed: {product.name}")
-                elif not original.startswith('https://'):
-                    # If it's just a path, construct full URL
-                    product.main_image = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/image/upload/{original}"
+                fixed_url = self.fix_url(product.main_image, 'image')
+                if fixed_url != product.main_image:
+                    product.main_image = fixed_url
                     product.save()
                     fixed_count += 1
                     self.stdout.write(f"✓ Fixed: {product.name}")
@@ -66,34 +69,13 @@ class Command(BaseCommand):
     def fix_product_videos(self):
         """Fix Product video URLs"""
         self.stdout.write("\nFixing Product video fields...")
-        
-        products = Product.objects.all()
         fixed_count = 0
         
-        for product in products:
+        for product in Product.objects.all():
             if product.video:
-                original = product.video
-                # If it's missing /video/upload/, add it
-                if original.startswith('https://res.cloudinary.com/') and '/video/upload/' not in original:
-                    parts = original.split('/')
-                    if len(parts) >= 5:
-                        cloud_name = parts[3]
-                        path = '/'.join(parts[4:])
-                        product.video = f"https://res.cloudinary.com/{cloud_name}/video/upload/{path}"
-                        product.save()
-                        fixed_count += 1
-                        self.stdout.write(f"✓ Fixed video: {product.name}")
-                elif 'video/upload/' in original:
-                    if original.startswith('video/upload/'):
-                        path = original.replace('video/upload/', '')
-                    else:
-                        path = original.split('video/upload/')[-1]
-                    product.video = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/video/upload/{path}"
-                    product.save()
-                    fixed_count += 1
-                    self.stdout.write(f"✓ Fixed video: {product.name}")
-                elif not original.startswith('https://'):
-                    product.video = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/video/upload/{original}"
+                fixed_url = self.fix_url(product.video, 'video', include_sierra_luxe=True)
+                if fixed_url != product.video:
+                    product.video = fixed_url
                     product.save()
                     fixed_count += 1
                     self.stdout.write(f"✓ Fixed video: {product.name}")
@@ -103,34 +85,13 @@ class Command(BaseCommand):
     def fix_product_gallery_images(self):
         """Fix ProductImage image URLs"""
         self.stdout.write("\nFixing ProductImage fields...")
-        
-        product_images = ProductImage.objects.all()
         fixed_count = 0
         
-        for img in product_images:
+        for img in ProductImage.objects.all():
             if img.image:
-                original = img.image
-                # If it's missing /image/upload/, add it
-                if original.startswith('https://res.cloudinary.com/') and '/image/upload/' not in original:
-                    parts = original.split('/')
-                    if len(parts) >= 5:
-                        cloud_name = parts[3]
-                        path = '/'.join(parts[4:])
-                        img.image = f"https://res.cloudinary.com/{cloud_name}/image/upload/{path}"
-                        img.save()
-                        fixed_count += 1
-                        self.stdout.write(f"✓ Fixed: {img.product.name} - {img.id}")
-                elif 'image/upload/' in original:
-                    if original.startswith('image/upload/'):
-                        path = original.replace('image/upload/', '')
-                    else:
-                        path = original.split('image/upload/')[-1]
-                    img.image = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/image/upload/{path}"
-                    img.save()
-                    fixed_count += 1
-                    self.stdout.write(f"✓ Fixed: {img.product.name} - {img.id}")
-                elif not original.startswith('https://'):
-                    img.image = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/image/upload/{original}"
+                fixed_url = self.fix_url(img.image, 'image')
+                if fixed_url != img.image:
+                    img.image = fixed_url
                     img.save()
                     fixed_count += 1
                     self.stdout.write(f"✓ Fixed: {img.product.name} - {img.id}")
@@ -140,24 +101,13 @@ class Command(BaseCommand):
     def fix_category_images(self):
         """Fix Category image URLs"""
         self.stdout.write("\nFixing Category images...")
-        
-        categories = Category.objects.all()
         fixed_count = 0
         
-        for category in categories:
+        for category in Category.objects.all():
             if category.image:
-                original = category.image
-                if 'image/upload/' in original:
-                    if original.startswith('image/upload/'):
-                        path = original.replace('image/upload/', '')
-                    else:
-                        path = original.split('image/upload/')[-1]
-                    category.image = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/image/upload/{path}"
-                    category.save()
-                    fixed_count += 1
-                    self.stdout.write(f"✓ Fixed: {category.name}")
-                elif not original.startswith('https://'):
-                    category.image = f"https://res.cloudinary.com/{settings.CLOUDINARY_STORAGE['CLOUD_NAME']}/image/upload/{original}"
+                fixed_url = self.fix_url(category.image, 'image')
+                if fixed_url != category.image:
+                    category.image = fixed_url
                     category.save()
                     fixed_count += 1
                     self.stdout.write(f"✓ Fixed: {category.name}")
