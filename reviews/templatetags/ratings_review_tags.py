@@ -37,11 +37,11 @@ def star_rating(rating, review_count=None):
 def category_image(category):
     """Get image URL for a category based on name"""
     category_images = {
-        'women': '/media/products/African Lace Maxi Dress 1.webp',
-        'men': '/media/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif',
-        'kids': '/media/products/baby-girl-ankara-ball-gown-dress-1.webp',
-        'wedding': '/media/products/aso-oke-couple-outfits-1.webp',
-        'traditional': '/media/products/red-beaded-african-dress-1.webp',
+        'women': 'https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/African Lace Maxi Dress 1.webp',
+        'men': 'https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif',
+        'kids': 'https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/baby-girl-ankara-ball-gown-dress-1.webp',
+        'wedding': 'https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/aso-oke-couple-outfits-1.webp',
+        'traditional': 'https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/red-beaded-african-dress-1.webp',
     }
     category_name_lower = category.name.lower() if hasattr(category, 'name') else str(category).lower()
     return category_images.get(category_name_lower, category.image if hasattr(category, 'image') else None)
