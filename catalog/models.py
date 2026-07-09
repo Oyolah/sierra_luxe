@@ -84,3 +84,22 @@ class ProductImage(models.Model):
         verbose_name_plural = 'Product Images'
         ordering = ['-is_primary', 'created_at']
 
+
+class Store(models.Model):
+    """Store/shop model to track shop-wide metrics"""
+    name = models.CharField(max_length=200, default='Sierra Luxe')
+    description = models.TextField(blank=True)
+    smooth_shipping = models.BooleanField(default=True, help_text='Has a history of shipping on time with tracking')
+    speedy_replies = models.BooleanField(default=True, help_text='Has a history of replying to messages quickly')
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=4.8, help_text='Average review rating')
+    total_reviews = models.IntegerField(default=0, help_text='Total number of reviews')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Store'
+        verbose_name_plural = 'Stores'
+

@@ -123,6 +123,45 @@
         color: #d4a017;
         margin-bottom: 15px;
     }
+    
+    .star-rating-display {
+        font-size: 1.2rem;
+        color: #e0e0e0;
+    }
+    .star-rating-display .filled {
+        color: #d4a017;
+    }
+    
+    .star-rating-input {
+        font-size: 1.5rem;
+        color: #e0e0e0;
+        cursor: pointer;
+    }
+    .star-rating-input .filled {
+        color: #d4a017;
+    }
+    .star-rating-input .fa-star {
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 0 2px;
+    }
+    .star-rating-input .fa-star:hover,
+    .star-rating-input .fa-star:hover ~ .fa-star {
+        color: #d4a017;
+    }
+    
+    .review-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .verified-badge {
+        color: #28a745;
+        font-size: 0.85rem;
+    }
 </style>
 {% endblock %}
 
@@ -191,6 +230,15 @@
                 <p class="text-muted mb-0"><s>{{ currency_symbol }}{{ product.discount_price }}</s></p>
                 <span class="badge bg-danger ms-2">Sale</span>
                 {% endif %}
+            </div>
+            
+            <!-- Product Rating -->
+            <div class="d-flex align-items-center mb-4" id="product-rating-summary">
+                <div class="star-rating-display me-2" data-rating="{{ average_rating }}">
+                    <span class="stars"></span>
+                </div>
+                <span class="fw-bold">{{ average_rating|floatformat:1 }}</span>
+                <span class="text-muted ms-2">({{ review_count }} review{{ review_count|pluralize }})</span>
             </div>
             
             <p class="text-muted mb-4">{{ product.description }}</p>
@@ -269,6 +317,192 @@
                     <li class="mb-2"><strong>Care Instructions:</strong> {{ product.care_instructions }}</li>
                     {% endif %}
                 </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviews Section -->
+    <div class="row mt-5" id="reviews-section">
+        <div class="col-12">
+            <h2 class="mb-4">Reviews</h2>
+            
+            <!-- Store Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">About the store</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if store.smooth_shipping %}
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                {% else %}
+                                <i class="fas fa-times-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Smooth shipping</span>
+                            </div>
+                            <p class="text-muted small mb-0">Has a history of shipping on time with tracking.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if store.speedy_replies %}
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                {% else %}
+                                <i class="fas fa-times-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Speedy replies</span>
+                            </div>
+                            <p class="text-muted small mb-0">Has a history of replying to messages quickly.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if store.average_rating >= 4.8 %}
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                {% else %}
+                                <i class="fas fa-times-circle text-muted me-2"></i>
+                                {% endif %}
+                                <span>Rave reviews</span>
+                            </div>
+                            <p class="text-muted small mb-0">Average review rating is {{ store.average_rating }} or higher.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shop-wide Reviews -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">All reviews from this shop ({{ store.total_reviews }})</h5>
+                <div class="star-rating-display" data-rating="{{ store.average_rating }}">
+                    <span class="stars"></span>
+                </div>
+            </div>
+            
+            <!-- Reviews Carousel/Grid -->
+            {% if shop_reviews %}
+            <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for review in shop_reviews %}
+                    {% if forloop.counter0|divisibleby:2 %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="review-card h-100">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <strong class="me-2">{{ review.customer.username }}</strong>
+                                                {% if review.is_verified_purchase %}
+                                                <span class="verified-badge"><i class="fas fa-check-circle me-1"></i>Verified Purchase</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="star-rating-display mb-2" data-rating="{{ review.rating }}">
+                                                <span class="stars"></span>
+                                            </div>
+                                            <h6 class="mb-1">{{ review.title }}</h6>
+                                            <p class="text-muted small mb-2">Reviewed on {{ review.product.name }}</p>
+                                            <p class="text-muted mb-0">{{ review.comment }}</p>
+                                        </div>
+                                        <small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if forloop.counter < shop_reviews|length %}
+                            <div class="col-md-6">
+                                {% with next_review=shop_reviews|slice:forloop.counter|first %}
+                                {% if next_review %}
+                                <div class="review-card h-100">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <strong class="me-2">{{ next_review.customer.username }}</strong>
+                                                {% if next_review.is_verified_purchase %}
+                                                <span class="verified-badge"><i class="fas fa-check-circle me-1"></i>Verified Purchase</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="star-rating-display mb-2" data-rating="{{ next_review.rating }}">
+                                                <span class="stars"></span>
+                                            </div>
+                                            <h6 class="mb-1">{{ next_review.title }}</h6>
+                                            <p class="text-muted small mb-2">Reviewed on {{ next_review.product.name }}</p>
+                                            <p class="text-muted mb-0">{{ next_review.comment }}</p>
+                                        </div>
+                                        <small class="text-muted">{{ next_review.created_at|date:"F d, Y" }}</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% if shop_reviews|length > 2 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#reviewsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#reviewsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted" id="no-reviews-message">
+                <i class="far fa-comment-dots fa-3x mb-3"></i>
+                <p>No reviews yet. Be the first to review our products!</p>
+            </div>
+            {% endif %}
+            
+            <!-- Review Alert -->
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                {% if user.is_authenticated and not user_has_reviewed %}
+                Want to review this product? <a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal" class="alert-link">Click here to submit a review</a>.
+                {% elif user.is_authenticated and user_has_reviewed %}
+                You have already reviewed this product.
+                {% else %}
+                Please <a href="{% url 'users:login' %}?next={{ request.path }}" class="alert-link">log in</a> to write a review.
+                {% endif %}
+            </div>
+            
+            <!-- Review Modal -->
+            <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reviewModalLabel">Review {{ product.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="review-form" method="post" action="{% url 'reviews:add_review' product.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label">Your Rating</label>
+                                    <div class="star-rating-input" id="star-rating-input">
+                                        <i class="fas fa-star" data-value="1"></i>
+                                        <i class="fas fa-star" data-value="2"></i>
+                                        <i class="fas fa-star" data-value="3"></i>
+                                        <i class="fas fa-star" data-value="4"></i>
+                                        <i class="fas fa-star" data-value="5"></i>
+                                    </div>
+                                    <input type="hidden" name="rating" id="review-rating" value="0">
+                                    <div class="invalid-feedback" id="rating-error">Please select a rating.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="review-title">Review Title</label>
+                                    <input type="text" name="title" class="form-control" id="review-title" placeholder="Summarize your experience" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="review-comment">Review</label>
+                                    <textarea name="comment" class="form-control" id="review-comment" rows="4" placeholder="Share your thoughts about the product" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -554,6 +788,129 @@ if (quantityInput) {
     quantityInput.addEventListener('change', function() {
         document.getElementById('cart-quantity').value = this.value;
     });
+}
+
+// Star rating display helper
+function renderStarRatings() {
+    document.querySelectorAll('.star-rating-display').forEach(container => {
+        const rating = parseFloat(container.dataset.rating) || 0;
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                starsHtml += '<i class="fas fa-star filled"></i>';
+            } else if (i - 0.5 <= rating) {
+                starsHtml += '<i class="fas fa-star-half-alt filled"></i>';
+            } else {
+                starsHtml += '<i class="far fa-star"></i>';
+            }
+        }
+        container.querySelector('.stars').innerHTML = starsHtml;
+    });
+}
+
+// Star rating input
+const starRatingInput = document.getElementById('star-rating-input');
+const ratingInput = document.getElementById('review-rating');
+if (starRatingInput) {
+    const stars = starRatingInput.querySelectorAll('.fa-star');
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const value = parseInt(this.dataset.value);
+            updateStarInput(value);
+        });
+        
+        star.addEventListener('click', function() {
+            const value = parseInt(this.dataset.value);
+            ratingInput.value = value;
+            updateStarInput(value);
+        });
+    });
+    
+    starRatingInput.addEventListener('mouseleave', function() {
+        const currentValue = parseInt(ratingInput.value) || 0;
+        updateStarInput(currentValue);
+    });
+    
+    function updateStarInput(value) {
+        stars.forEach((star, index) => {
+            if (index < value) {
+                star.classList.add('filled');
+            } else {
+                star.classList.remove('filled');
+            }
+        });
+    }
+}
+
+// Handle review form submission
+const reviewForm = document.getElementById('review-form');
+if (reviewForm) {
+    reviewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const rating = parseInt(ratingInput.value);
+        if (rating === 0) {
+            document.getElementById('rating-error').style.display = 'block';
+            return;
+        }
+        document.getElementById('rating-error').style.display = 'none';
+        
+        const formData = new FormData(this);
+        const csrftoken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showSuccessMessage(data.message);
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
+                if (modal) modal.hide();
+                
+                // Reset form
+                reviewForm.reset();
+                if (ratingInput) ratingInput.value = 0;
+                if (starRatingInput) updateStarInput(0);
+                
+                // Update alert message
+                const alertElement = document.querySelector('.alert-info');
+                if (alertElement) {
+                    alertElement.innerHTML = '<i class="fas fa-check-circle me-2"></i>You have already reviewed this product.';
+                }
+                
+                // Update store review count
+                updateStoreReviewCount();
+            } else {
+                alert(data.error || 'Error submitting review. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error submitting review. Please try again.');
+        });
+    });
+}
+
+// Initial render
+renderStarRatings();
+
+// Update store total reviews count dynamically
+function updateStoreReviewCount() {
+    const storeReviewsElement = document.querySelector('#reviews-section h5');
+    if (storeReviewsElement) {
+        const currentCount = parseInt("{{ store.total_reviews }}");
+        const newCount = currentCount + 1;
+        storeReviewsElement.textContent = `All reviews from this shop (${newCount})`;
+    }
 }
 
 </script>
