@@ -66,17 +66,21 @@ class Product(SlugModel):
     
     def delete(self, *args, **kwargs):
         # Delete main image from Cloudinary
-        try:
-            if self.main_image and hasattr(self.main_image, 'public_id') and self.main_image.public_id:
-                cloudinary.uploader.destroy(self.main_image.public_id, resource_type='image')
-        except Exception:
-            pass
+        if self.main_image:
+            try:
+                public_id = getattr(self.main_image, 'public_id', None)
+                if public_id:
+                    cloudinary.uploader.destroy(public_id, resource_type='image')
+            except:
+                pass
         # Delete video from Cloudinary
-        try:
-            if self.video and hasattr(self.video, 'public_id') and self.video.public_id:
-                cloudinary.uploader.destroy(self.video.public_id, resource_type='video')
-        except Exception:
-            pass
+        if self.video:
+            try:
+                public_id = getattr(self.video, 'public_id', None)
+                if public_id:
+                    cloudinary.uploader.destroy(public_id, resource_type='video')
+            except:
+                pass
         # Delete all related ProductImage objects (which will delete their Cloudinary images)
         for image in self.images.all():
             image.delete()
@@ -99,11 +103,13 @@ class ProductImage(models.Model):
     
     def delete(self, *args, **kwargs):
         # Delete image from Cloudinary
-        try:
-            if self.image and hasattr(self.image, 'public_id') and self.image.public_id:
-                cloudinary.uploader.destroy(self.image.public_id, resource_type='image')
-        except Exception:
-            pass
+        if self.image:
+            try:
+                public_id = getattr(self.image, 'public_id', None)
+                if public_id:
+                    cloudinary.uploader.destroy(public_id, resource_type='image')
+            except:
+                pass
         super().delete(*args, **kwargs)
     
     def __str__(self):
