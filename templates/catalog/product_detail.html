@@ -183,9 +183,9 @@
                 <!-- Thumbnails on left -->
                 <div class="d-flex flex-column gap-2">
                     {% if product.video %}
-                    <div class="video-thumbnail" onclick="showVideo()" style="cursor: pointer; position: relative;">
-                        <video src="{{ product.video|image_url }}" muted preload="metadata" style="width: 80px; height: 80px; object-fit: cover;" onloadedmetadata="this.currentTime = 0.1"></video>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <div class="video-thumbnail cursor-pointer position-relative" onclick="showVideo()">
+                        <video src="{{ product.video|image_url }}" muted preload="metadata" class="img-80x80 img-cover" onloadedmetadata="this.currentTime = 0.1"></video>
+                        <div class="video-play-button">
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
@@ -207,15 +207,15 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                     {% if product.video %}
-                    <video autoplay muted loop playsinline class="main-image" id="mainVideo" style="max-width: 100%; height: 720px; object-fit: cover;" preload="auto">
+                    <video autoplay muted loop playsinline class="main-image" id="mainVideo" preload="auto">
                         <source src="{{ product.video|image_url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                     {% endif %}
                     {% if product.main_image %}
-                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="main-image" id="mainImage" style="{% if product.video %}display: none;{% endif %} max-width: 100%; height: 720px; object-fit: cover;">
+                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="main-image{% if product.video %} hidden{% endif %}" id="mainImage">
                     {% elif not product.video %}
-                    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="main-image" id="mainImage" style="max-width: 100%; height: 720px; object-fit: cover;">
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="main-image" id="mainImage">
                     {% endif %}
                 </div>
             </div>
@@ -519,7 +519,7 @@
             <a href="{% url 'catalog:product_detail' related.slug %}" class="text-decoration-none">
                 <div class="card h-100 shadow-sm">
                     {% if related.main_image %}
-                    <img src="{{ related.main_image }}" alt="{{ related.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <img src="{{ related.main_image }}" alt="{{ related.name }}" class="card-img-top img-h-200 img-cover">
                     {% endif %}
                     <div class="card-body">
                         <h6 class="card-title">{{ related.name }}</h6>

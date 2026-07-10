@@ -40,9 +40,9 @@
                                 <tr>
                                     <td>
                                         {% if product.main_image %}
-                                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="img-50x50 img-cover rounded-4px">
                                         {% else %}
-                                        <div style="width: 50px; height: 50px; background: #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="img-50x50 bg-placeholder rounded-4px flex-center">
                                             <span class="text-muted small">No img</span>
                                         </div>
                                         {% endif %}
@@ -114,9 +114,9 @@
                                 <tr>
                                     <td>
                                         {% if product.main_image %}
-                                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="img-50x50 img-cover rounded-4px">
                                         {% else %}
-                                        <div style="width: 50px; height: 50px; background: #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="img-50x50 bg-placeholder rounded-4px flex-center">
                                             <span class="text-muted small">No img</span>
                                         </div>
                                         {% endif %}

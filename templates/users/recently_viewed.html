@@ -17,11 +17,9 @@
             <div class="card h-100 shadow-sm">
                 <a href="{% url 'catalog:product_detail' item.product.slug %}">
                     {% if item.product.main_image %}
-                    <img src="{{ item.product.main_image|image_url }}" class="card-img-top" alt="{{ item.product.name }}" 
-                         style="height: 250px; object-fit: cover;">
+                    <img src="{{ item.product.main_image|image_url }}" class="card-img-top img-h-250 img-cover" alt="{{ item.product.name }}">
                     {% else %}
-                    <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="{{ item.product.name }}" 
-                         style="height: 250px; object-fit: cover;">
+                    <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top img-h-250 img-cover" alt="{{ item.product.name }}">
                     {% endif %}
                 </a>
                 <div class="card-body">

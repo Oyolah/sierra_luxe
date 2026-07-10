@@ -8,9 +8,9 @@
         <div class="card shadow">
             <div class="card-body text-center">
                 {% if user.profile.profile_image %}
-                    <img src="{{ user.profile.profile_image }}" alt="Profile" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    <img src="{{ user.profile.profile_image }}" alt="Profile" class="rounded-circle mb-3 img-150x150 img-cover">
                 {% else %}
-                    <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px;">
+                    <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-3 img-150x150">
                         <i class="fas fa-user fa-4x text-white"></i>
                     </div>
                 {% endif %}

@@ -222,9 +222,9 @@
                 <a href="{% url 'catalog:product_detail' product.slug %}" class="text-decoration-none">
                     <div class="card featured-product h-100">
                         {% if product.main_image %}
-                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="card-img-top img-h-250 img-cover">
                         {% else %}
-                        <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ product.name|urlencode }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        <img src="https://via.placeholder.com/250x250/1a1a2e/d4a017?text={{ product.name|urlencode }}" alt="{{ product.name }}" class="card-img-top img-h-250 img-cover">
                         {% endif %}
                         <div class="card-body">
                             <h6 class="card-title text-dark">{{ product.name }}</h6>

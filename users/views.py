@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import HttpResponseForbidden
+from django.urls import reverse
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, UserUpdateForm
 from sierra_luxe.decorators import admin_required, customer_required
 from .models import RecentlyViewed
@@ -73,7 +74,7 @@ def user_logout(request):
     
     # Check if logout was due to session timeout
     if request.GET.get('session_timeout') == 'true':
-        return redirect('users:login', session_timeout='true')
+        return redirect(f"{reverse('users:login')}?session_timeout=true")
     
     messages.info(request, 'You have been logged out.')
     return redirect('catalog:home')

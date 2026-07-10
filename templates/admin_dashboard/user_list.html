@@ -12,7 +12,7 @@
                 <i class="fas fa-search"></i>
                 <input type="text" class="form-control" placeholder="Search users..." id="searchInput" value="{{ request.GET.search }}">
             </div>
-            <select class="form-select" style="width: auto;" id="roleFilter">
+            <select class="form-select width-auto" id="roleFilter">
                 <option value="">All Roles</option>
                 {% for value, label in role_choices %}
                 <option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>
