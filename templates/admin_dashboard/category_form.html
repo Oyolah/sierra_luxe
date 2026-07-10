@@ -33,17 +33,28 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Category Image</label>
-                        <input type="file" name="image" class="form-control form-control-admin" accept="image/*" id="categoryImage">
-                        <div class="mt-2">
-                            <p class="small text-muted mb-1">Preview:</p>
-                            <div id="imagePreview">
-                                {% if category.image %}
-                                <img src="{{ category.image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
-                                {% else %}
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
-                                    <span class="text-muted small">No image selected</span>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="file-upload-area" id="categoryImageDropArea">
+                                    <input type="file" name="image" class="file-input" accept="image/*" id="categoryImage">
+                                    <div class="file-upload-content">
+                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                        <p class="mb-0">Click or drag image here</p>
+                                        <small class="text-muted">Supports single file</small>
+                                    </div>
                                 </div>
-                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <p class="small text-muted mb-1">Preview:</p>
+                                <div id="imagePreview">
+                                    {% if category.image %}
+                                    <img src="{{ category.image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
+                                    {% else %}
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                        <span class="text-muted small">No image selected</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -65,5 +76,6 @@
     </div>
 </div>
 
+<script src="{% static 'js/admin_dashboard/drag_drop.js' %}"></script>
 <script src="{% static 'js/admin_dashboard/category_form.js' %}"></script>
 {% endblock %}

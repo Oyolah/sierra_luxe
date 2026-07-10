@@ -83,7 +83,14 @@
                 <div class="col-md-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Main Image</label>
-                        <input type="file" name="main_image" class="form-control form-control-admin" accept="image/*" id="mainImage">
+                        <div class="file-upload-area" id="mainImageDropArea">
+                            <input type="file" name="main_image" class="file-input" accept="image/*" id="mainImage">
+                            <div class="file-upload-content">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                <p class="mb-0">Click or drag image here</p>
+                                <small class="text-muted">Supports single file</small>
+                            </div>
+                        </div>
                         <div class="mt-2">
                             <p class="small text-muted mb-1">Preview:</p>
                             <div id="mainImagePreview">
@@ -139,5 +146,6 @@
     </div>
 </div>
 
+<script src="{% static 'js/admin_dashboard/drag_drop.js' %}"></script>
 <script src="{% static 'js/admin_dashboard/product_form.js' %}"></script>
 {% endblock %}

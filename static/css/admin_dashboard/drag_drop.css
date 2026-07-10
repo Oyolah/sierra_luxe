@@ -1,0 +1,69 @@
+/* Drag and Drop Upload Area Styles - Matching Product Images Design */
+.file-upload-area,
+.drag-drop-area {
+    border: 2px dashed #d4a017;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+    position: relative;
+}
+
+.file-upload-area:hover,
+.drag-drop-area:hover {
+    background: linear-gradient(135deg, #fff3cd 0%, #fff 100%);
+    border-color: #b8860b;
+}
+
+.file-upload-area.dragover,
+.drag-drop-area.dragover {
+    background: linear-gradient(135deg, #d4a017 0%, #f4d03f 100%);
+    border-color: #b8860b;
+}
+
+.file-upload-area.dragover .file-upload-content,
+.file-upload-area.dragover .drag-drop-content,
+.drag-drop-area.dragover .file-upload-content,
+.drag-drop-area.dragover .drag-drop-content {
+    color: white;
+}
+
+.file-upload-area.dragover .file-upload-content i,
+.file-upload-area.dragover .drag-drop-content i,
+.file-upload-area.dragover .file-upload-content small,
+.file-upload-area.dragover .drag-drop-content small,
+.drag-drop-area.dragover .file-upload-content i,
+.drag-drop-area.dragover .drag-drop-content i,
+.drag-drop-area.dragover .file-upload-content small,
+.drag-drop-area.dragover .drag-drop-content small {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.file-input,
+.drag-drop-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-content,
+.drag-drop-content {
+    color: #d4a017;
+}
+
+.file-upload-content i,
+.drag-drop-content i {
+    margin-bottom: 12px;
+}
+
+.file-upload-content p,
+.drag-drop-content p {
+    font-weight: 600;
+    margin-bottom: 4px;
+}

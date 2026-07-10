@@ -1,59 +1,5 @@
 /* Product Images Page Styles */
 
-/* File Upload Area */
-.file-upload-area {
-    border: 2px dashed #d4a017;
-    border-radius: 12px;
-    padding: 40px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
-    position: relative;
-}
-
-.file-upload-area:hover {
-    background: linear-gradient(135deg, #fff3cd 0%, #fff 100%);
-    border-color: #b8860b;
-}
-
-.file-upload-area.dragover {
-    background: linear-gradient(135deg, #d4a017 0%, #f4d03f 100%);
-    border-color: #b8860b;
-}
-
-.file-upload-area.dragover .file-upload-content {
-    color: white;
-}
-
-.file-upload-area.dragover .file-upload-content i,
-.file-upload-area.dragover .file-upload-content small {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.file-input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.file-upload-content {
-    color: #d4a017;
-}
-
-.file-upload-content i {
-    margin-bottom: 12px;
-}
-
-.file-upload-content p {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
 /* Preview Remove Button */
 .preview-remove-btn {
     position: absolute;
