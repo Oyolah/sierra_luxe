@@ -18,6 +18,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentMediaIndex = 0;
 
+    // Initialize thumbnail navigation buttons
+    function updateThumbnailNavButtons() {
+        const scrollArea = document.querySelector('#thumbnailScrollArea');
+        const upBtn = document.querySelector('#thumbNavUp');
+        const downBtn = document.querySelector('#thumbNavDown');
+        
+        if (!scrollArea) return;
+        
+        // Disable up button if at top
+        if (upBtn) {
+            upBtn.disabled = scrollArea.scrollTop <= 0;
+        }
+        
+        // Disable down button if at bottom
+        if (downBtn) {
+            downBtn.disabled = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 1;
+        }
+    }
+
+    // Scroll thumbnails function
+    window.scrollThumbnails = function(direction) {
+        const scrollArea = document.querySelector('#thumbnailScrollArea');
+        if (!scrollArea) return;
+        
+        const scrollAmount = 88; // 80px thumbnail + 8px gap
+        if (direction === 'up') {
+            scrollArea.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+        } else {
+            scrollArea.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+        }
+        
+        // Update button states after scroll
+        setTimeout(updateThumbnailNavButtons, 300);
+    };
+
     // Initialize active thumbnail on page load
     function initializeActiveThumbnail() {
         const mainImage = document.querySelector('#mainImage');
@@ -31,11 +66,39 @@ document.addEventListener('DOMContentLoaded', function() {
             // Image is showing, mark first thumbnail as active
             if (thumbnails.length > 0) {
                 thumbnails[0].classList.add('active');
+                scrollToThumbnail(thumbnails[0]);
             }
         } else if (thumbnails.length > 0) {
             // No main image, activate first thumbnail
             thumbnails[0].classList.add('active');
+            scrollToThumbnail(thumbnails[0]);
         }
+        
+        // Initialize nav button states
+        updateThumbnailNavButtons();
+        
+        // Add scroll event listener to update button states
+        const scrollArea = document.querySelector('#thumbnailScrollArea');
+        if (scrollArea) {
+            scrollArea.addEventListener('scroll', updateThumbnailNavButtons);
+        }
+    }
+
+    // Scroll to thumbnail function
+    function scrollToThumbnail(thumbnail) {
+        const scrollArea = document.querySelector('#thumbnailScrollArea');
+        if (!scrollArea || !thumbnail) return;
+        
+        // Calculate position to center the thumbnail
+        const containerHeight = scrollArea.clientHeight;
+        const thumbnailTop = thumbnail.offsetTop;
+        const thumbnailHeight = thumbnail.offsetHeight;
+        const scrollPosition = thumbnailTop - (containerHeight / 2) + (thumbnailHeight / 2);
+        
+        scrollArea.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+        });
     }
 
     // Function to change main media (image or video)
@@ -58,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update active thumbnail using element reference
         if (element) {
             updateActiveThumbnailByElement(element);
+            scrollToThumbnail(element);
         } else {
             updateActiveThumbnail(src);
         }
@@ -81,6 +145,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update active thumbnail for video
         updateActiveThumbnail(null, true);
+        
+        // Scroll to video thumbnail
+        const videoThumbnail = document.querySelector('.video-thumbnail');
+        if (videoThumbnail) {
+            scrollToThumbnail(videoThumbnail);
+        }
     }
 
     // Function to update active thumbnail styling by element reference
@@ -125,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Compare URLs, handling potential encoding differences
                 if (thumb.src === src || thumb.src === decodeURIComponent(src) || encodeURIComponent(thumb.src) === encodeURIComponent(src)) {
                     thumb.classList.add('active');
+                    scrollToThumbnail(thumb);
                 }
             });
         }

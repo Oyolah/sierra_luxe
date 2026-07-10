@@ -29,21 +29,29 @@
         <div class="col-lg-6">
             <div class="product-gallery d-flex gap-3">
                 <!-- Thumbnails on left -->
-                <div class="d-flex flex-column gap-2">
-                    {% if product.video %}
-                    <div class="video-thumbnail cursor-pointer position-relative" onclick="showVideo()" data-index="0">
-                        <video src="{{ product.video|image_url }}" muted preload="metadata" class="img-80x80 img-cover" onloadedmetadata="this.currentTime = 0.1"></video>
-                        <div class="video-play-button">
-                            <i class="fas fa-play"></i>
+                <div class="thumbnail-container">
+                    <button class="thumbnail-nav-btn up" onclick="scrollThumbnails('up')" id="thumbNavUp">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <div class="thumbnail-scroll-area" id="thumbnailScrollArea">
+                        {% if product.video %}
+                        <div class="video-thumbnail cursor-pointer position-relative" onclick="showVideo()" data-index="0">
+                            <video src="{{ product.video|image_url }}" muted preload="metadata" class="img-80x80 img-cover" onloadedmetadata="this.currentTime = 0.1"></video>
+                            <div class="video-play-button">
+                                <i class="fas fa-play"></i>
+                            </div>
                         </div>
+                        {% endif %}
+                        {% if product.main_image %}
+                        <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ product.main_image|image_url }}', this)" data-index="{% if product.video %}1{% else %}0{% endif %}">
+                        {% endif %}
+                        {% for image in product.images.all %}
+                        <img src="{{ image.image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ image.image|image_url }}', this)" data-index="{% if product.video %}{{ forloop.counter|add:1 }}{% else %}{{ forloop.counter }}{% endif %}">
+                        {% endfor %}
                     </div>
-                    {% endif %}
-                    {% if product.main_image %}
-                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ product.main_image|image_url }}', this)" data-index="{% if product.video %}1{% else %}0{% endif %}">
-                    {% endif %}
-                    {% for image in product.images.all %}
-                    <img src="{{ image.image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ image.image|image_url }}', this)" data-index="{% if product.video %}{{ forloop.counter|add:1 }}{% else %}{{ forloop.counter }}{% endif %}">
-                    {% endfor %}
+                    <button class="thumbnail-nav-btn down" onclick="scrollThumbnails('down')" id="thumbNavDown">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
                 </div>
                 
                 <!-- Main image/video on right -->
