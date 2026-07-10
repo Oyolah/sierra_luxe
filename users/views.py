@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -63,7 +63,7 @@ def register(request):
                 })
             
             messages.success(request, f'Account created for {username}! You can now log in.')
-            return redirect('users:auth')
+            return redirect('users:login')
         else:
             # Handle AJAX requests with errors
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -125,7 +125,7 @@ def user_logout(request):
     
     # Check if logout was due to session timeout
     if request.GET.get('session_timeout') == 'true':
-        return redirect(f"{reverse('users:auth')}?session_timeout=true")
+        return redirect(f"{reverse('users:login')}?session_timeout=true")
     
     messages.info(request, 'You have been logged out.')
     return redirect('catalog:home')

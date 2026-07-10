@@ -157,9 +157,13 @@
 }
 
 .btn-auth:hover {
-    background: rgba(var(--bs-dark-rgb), 0.85);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--bs-dark-rgb), 0.4);
     color: white;
-    box-shadow: 0 6px 20px rgba(var(--bs-dark-rgb), 0.5);
+}
+
+.btn-auth:active {
+    transform: translateY(0);
 }
 
 .auth-footer {

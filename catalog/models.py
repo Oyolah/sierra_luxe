@@ -21,7 +21,7 @@ class SlugModel(models.Model):
 class Category(SlugModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    image = CloudinaryField('category_images', blank=True, null=True)
+    image = CloudinaryField('category_images', asset_folder='sierra_luxe/category_images', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -44,7 +44,7 @@ class Product(SlugModel):
     colors = models.CharField(max_length=100, help_text='Comma-separated colors')
     material = models.CharField(max_length=100, blank=True)
     care_instructions = models.TextField(blank=True)
-    main_image = CloudinaryField('product_images', blank=True, null=True)
+    main_image = CloudinaryField('product_images', asset_folder='sierra_luxe/product_images', blank=True, null=True)
     video = models.URLField(blank=True, null=True, help_text='Cloudinary video URL')
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -107,7 +107,7 @@ class Product(SlugModel):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = CloudinaryField('product_images')
+    image = CloudinaryField('product_images', asset_folder='sierra_luxe/product_images')
     is_primary = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
