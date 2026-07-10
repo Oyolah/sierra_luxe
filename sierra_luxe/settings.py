@@ -254,6 +254,9 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # Logging Configuration
+# Check if running in read-only environment (e.g., Vercel)
+IS_READ_ONLY_FS = not os.access(BASE_DIR, os.W_OK)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -282,6 +285,39 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'sierra_luxe': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Add file handlers only if not in read-only environment
+if not IS_READ_ONLY_FS:
+    LOGGING['handlers'].update({
         'file': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -304,37 +340,19 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
         },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['file', 'error_file', 'mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'django.security': {
-            'handlers': ['file', 'error_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'django.db.backends': {
-            'handlers': ['file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'sierra_luxe': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-}
+    })
+    
+    LOGGING['loggers']['django']['handlers'] = ['console', 'file']
+    LOGGING['loggers']['django.request']['handlers'] = ['file', 'error_file', 'mail_admins']
+    LOGGING['loggers']['django.security']['handlers'] = ['file', 'error_file']
+    LOGGING['loggers']['django.db.backends']['handlers'] = ['file']
+    LOGGING['loggers']['sierra_luxe']['handlers'] = ['console', 'file', 'error_file']
 
-# Create logs directory if it doesn't exist
+# Create logs directory if it doesn't exist (only for local development)
 import os
-if not os.path.exists(BASE_DIR / 'logs'):
-    os.makedirs(BASE_DIR / 'logs')
+try:
+    if not os.path.exists(BASE_DIR / 'logs'):
+        os.makedirs(BASE_DIR / 'logs')
+except (OSError, PermissionError):
+    # Skip directory creation in read-only environments (e.g., Vercel)
+    pass
