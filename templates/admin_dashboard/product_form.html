@@ -22,18 +22,18 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Product Name</label>
+                        <label class="form-label fw-bold">Product Name <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control form-control-admin" value="{{ product.name|default:'' }}" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Description</label>
+                        <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
                         <textarea name="description" class="form-control form-control-admin" rows="5" required>{{ product.description|default:'' }}</textarea>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Price ({{ currency_symbol }})</label>
+                            <label class="form-label fw-bold">Price ({{ currency_symbol }}) <span class="text-danger">*</span></label>
                             <input type="number" name="price" step="0.01" min="0" class="form-control form-control-admin" value="{{ product.price|default:'' }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -44,11 +44,11 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Stock</label>
+                            <label class="form-label fw-bold">Stock <span class="text-danger">*</span></label>
                             <input type="number" name="stock" min="0" class="form-control form-control-admin" value="{{ product.stock|default:0 }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Category</label>
+                            <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
                             <select name="category" class="form-select form-control-admin" required>
                                 <option value="">Select Category</option>
                                 {% for category in categories %}

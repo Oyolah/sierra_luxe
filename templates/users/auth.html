@@ -37,14 +37,14 @@
                 <form method="post" id="loginForm" action="{% url 'users:login' %}">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="loginUsername" class="form-label">Username</label>
+                        <label for="loginUsername" class="form-label">Username <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                             <input type="text" class="form-control" id="loginUsername" name="username" placeholder="Enter your username" required>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="loginPassword" class="form-label">Password</label>
+                        <label for="loginPassword" class="form-label">Password <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter your password" required>
@@ -68,21 +68,21 @@
                 <form method="post" id="registerForm" action="{% url 'users:register' %}">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="regUsername" class="form-label">Username</label>
+                        <label for="regUsername" class="form-label">Username <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                             <input type="text" class="form-control" id="regUsername" name="username" placeholder="Choose a username" required>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="regEmail" class="form-label">Email</label>
+                        <label for="regEmail" class="form-label">Email <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             <input type="email" class="form-control" id="regEmail" name="email" placeholder="Enter your email" required>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="regPassword" class="form-label">Password</label>
+                        <label for="regPassword" class="form-label">Password <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             <input type="password" class="form-control" id="regPassword" name="password1" placeholder="Create a password" required>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="regConfirmPassword" class="form-label">Confirm Password</label>
+                        <label for="regConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             <input type="password" class="form-control" id="regConfirmPassword" name="password2" placeholder="Confirm your password" required>
