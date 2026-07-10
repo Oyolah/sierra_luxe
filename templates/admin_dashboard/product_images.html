@@ -38,11 +38,11 @@
                                             <i class="fas fa-star me-1"></i> Set Primary
                                         </button>
                                     </form>
-                                    <form method="post" class="flex-grow-1">
+                                    <form method="post" class="flex-grow-1" id="deleteForm-{{ image.id }}">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="delete_image">
                                         <input type="hidden" name="image_id" value="{{ image.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this image?')">
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="showDeleteModal('deleteForm-{{ image.id }}', 'Delete this image?')">
                                             <i class="fas fa-trash me-1"></i> Delete
                                         </button>
                                     </form>

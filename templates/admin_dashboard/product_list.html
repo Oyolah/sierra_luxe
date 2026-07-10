@@ -96,9 +96,9 @@
                             <a href="{% url 'admin_dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form method="post" action="{% url 'admin_dashboard:product_delete' product.id %}" class="d-inline" onsubmit="return confirm('Delete this product?')">
+                            <form method="post" action="{% url 'admin_dashboard:product_delete' product.id %}" class="d-inline" id="deleteForm-{{ product.id }}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="showDeleteModal('deleteForm-{{ product.id }}', 'Delete this product?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

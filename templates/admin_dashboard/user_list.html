@@ -67,9 +67,9 @@
                             <a href="{% url 'admin_dashboard:user_edit' user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form method="post" action="{% url 'admin_dashboard:user_delete' user.id %}" class="d-inline" onsubmit="return confirm('Delete this user?')">
+                            <form method="post" action="{% url 'admin_dashboard:user_delete' user.id %}" class="d-inline" id="deleteForm-{{ user.id }}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="showDeleteModal('deleteForm-{{ user.id }}', 'Delete this user?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -85,8 +85,4 @@
         </table>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/admin_dashboard/user_list.js' %}"></script>
 {% endblock %}

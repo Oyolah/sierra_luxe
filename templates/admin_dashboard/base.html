@@ -97,6 +97,10 @@
         </div>
     </div>
     
+    <!-- Delete Confirmation Modal -->
+    {% include 'admin_dashboard/components/delete_modal.html' %}
+    
+    <script src="{% static 'js/admin_dashboard/delete_modal.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
