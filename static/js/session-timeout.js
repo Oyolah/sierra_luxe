@@ -140,7 +140,7 @@ class SessionTimeoutManager {
         sessionStorage.setItem('session_timeout', 'true');
         
         // Redirect to logout with session timeout flag
-        window.location.href = '/logout/?session_timeout=true';
+        window.location.href = '/users/logout/?session_timeout=true';
     }
 }
 
