@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Authentication - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h2>Welcome to {{ site_name }}</h2>
+            <p class="text-white-50">Sign in to continue shopping</p>
+        </div>
+
+        <ul class="nav nav-tabs auth-tabs" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if not show_register %}active{% endif %}" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="{% if not show_register %}true{% else %}false{% endif %}">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if show_register %}active{% endif %}" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="{% if show_register %}true{% else %}false{% endif %}">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content auth-content" id="authTabsContent">
+            <!-- Login Tab -->
+            <div class="tab-pane fade {% if not show_register %}show active{% endif %}" id="login" role="tabpanel" aria-labelledby="login-tab">
+                <form method="post" id="loginForm" action="{% url 'users:login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="loginUsername" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="loginUsername" name="username" placeholder="Enter your username" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter your password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('loginPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                    <button type="submit" class="btn btn-auth w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </button>
+                </form>
+            </div>
+
+            <!-- Register Tab -->
+            <div class="tab-pane fade {% if show_register %}show active{% endif %}" id="register" role="tabpanel" aria-labelledby="register-tab">
+                <form method="post" id="registerForm" action="{% url 'users:register' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="regUsername" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="regUsername" name="username" placeholder="Choose a username" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="regEmail" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="regEmail" name="email" placeholder="Enter your email" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="regPassword" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="regPassword" name="password1" placeholder="Create a password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('regPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="regConfirmPassword" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="regConfirmPassword" name="password2" placeholder="Confirm your password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('regConfirmPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-auth w-100">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="auth-footer">
+            <p class="text-muted mb-0">
+                By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/users/auth.js' %}"></script>
+{% endblock %}

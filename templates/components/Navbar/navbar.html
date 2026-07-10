@@ -80,12 +80,12 @@
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:login' %}?next={% url 'cart:cart_view' %}">
+                        <a class="nav-link" href="{% url 'users:auth' %}?next={% url 'cart:cart_view' %}">
                             <i class="fas fa-shopping-cart"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</a>
+                        <a class="nav-link" href="{% url 'users:auth' %}">Sign In</a>
                     </li>
                 {% endif %}
             </ul>
@@ -153,35 +153,6 @@
                             </div>
                         </a>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sign In Modal -->
-<div class="modal fade" id="signInModal" tabindex="-1" aria-labelledby="signInModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="signInModalLabel">Sign In</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'users:login' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Sign In</button>
-                </form>
-                <div class="text-center mt-3">
-                    <p class="mb-0">Don't have an account? <a href="{% url 'users:register' %}">Sign Up</a></p>
                 </div>
             </div>
         </div>

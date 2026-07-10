@@ -1,0 +1,207 @@
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 2rem 1rem;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    max-width: 500px;
+    width: 100%;
+}
+
+.auth-header {
+    text-align: center;
+    padding: 2.5rem 2rem 1.5rem;
+    background: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity, 1));
+    color: white;
+}
+
+.auth-logo {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.auth-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.auth-tabs {
+    border: none;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    margin: 0;
+}
+
+.auth-tabs .nav-item {
+    flex: 1;
+    text-align: center;
+}
+
+.auth-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    padding: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.auth-tabs .nav-link:hover {
+    background: rgba(var(--bs-dark-rgb), 0.1);
+    color: rgba(var(--bs-dark-rgb), 1);
+}
+
+.auth-tabs .nav-link.active {
+    background: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity, 1));
+    color: white;
+    box-shadow: 0 4px 15px rgba(var(--bs-dark-rgb), 0.3);
+}
+
+.auth-content {
+    padding: 2rem;
+}
+
+.auth-content .tab-pane {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-content .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.auth-content .input-group-text {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    color: #6c757d;
+    border-right: none;
+}
+
+.auth-content .form-control {
+    border: 2px solid #e9ecef;
+    border-left: none;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.auth-content .form-control:focus {
+    border-color: rgba(var(--bs-dark-rgb), 1);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-dark-rgb), 0.15);
+}
+
+.auth-content .input-group:focus-within .input-group-text {
+    border-color: rgba(var(--bs-dark-rgb), 1);
+    background: white;
+}
+
+.auth-content .btn-outline-secondary {
+    border: 2px solid #e9ecef;
+    border-left: none;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.auth-content .btn-outline-secondary:hover {
+    background: #f8f9fa;
+    color: rgba(var(--bs-dark-rgb), 1);
+}
+
+.auth-content .form-check-input {
+    border: 2px solid #e9ecef;
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.auth-content .form-check-input:checked {
+    background-color: rgba(var(--bs-dark-rgb), 1);
+    border-color: rgba(var(--bs-dark-rgb), 1);
+}
+
+.btn-auth {
+    background: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity, 1));
+    border: none;
+    color: white;
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(var(--bs-dark-rgb), 0.3);
+}
+
+.btn-auth:hover {
+    background: rgba(var(--bs-dark-rgb), 0.85);
+    color: white;
+    box-shadow: 0 6px 20px rgba(var(--bs-dark-rgb), 0.5);
+}
+
+.auth-footer {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+}
+
+.auth-footer a {
+    color: rgba(var(--bs-dark-rgb), 1);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .auth-container {
+        padding: 1rem;
+    }
+    
+    .auth-card {
+        border-radius: 15px;
+    }
+    
+    .auth-header {
+        padding: 2rem 1.5rem 1rem;
+    }
+    
+    .auth-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .auth-content {
+        padding: 1.5rem;
+    }
+    
+    .auth-footer {
+        padding: 1rem 1.5rem;
+    }
+}
