@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global function to show modal
 window.showModal = function(modalId, title, body, onConfirm) {
-    const modal = document.getElementById(modalId);
+    const modal = document.querySelector('#' + modalId);
     if (!modal) {
         console.error('Modal not found:', modalId);
         return;
@@ -36,7 +36,7 @@ window.showModal = function(modalId, title, body, onConfirm) {
     
     // Update title if provided
     if (title) {
-        const titleElement = document.getElementById(modalId + 'Label');
+        const titleElement = document.querySelector('#' + modalId + 'Label');
         if (titleElement) {
             titleElement.textContent = title;
         }
@@ -44,7 +44,7 @@ window.showModal = function(modalId, title, body, onConfirm) {
     
     // Update body if provided
     if (body) {
-        const bodyElement = document.getElementById(modalId + 'Body');
+        const bodyElement = document.querySelector('#' + modalId + 'Body');
         if (bodyElement) {
             bodyElement.innerHTML = body;
         }
@@ -62,7 +62,7 @@ window.showModal = function(modalId, title, body, onConfirm) {
 
 // Global function to hide modal
 window.hideModal = function(modalId) {
-    const modal = document.getElementById(modalId);
+    const modal = document.querySelector('#' + modalId);
     if (modal) {
         const bsModal = bootstrap.Modal.getInstance(modal);
         if (bsModal) {

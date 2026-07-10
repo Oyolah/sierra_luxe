@@ -72,8 +72,8 @@
 <script>
 function applyFilters() {
     const params = new URLSearchParams();
-    const search = document.getElementById('searchInput').value;
-    const status = document.getElementById('statusFilter').value;
+    const search = document.querySelector('#searchInput').value;
+    const status = document.querySelector('#statusFilter').value;
     
     if (search) params.set('search', search);
     if (status) params.set('status', status);
@@ -81,9 +81,9 @@ function applyFilters() {
     window.location.href = '{% url 'admin_dashboard:order_list' %}' + (params.toString() ? '?' + params.toString() : '');
 }
 
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
+document.querySelector('#searchInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') applyFilters();
 });
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.querySelector('#statusFilter').addEventListener('change', applyFilters);
 </script>
 {% endblock %}

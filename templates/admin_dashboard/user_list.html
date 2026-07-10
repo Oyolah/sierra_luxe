@@ -84,8 +84,8 @@
 <script>
 function applyFilters() {
     const params = new URLSearchParams();
-    const search = document.getElementById('searchInput').value;
-    const role = document.getElementById('roleFilter').value;
+    const search = document.querySelector('#searchInput').value;
+    const role = document.querySelector('#roleFilter').value;
     
     if (search) params.set('search', search);
     if (role) params.set('role', role);
@@ -93,9 +93,9 @@ function applyFilters() {
     window.location.href = '{% url 'admin_dashboard:user_list' %}' + (params.toString() ? '?' + params.toString() : '');
 }
 
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
+document.querySelector('#searchInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') applyFilters();
 });
-document.getElementById('roleFilter').addEventListener('change', applyFilters);
+document.querySelector('#roleFilter').addEventListener('change', applyFilters);
 </script>
 {% endblock %}

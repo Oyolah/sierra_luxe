@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Get data from data attributes
-    const productData = document.getElementById('product-data');
+    const productData = document.querySelector('#product-data');
     if (!productData) return;
     
     const videoUrl = productData.dataset.videoUrl || '';
@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to change main media (image or video)
     window.changeImage = function(src) {
-        const mainImage = document.getElementById('mainImage');
-        const mainVideo = document.getElementById('mainVideo');
+        const mainImage = document.querySelector('#mainImage');
+        const mainVideo = document.querySelector('#mainVideo');
         
         if (mainVideo) {
             mainVideo.style.display = 'none';
@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to show video
     window.showVideo = function() {
-        const mainImage = document.getElementById('mainImage');
-        const mainVideo = document.getElementById('mainVideo');
+        const mainImage = document.querySelector('#mainImage');
+        const mainVideo = document.querySelector('#mainVideo');
         
         if (mainImage) {
             mainImage.style.display = 'none';
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Populate size options using centralized utility
-    const sizeContainer = document.getElementById('size-options');
+    const sizeContainer = document.querySelector('#size-options');
     if (sizeContainer && sizes && typeof FormUtils !== 'undefined') {
         FormUtils.createOptionButtons(
             sizes,
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Populate color options using centralized utility
-    const colorContainer = document.getElementById('color-options');
+    const colorContainer = document.querySelector('#color-options');
     if (colorContainer && colors && typeof FormUtils !== 'undefined') {
         FormUtils.createColorOptions(
             colors,
@@ -113,18 +113,18 @@ function selectSize(btn) {
     document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     // Update hidden form field
-    document.getElementById('cart-size').value = btn.textContent.trim();
+    document.querySelector('#cart-size').value = btn.textContent.trim();
 }
 
 function selectColor(div) {
     document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
     div.classList.add('active');
     // Update hidden form field
-    document.getElementById('cart-color').value = div.dataset.color || div.title;
+    document.querySelector('#cart-color').value = div.dataset.color || div.title;
 }
 
 function changeQuantity(delta) {
-    const input = document.getElementById('quantity');
+    const input = document.querySelector('#quantity');
     const newValue = parseInt(input.value) + delta;
     const max = parseInt(input.max);
     
@@ -132,24 +132,24 @@ function changeQuantity(delta) {
         input.value = newValue;
     }
     // Update hidden form field
-    document.getElementById('cart-quantity').value = input.value;
+    document.querySelector('#cart-quantity').value = input.value;
 }
 
 // Handle add to cart form submission
-const addToCartForm = document.getElementById('add-to-cart-form');
+const addToCartForm = document.querySelector('#add-to-cart-form');
 if (addToCartForm) {
     addToCartForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         // Get data from data attributes
-        const productData = document.getElementById('product-data');
+        const productData = document.querySelector('#product-data');
         const hasSizes = productData.dataset.sizes !== '';
         const hasColors = productData.dataset.colors !== '';
         
         // Update quantity before submit
-        const quantity = document.getElementById('quantity');
+        const quantity = document.querySelector('#quantity');
         if (quantity) {
-            document.getElementById('cart-quantity').value = quantity.value;
+            document.querySelector('#cart-quantity').value = quantity.value;
         }
         
         // Validate size selection if product has sizes
@@ -159,7 +159,7 @@ if (addToCartForm) {
                 showModal('validationModal', 'Selection Required', 'Please select a size before adding to cart.');
                 return false;
             }
-            document.getElementById('cart-size').value = selectedSize.textContent.trim();
+            document.querySelector('#cart-size').value = selectedSize.textContent.trim();
         }
         
         // Validate color selection if product has colors
@@ -169,7 +169,7 @@ if (addToCartForm) {
                 showModal('validationModal', 'Selection Required', 'Please select a color before adding to cart.');
                 return false;
             }
-            document.getElementById('cart-color').value = selectedColor.dataset.color || selectedColor.title;
+            document.querySelector('#cart-color').value = selectedColor.dataset.color || selectedColor.title;
         }
         
         // Submit via AJAX
@@ -233,7 +233,7 @@ function showSuccessMessage(message) {
 // Update cart count in navbar
 function updateCartCount(count) {
     let cartBadge = document.querySelector('.cart-count');
-    const cartDropdown = document.getElementById('cartDropdown');
+    const cartDropdown = document.querySelector('#cartDropdown');
     
     if (!cartBadge && cartDropdown && count > 0) {
         // Create badge if it doesn't exist

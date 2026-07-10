@@ -90,7 +90,7 @@ class SessionTimeoutManager {
         if (this.warningShown) return;
         this.warningShown = true;
         
-        const warningModal = document.getElementById('session-timeout-warning');
+        const warningModal = document.querySelector('#session-timeout-warning');
         if (warningModal) {
             warningModal.classList.add('show');
             warningModal.style.display = 'block';
@@ -102,7 +102,7 @@ class SessionTimeoutManager {
     
     startCountdown() {
         let timeLeft = 60; // 60 seconds
-        const countdownElement = document.getElementById('session-countdown');
+        const countdownElement = document.querySelector('#session-countdown');
         
         if (countdownElement) {
             const countdownInterval = setInterval(() => {
@@ -124,7 +124,7 @@ class SessionTimeoutManager {
     }
     
     hideWarning() {
-        const warningModal = document.getElementById('session-timeout-warning');
+        const warningModal = document.querySelector('#session-timeout-warning');
         if (warningModal) {
             warningModal.classList.remove('show');
             warningModal.style.display = 'none';

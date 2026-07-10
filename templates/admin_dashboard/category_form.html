@@ -60,8 +60,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.getElementById('categoryImage');
-    const imagePreview = document.getElementById('imagePreview');
+    const imageInput = document.querySelector('#categoryImage');
+    const imagePreview = document.querySelector('#imagePreview');
     
     if (imageInput && imagePreview) {
         imageInput.addEventListener('change', function(e) {

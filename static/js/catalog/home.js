@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const track = document.getElementById('carouselTrack');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
+    const track = document.querySelector('#carouselTrack');
+    const prevBtn = document.querySelector('#prevBtn');
+    const nextBtn = document.querySelector('#nextBtn');
     
     if (track && prevBtn && nextBtn) {
         let currentIndex = 0;

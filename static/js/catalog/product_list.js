@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const minPrice = document.getElementById('minPrice');
-    const maxPrice = document.getElementById('maxPrice');
-    const sizeFilter = document.getElementById('sizeFilter');
-    const colorFilter = document.getElementById('colorFilter');
-    const applyFiltersBtn = document.getElementById('applyFilters');
-    const clearFiltersBtn = document.getElementById('clearFilters');
+    const categoryFilter = document.querySelector('#categoryFilter');
+    const minPrice = document.querySelector('#minPrice');
+    const maxPrice = document.querySelector('#maxPrice');
+    const sizeFilter = document.querySelector('#sizeFilter');
+    const colorFilter = document.querySelector('#colorFilter');
+    const applyFiltersBtn = document.querySelector('#applyFilters');
+    const clearFiltersBtn = document.querySelector('#clearFilters');
     
     // Function to get filter parameters
     function getFilterParams() {

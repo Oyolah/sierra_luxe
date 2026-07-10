@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const clearSearch = document.getElementById('clearSearch');
-    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.querySelector('#searchInput');
+    const clearSearch = document.querySelector('#clearSearch');
+    const searchForm = document.querySelector('#searchForm');
     
     // Show/hide clear button based on initial value
     if (searchInput.value) {
@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Cart dropdown hover functionality
-    const cartDropdown = document.getElementById('cart-dropdown');
-    const cartDropdownMenu = document.getElementById('cart-dropdown-menu');
+    const cartDropdown = document.querySelector('#cart-dropdown');
+    const cartDropdownMenu = document.querySelector('#cart-dropdown-menu');
     let cartHoverTimeout;
     
     if (cartDropdown && cartDropdownMenu) {
@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 console.log('Cart preview data:', data);
-                const cartItemsPreview = document.getElementById('cart-items-preview');
-                const cartDropdownTotal = document.getElementById('cart-dropdown-total');
+                const cartItemsPreview = document.querySelector('#cart-items-preview');
+                const cartDropdownTotal = document.querySelector('#cart-dropdown-total');
                 
                 if (!cartItemsPreview || !cartDropdownTotal) {
                     console.error('Cart preview elements not found');
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error loading cart preview:', error);
-                const cartItemsPreview = document.getElementById('cart-items-preview');
+                const cartItemsPreview = document.querySelector('#cart-items-preview');
                 if (cartItemsPreview) {
                     cartItemsPreview.innerHTML = '<div class="text-center py-4 text-danger">Failed to load cart</div>';
                 }

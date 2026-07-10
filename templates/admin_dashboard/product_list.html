@@ -113,14 +113,14 @@
 <script>
 function updateBulkDeleteButton() {
     var checkboxes = document.querySelectorAll('.product-checkbox:checked');
-    var bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    var bulkDeleteBtn = document.querySelector('#bulkDeleteBtn');
     if (bulkDeleteBtn) {
         bulkDeleteBtn.style.display = checkboxes.length > 0 ? 'inline-block' : 'none';
     }
 }
 
 function toggleSelectAll() {
-    var selectAll = document.getElementById('selectAll');
+    var selectAll = document.querySelector('#selectAll');
     var checkboxes = document.querySelectorAll('.product-checkbox');
     for (var i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = selectAll.checked;
@@ -158,9 +158,9 @@ function bulkDelete() {
 
 function applyFilters() {
     var params = new URLSearchParams();
-    var search = document.getElementById('searchInput').value;
-    var category = document.getElementById('categoryFilter').value;
-    var status = document.getElementById('statusFilter').value;
+    var search = document.querySelector('#searchInput').value;
+    var category = document.querySelector('#categoryFilter').value;
+    var status = document.querySelector('#statusFilter').value;
     
     if (search) params.set('search', search);
     if (category) params.set('category', category);
