@@ -410,3 +410,250 @@ function updateCartCount(count) {
         loadCartPreview();
     }
 }
+
+// Toggle like functionality
+window.toggleLike = function(productId) {
+    const likeBtn = document.querySelector('.like-btn');
+    if (!likeBtn) return;
+    
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
+    fetch(`/reviews/product/${productId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update like button state
+            const icon = likeBtn.querySelector('i');
+            const countSpan = likeBtn.querySelector('.like-count');
+            
+            if (data.is_liked) {
+                icon.classList.add('text-danger');
+            } else {
+                icon.classList.remove('text-danger');
+            }
+            
+            countSpan.textContent = data.like_count;
+            
+            // Show success message
+            showSuccessMessage(data.message);
+        } else {
+            alert('Error updating like. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error toggling like:', error);
+        alert('Error updating like. Please try again.');
+    });
+};
+
+// Initialize like button click handlers
+document.addEventListener('DOMContentLoaded', function() {
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
+        const productId = btn.dataset.productId;
+        if (productId) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleLike(productId);
+            });
+        }
+    });
+    
+    // Initialize star rating input
+    const starRatingInput = document.querySelector('#star-rating-input');
+    if (starRatingInput) {
+        const stars = starRatingInput.querySelectorAll('i');
+        const ratingInput = document.querySelector('#review-rating');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.dataset.value;
+                ratingInput.value = value;
+                
+                // Update star visual state
+                stars.forEach((s, index) => {
+                    if (index < value) {
+                        s.classList.add('text-warning');
+                        s.classList.remove('text-muted');
+                    } else {
+                        s.classList.remove('text-warning');
+                        s.classList.add('text-muted');
+                    }
+                });
+                
+                // Clear error message
+                const errorDiv = document.querySelector('#rating-error');
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            });
+            
+            // Add hover effect
+            star.addEventListener('mouseenter', function() {
+                const value = this.dataset.value;
+                stars.forEach((s, index) => {
+                    if (index < value) {
+                        s.classList.add('text-warning');
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseleave', function() {
+                const currentValue = ratingInput.value;
+                stars.forEach((s, index) => {
+                    if (index < currentValue) {
+                        s.classList.add('text-warning');
+                    } else {
+                        s.classList.remove('text-warning');
+                    }
+                });
+            });
+        });
+    }
+    
+    // Handle review form submission
+    const reviewForm = document.querySelector('#review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            const ratingInput = document.querySelector('#review-rating');
+            const errorDiv = document.querySelector('#rating-error');
+            const titleInput = document.querySelector('#review-title');
+            const commentInput = document.querySelector('#review-comment');
+            
+            // Clear previous errors
+            clearFormErrors();
+            
+            let hasError = false;
+            
+            // Validate rating
+            if (ratingInput.value === '0' || ratingInput.value === '') {
+                showFieldError('rating', 'Please select a rating');
+                hasError = true;
+            }
+            
+            // Validate title
+            if (!titleInput.value.trim()) {
+                showFieldError('title', 'Please enter a review title');
+                hasError = true;
+            }
+            
+            // Validate comment
+            if (!commentInput.value.trim()) {
+                showFieldError('comment', 'Please enter your review');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Submit via AJAX
+            const formData = new FormData(this);
+            const csrftoken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Disable submit button
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.querySelector('#reviewModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Show success message
+                    showSuccessMessage(data.message);
+                    
+                    // Reload page to show updated reviews
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Show server errors
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const errorMessages = data.errors[field];
+                            showFieldError(field, errorMessages.join(' '));
+                        });
+                    } else if (data.error) {
+                        showFormError(data.error);
+                    }
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit Review';
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting review:', error);
+                showFormError('Error submitting review. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Review';
+            });
+        });
+    }
+});
+
+// Clear all form errors
+function clearFormErrors() {
+    document.querySelectorAll('.field-error').forEach(el => el.remove());
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+}
+
+// Show error for a specific field
+function showFieldError(fieldName, message) {
+    const field = document.querySelector(`[name="${fieldName}"]`);
+    if (!field) return;
+    
+    field.classList.add('is-invalid');
+    
+    // Remove existing error for this field
+    const existingError = field.parentElement.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Add new error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error text-danger small mt-1';
+    errorDiv.textContent = message;
+    field.parentElement.appendChild(errorDiv);
+}
+
+// Show general form error
+function showFormError(message) {
+    const form = document.querySelector('#review-form');
+    if (!form) return;
+    
+    // Remove existing form error
+    const existingError = form.querySelector('.form-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Add new error message at top of form
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'form-error alert alert-danger';
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
+    form.insertBefore(errorDiv, form.firstChild);
+}

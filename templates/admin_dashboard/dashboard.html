@@ -50,7 +50,7 @@
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-6">
+    <div class="col-md-3">
         <div class="stat-card">
             <div class="stat-icon bg-dark bg-opacity-10 text-dark">
                 <i class="fas fa-euro-sign"></i>
@@ -59,7 +59,7 @@
             <div class="stat-label">Total Sales</div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
         <div class="stat-card">
             <div class="stat-icon bg-danger bg-opacity-10 text-danger">
                 <i class="fas fa-clock"></i>
@@ -68,10 +68,28 @@
             <div class="stat-label">Pending Orders</div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-value">{{ total_reviews }}</div>
+            <div class="stat-label">Total Reviews</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-value">{{ total_likes }}</div>
+            <div class="stat-label">Total Likes</div>
+        </div>
+    </div>
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-8">
+    <div class="col-lg-6">
         <div class="page-card">
             <div class="page-card-header">
                 <h5 class="mb-0">Recent Orders</h5>
@@ -112,6 +130,47 @@
         </div>
     </div>
     
+    <div class="col-lg-6">
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Recent Reviews</h5>
+                <a href="{% url 'admin_dashboard:review_list' %}" class="btn btn-sm btn-admin-outline">View All</a>
+            </div>
+            <div class="page-card-body p-0">
+                <table class="table table-admin mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Customer</th>
+                            <th>Rating</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in recent_reviews %}
+                        <tr>
+                            <td>{{ review.product.name }}</td>
+                            <td>{{ review.customer.username }}</td>
+                            <td>
+                                <div class="text-warning">
+                                    {% if review.rating == 5 %}★★★★★{% elif review.rating == 4 %}★★★★☆{% elif review.rating == 3 %}★★★☆☆{% elif review.rating == 2 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+                                </div>
+                            </td>
+                            <td>{{ review.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No reviews yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
     <div class="col-lg-4">
         <div class="page-card mb-4">
             <div class="page-card-header">
@@ -135,6 +194,57 @@
             </div>
         </div>
         
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Top Rated Products</h5>
+                <a href="{% url 'admin_dashboard:product_list' %}" class="btn btn-sm btn-admin-outline">View All</a>
+            </div>
+            <div class="page-card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for product in top_rated_products %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">{{ product.name }}</h6>
+                            <small class="text-warning">
+                                {% if product.avg_rating >= 4.5 %}★★★★★{% elif product.avg_rating >= 3.5 %}★★★★☆{% elif product.avg_rating >= 2.5 %}★★★☆☆{% elif product.avg_rating >= 1.5 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+                                {{ product.avg_rating|floatformat:1 }} ({{ product.review_count }} reviews)
+                            </small>
+                        </div>
+                        <a href="{% url 'admin_dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted py-4">No rated products yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Most Liked Products</h5>
+                <a href="{% url 'admin_dashboard:product_list' %}" class="btn btn-sm btn-admin-outline">View All</a>
+            </div>
+            <div class="page-card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for product in most_liked_products %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">{{ product.name }}</h6>
+                            <small class="text-danger"><i class="fas fa-heart"></i> {{ product.like_count }} likes</small>
+                        </div>
+                        <a href="{% url 'admin_dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted py-4">No liked products yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
         <div class="page-card">
             <div class="page-card-header">
                 <h5 class="mb-0">New Customers</h5>

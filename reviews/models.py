@@ -3,6 +3,20 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from catalog.models import Product
 
+class Like(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Like'
+        verbose_name_plural = 'Likes'
+        unique_together = ('product', 'user')
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} likes {self.product.name}"
+
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')

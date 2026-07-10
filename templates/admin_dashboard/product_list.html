@@ -52,6 +52,8 @@
                     <th>Category</th>
                     <th>Price</th>
                     <th>Stock</th>
+                    <th>Rating</th>
+                    <th>Likes</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -84,6 +86,23 @@
                         </span>
                     </td>
                     <td>
+                        {% with product|average_rating as avg %}
+                        {% if avg > 0 %}
+                        <div class="text-warning small">
+                            {% if avg >= 4.5 %}★★★★★{% elif avg >= 3.5 %}★★★★☆{% elif avg >= 2.5 %}★★★☆☆{% elif avg >= 1.5 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+                        </div>
+                        <small class="text-muted">{{ avg|floatformat:1 }} ({{ product|review_count }})</small>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <div class="text-danger small">
+                            <i class="fas fa-heart"></i> {{ product.likes.count }}
+                        </div>
+                    </td>
+                    <td>
                         <span class="status-badge bg-{{ product.is_active|status_badge_class:'product' }}-subtle text-{{ product.is_active|status_badge_class:'product' }}">
                             {% if product.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
@@ -107,7 +126,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="text-center text-muted py-5">No products found</td>
+                    <td colspan="10" class="text-center text-muted py-5">No products found</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -1,0 +1,129 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Likes - Admin Dashboard{% endblock %}
+
+{% block page_title %}Likes Management{% endblock %}
+
+{% block breadcrumbs %}
+{% with breadcrumbs=breadcrumbs %}
+{% include 'components/admin_breadcrumb.html' %}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="page-card">
+            <div class="page-card-body text-center">
+                <h3 class="text-danger mb-0">{{ total_likes }}</h3>
+                <p class="text-muted mb-0">Total Likes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-card">
+    <div class="page-card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Product Likes</h5>
+            <div>
+                <form method="get" class="d-flex gap-2">
+                    <input type="text" name="search" class="form-control" placeholder="Search likes..." value="{{ request.GET.search }}">
+                    <select name="product" class="form-select">
+                        <option value="">All Products</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}" {% if request.GET.product == product.id|stringformat:"s" %}selected{% endif %}>{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{% url 'admin_dashboard:like_list' %}" class="btn btn-outline-secondary">Clear</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="page-card-body">
+        <form method="post" action="{% url 'admin_dashboard:like_bulk_delete' %}">
+            {% csrf_token %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="50"><input type="checkbox" id="select-all-likes"></th>
+                            <th>Product</th>
+                            <th>User</th>
+                            <th>Date Liked</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for like in page_obj %}
+                        <tr>
+                            <td><input type="checkbox" name="like_ids" value="{{ like.id }}" class="like-checkbox"></td>
+                            <td>
+                                <a href="{% url 'admin_dashboard:product_edit' like.product.id %}" class="text-decoration-none">{{ like.product.name }}</a>
+                            </td>
+                            <td>{{ like.user.username }}</td>
+                            <td>{{ like.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <form method="post" action="{% url 'admin_dashboard:like_delete' like.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this like?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">No likes found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if page_obj.has_other_pages %}
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <p class="text-muted mb-0">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} likes</p>
+                <nav>
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+            <div class="mt-3 pt-3 border-top">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Delete selected likes?')">
+                        <i class="fas fa-trash me-2"></i>Delete Selected
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/admin_dashboard/like_list.js' %}"></script>
+{% endblock %}

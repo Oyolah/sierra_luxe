@@ -89,13 +89,30 @@
                 {% endif %}
             </div>
             
-            <!-- Product Rating -->
-            <div class="d-flex align-items-center mb-4" id="product-rating-summary">
-                <div class="star-rating-display me-2" data-rating="{{ average_rating }}">
-                    <span class="stars"></span>
+            <!-- Product Rating and Likes -->
+            <div class="d-flex align-items-center justify-content-between mb-4" id="product-rating-summary">
+                <div class="d-flex align-items-center">
+                    <div class="star-rating-display me-2" data-rating="{{ average_rating }}">
+                        <span class="stars"></span>
+                    </div>
+                    <span class="fw-bold">{{ average_rating|floatformat:1 }}</span>
+                    <span class="text-muted ms-2">({{ review_count }} review{{ review_count|pluralize }})</span>
                 </div>
-                <span class="fw-bold">{{ average_rating|floatformat:1 }}</span>
-                <span class="text-muted ms-2">({{ review_count }} review{{ review_count|pluralize }})</span>
+                <div class="d-flex align-items-center" id="like-container">
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-outline-primary btn-sm like-btn" 
+                            data-product-id="{{ product.id }}" 
+                            data-is-liked="{{ is_liked|yesno:'true,false' }}">
+                        <i class="fas fa-heart{% if is_liked %} text-danger{% endif %}"></i>
+                        <span class="like-count">{{ like_count }}</span>
+                    </button>
+                    {% else %}
+                    <button class="btn btn-outline-primary btn-sm" disabled>
+                        <i class="fas fa-heart"></i>
+                        <span class="like-count">{{ like_count }}</span>
+                    </button>
+                    {% endif %}
+                </div>
             </div>
             
             <p class="text-muted mb-4">{{ product.description }}</p>

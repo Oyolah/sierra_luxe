@@ -74,13 +74,18 @@
                             <div class="card-body">
                                 {% load ratings_review_tags %}
                                 <h6 class="card-title text-dark">{{ product.name }}</h6>
-                                {% with product|average_rating as avg %}
-                                {% if avg > 0 %}
-                                <div class="mb-1">
-                                    {% star_rating avg product|review_count %}
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    {% with product|average_rating as avg %}
+                                    {% if avg > 0 %}
+                                    <div class="small">
+                                        {% star_rating avg product|review_count %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-heart"></i> {{ product.likes.count }}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% endwith %}
                                 <p class="card-text text-muted small">{{ product.description|truncatechars:80 }}</p>
                                 <p class="price mb-0">{{ currency_symbol }}{{ product.price }}</p>
                                 {% if product.discount_price %}

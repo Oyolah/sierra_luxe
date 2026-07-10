@@ -2,18 +2,21 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Sum, Q, Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from decimal import Decimal
 from django.urls import reverse
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 from sierra_luxe.decorators import login_admin_required, admin_required
 from sierra_luxe.utils import get_breadcrumbs
 from catalog.models import Category, Product, ProductImage
 from orders.models import Order
 from users.models import User
 from cart.models import Cart
+from reviews.models import Review, Like
 
 User = get_user_model()
 
@@ -48,6 +51,26 @@ def dashboard(request):
     
     pending_orders = Order.objects.filter(status='PENDING').count()
     
+    # Reviews and Likes stats
+    total_reviews = Review.objects.count()
+    approved_reviews = Review.objects.filter(is_approved=True).count()
+    pending_reviews = Review.objects.filter(is_approved=False).count()
+    total_likes = Like.objects.count()
+    
+    # Recent reviews
+    recent_reviews = Review.objects.select_related('customer', 'product').filter(is_approved=True).order_by('-created_at')[:5]
+    
+    # Top rated products
+    top_rated_products = Product.objects.annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews')
+    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
+    
+    # Most liked products
+    most_liked_products = Product.objects.annotate(
+        like_count=Count('likes')
+    ).filter(like_count__gt=0).order_by('-like_count')[:5]
+    
     context = {
         'total_products': total_products,
         'total_categories': total_categories,
@@ -58,6 +81,13 @@ def dashboard(request):
         'recent_orders': recent_orders,
         'recent_users': recent_users,
         'low_stock_products': low_stock_products,
+        'total_reviews': total_reviews,
+        'approved_reviews': approved_reviews,
+        'pending_reviews': pending_reviews,
+        'total_likes': total_likes,
+        'recent_reviews': recent_reviews,
+        'top_rated_products': top_rated_products,
+        'most_liked_products': most_liked_products,
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', None, 'fas fa-tachometer-alt')
         ),
@@ -605,3 +635,206 @@ def remove_featured(request, product_id):
         messages.success(request, f'{product.name} has been removed from featured products.')
     
     return redirect('admin_dashboard:featured_products')
+
+
+# ============ REVIEWS MANAGEMENT ============
+
+@login_admin_required
+def review_list(request):
+    """List all reviews with search and filter"""
+    reviews = Review.objects.select_related('customer', 'product').all()
+    
+    # Search
+    search_query = request.GET.get('search')
+    if search_query:
+        reviews = reviews.filter(
+            Q(customer__username__icontains=search_query) |
+            Q(product__name__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(comment__icontains=search_query)
+        )
+    
+    # Filter by product
+    product_id = request.GET.get('product')
+    if product_id:
+        reviews = reviews.filter(product_id=product_id)
+    
+    # Filter by rating
+    rating = request.GET.get('rating')
+    if rating:
+        reviews = reviews.filter(rating=rating)
+    
+    # Filter by status
+    status = request.GET.get('status')
+    if status == 'approved':
+        reviews = reviews.filter(is_approved=True)
+    elif status == 'pending':
+        reviews = reviews.filter(is_approved=False)
+    
+    # Pagination
+    paginator = Paginator(reviews, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Statistics
+    total_reviews = Review.objects.count()
+    approved_reviews = Review.objects.filter(is_approved=True).count()
+    pending_reviews = Review.objects.filter(is_approved=False).count()
+    
+    context = {
+        'page_obj': page_obj,
+        'products': Product.objects.all(),
+        'total_reviews': total_reviews,
+        'approved_reviews': approved_reviews,
+        'pending_reviews': pending_reviews,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Reviews', None, 'fas fa-star')
+        ),
+    }
+    return render(request, 'admin_dashboard/review_list.html', context)
+
+
+@login_admin_required
+def review_detail(request, review_id):
+    """View review details"""
+    review = get_object_or_404(Review.objects.select_related('customer', 'product'), id=review_id)
+    
+    context = {
+        'review': review,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Reviews', reverse('admin_dashboard:review_list'), 'fas fa-star'),
+            ('Review Detail', None, 'fas fa-eye')
+        ),
+    }
+    return render(request, 'admin_dashboard/review_detail.html', context)
+
+
+@login_admin_required
+@require_POST
+def review_approve(request, review_id):
+    """Approve a review"""
+    review = get_object_or_404(Review, id=review_id)
+    review.is_approved = True
+    review.save()
+    messages.success(request, f'Review by {review.customer.username} has been approved.')
+    return redirect('admin_dashboard:review_list')
+
+
+@login_admin_required
+@require_POST
+def review_reject(request, review_id):
+    """Reject a review"""
+    review = get_object_or_404(Review, id=review_id)
+    review.is_approved = False
+    review.save()
+    messages.success(request, f'Review by {review.customer.username} has been rejected.')
+    return redirect('admin_dashboard:review_list')
+
+
+@login_admin_required
+@require_POST
+def review_delete(request, review_id):
+    """Delete a review"""
+    review = get_object_or_404(Review, id=review_id)
+    review.delete()
+    messages.success(request, 'Review deleted successfully.')
+    return redirect('admin_dashboard:review_list')
+
+
+@login_admin_required
+@require_POST
+def review_bulk_action(request):
+    """Bulk action for reviews (approve, reject, delete)"""
+    action = request.POST.get('action')
+    review_ids = request.POST.getlist('review_ids')
+    
+    if not review_ids:
+        messages.warning(request, 'No reviews selected.')
+        return redirect('admin_dashboard:review_list')
+    
+    reviews = Review.objects.filter(id__in=review_ids)
+    
+    if action == 'approve':
+        reviews.update(is_approved=True)
+        messages.success(request, f'{reviews.count()} review(s) approved successfully.')
+    elif action == 'reject':
+        reviews.update(is_approved=False)
+        messages.success(request, f'{reviews.count()} review(s) rejected successfully.')
+    elif action == 'delete':
+        count = reviews.count()
+        reviews.delete()
+        messages.success(request, f'{count} review(s) deleted successfully.')
+    else:
+        messages.error(request, 'Invalid action.')
+    
+    return redirect('admin_dashboard:review_list')
+
+
+# ============ LIKES MANAGEMENT ============
+
+@login_admin_required
+def like_list(request):
+    """List all likes with search and filter"""
+    likes = Like.objects.select_related('user', 'product').all()
+    
+    # Search
+    search_query = request.GET.get('search')
+    if search_query:
+        likes = likes.filter(
+            Q(user__username__icontains=search_query) |
+            Q(product__name__icontains=search_query)
+        )
+    
+    # Filter by product
+    product_id = request.GET.get('product')
+    if product_id:
+        likes = likes.filter(product_id=product_id)
+    
+    # Pagination
+    paginator = Paginator(likes, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Statistics
+    total_likes = Like.objects.count()
+    
+    context = {
+        'page_obj': page_obj,
+        'products': Product.objects.all(),
+        'total_likes': total_likes,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Likes', None, 'fas fa-heart')
+        ),
+    }
+    return render(request, 'admin_dashboard/like_list.html', context)
+
+
+@login_admin_required
+@require_POST
+def like_delete(request, like_id):
+    """Delete a like"""
+    like = get_object_or_404(Like, id=like_id)
+    like.delete()
+    messages.success(request, 'Like deleted successfully.')
+    return redirect('admin_dashboard:like_list')
+
+
+@login_admin_required
+@require_POST
+def like_bulk_delete(request):
+    """Bulk delete likes"""
+    like_ids = request.POST.getlist('like_ids')
+    
+    if not like_ids:
+        messages.warning(request, 'No likes selected.')
+        return redirect('admin_dashboard:like_list')
+    
+    likes = Like.objects.filter(id__in=like_ids)
+    count = likes.count()
+    likes.delete()
+    messages.success(request, f'{count} like(s) deleted successfully.')
+    
+    return redirect('admin_dashboard:like_list')

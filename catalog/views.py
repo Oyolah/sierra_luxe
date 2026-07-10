@@ -101,6 +101,12 @@ def product_detail(request, slug):
     if request.user.is_authenticated:
         user_has_reviewed = product.reviews.filter(customer=request.user).exists()
     
+    # Get like data
+    from reviews.views import get_product_like_data
+    like_data = get_product_like_data(product, request.user)
+    like_count = like_data['like_count']
+    is_liked = like_data['is_liked']
+    
     # Get shop-wide reviews
     from reviews.models import Review
     shop_reviews = Review.objects.filter(is_approved=True).select_related('customer', 'product').order_by('-created_at')[:10]
@@ -123,6 +129,8 @@ def product_detail(request, slug):
         'average_rating': average_rating,
         'review_count': review_count,
         'user_has_reviewed': user_has_reviewed,
+        'like_count': like_count,
+        'is_liked': is_liked,
         'store': store,
         'shop_reviews': shop_reviews,
     })

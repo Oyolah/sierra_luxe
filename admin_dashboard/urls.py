@@ -25,4 +25,13 @@ urlpatterns = [
     path('orders/', views.order_list, name='order_list'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
     path('orders/<int:order_id>/status/', views.order_status_update, name='order_status_update'),
+    path('reviews/', views.review_list, name='review_list'),
+    path('reviews/<int:review_id>/', views.review_detail, name='review_detail'),
+    path('reviews/<int:review_id>/approve/', views.review_approve, name='review_approve'),
+    path('reviews/<int:review_id>/reject/', views.review_reject, name='review_reject'),
+    path('reviews/<int:review_id>/delete/', views.review_delete, name='review_delete'),
+    path('reviews/bulk-action/', views.review_bulk_action, name='review_bulk_action'),
+    path('likes/', views.like_list, name='like_list'),
+    path('likes/<int:like_id>/delete/', views.like_delete, name='like_delete'),
+    path('likes/bulk-delete/', views.like_bulk_delete, name='like_bulk_delete'),
 ]
