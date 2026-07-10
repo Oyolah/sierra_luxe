@@ -31,7 +31,7 @@
                 <!-- Thumbnails on left -->
                 <div class="d-flex flex-column gap-2">
                     {% if product.video %}
-                    <div class="video-thumbnail cursor-pointer position-relative" onclick="showVideo()">
+                    <div class="video-thumbnail cursor-pointer position-relative" onclick="showVideo()" data-index="0">
                         <video src="{{ product.video|image_url }}" muted preload="metadata" class="img-80x80 img-cover" onloadedmetadata="this.currentTime = 0.1"></video>
                         <div class="video-play-button">
                             <i class="fas fa-play"></i>
@@ -39,10 +39,10 @@
                     </div>
                     {% endif %}
                     {% if product.main_image %}
-                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ product.main_image|image_url }}')">
+                    <img src="{{ product.main_image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ product.main_image|image_url }}', this)" data-index="{% if product.video %}1{% else %}0{% endif %}">
                     {% endif %}
                     {% for image in product.images.all %}
-                    <img src="{{ image.image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ image.image|image_url }}')">
+                    <img src="{{ image.image|image_url }}" alt="{{ product.name }}" class="thumbnail" onclick="changeImage('{{ image.image|image_url }}', this)" data-index="{% if product.video %}{{ forloop.counter|add:1 }}{% else %}{{ forloop.counter }}{% endif %}">
                     {% endfor %}
                 </div>
                 

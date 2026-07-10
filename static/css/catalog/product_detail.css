@@ -21,8 +21,34 @@
     transition: all 0.3s ease;
 }
 
-.thumbnail:hover, .thumbnail.active {
+.thumbnail:hover {
     border-color: #d4a017;
+}
+
+.thumbnail.active {
+    border-color: #d4a017 !important;
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.4) !important;
+    transform: scale(1.05);
+}
+
+.video-thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.video-thumbnail:hover {
+    border-color: #d4a017;
+}
+
+.video-thumbnail.active {
+    border-color: #d4a017 !important;
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.4) !important;
+    transform: scale(1.05);
 }
 
 .carousel-btn {

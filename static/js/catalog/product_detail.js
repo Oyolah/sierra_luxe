@@ -18,8 +18,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentMediaIndex = 0;
 
+    // Initialize active thumbnail on page load
+    function initializeActiveThumbnail() {
+        const mainImage = document.querySelector('#mainImage');
+        const mainVideo = document.querySelector('#mainVideo');
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        
+        if (mainVideo && !mainVideo.classList.contains('hidden')) {
+            // Video is showing, mark video thumbnail as active
+            updateActiveThumbnail(null, true);
+        } else if (mainImage && mainImage.src && thumbnails.length > 0) {
+            // Image is showing, mark first thumbnail as active
+            if (thumbnails.length > 0) {
+                thumbnails[0].classList.add('active');
+            }
+        } else if (thumbnails.length > 0) {
+            // No main image, activate first thumbnail
+            thumbnails[0].classList.add('active');
+        }
+    }
+
     // Function to change main media (image or video)
-    window.changeImage = function(src) {
+    window.changeImage = function(src, element) {
         const mainImage = document.querySelector('#mainImage');
         const mainVideo = document.querySelector('#mainVideo');
         
@@ -34,6 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update current index
         currentMediaIndex = allMedia.findIndex(m => m.url === src);
+        
+        // Update active thumbnail using element reference
+        if (element) {
+            updateActiveThumbnailByElement(element);
+        } else {
+            updateActiveThumbnail(src);
+        }
     }
 
     // Function to show video
@@ -47,6 +74,59 @@ document.addEventListener('DOMContentLoaded', function() {
         if (mainVideo) {
             mainVideo.style.display = 'block';
             mainVideo.play();
+        }
+        
+        // Update current index
+        currentMediaIndex = allMedia.findIndex(m => m.type === 'video');
+        
+        // Update active thumbnail for video
+        updateActiveThumbnail(null, true);
+    }
+
+    // Function to update active thumbnail styling by element reference
+    function updateActiveThumbnailByElement(element) {
+        // Remove active class from all thumbnails
+        document.querySelectorAll('.thumbnail').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        
+        // Remove active class from video thumbnail
+        const videoThumbnail = document.querySelector('.video-thumbnail');
+        if (videoThumbnail) {
+            videoThumbnail.classList.remove('active');
+        }
+        
+        // Add active class to the clicked element
+        if (element) {
+            element.classList.add('active');
+        }
+    }
+
+    // Function to update active thumbnail styling
+    function updateActiveThumbnail(src, isVideo = false) {
+        // Remove active class from all thumbnails
+        document.querySelectorAll('.thumbnail').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        
+        // Remove active class from video thumbnail
+        const videoThumbnail = document.querySelector('.video-thumbnail');
+        if (videoThumbnail) {
+            videoThumbnail.classList.remove('active');
+        }
+        
+        // Add active class to selected thumbnail
+        if (isVideo && videoThumbnail) {
+            videoThumbnail.classList.add('active');
+        } else if (src) {
+            // Find thumbnail with matching src (handle URL variations)
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach(thumb => {
+                // Compare URLs, handling potential encoding differences
+                if (thumb.src === src || thumb.src === decodeURIComponent(src) || encodeURIComponent(thumb.src) === encodeURIComponent(src)) {
+                    thumb.classList.add('active');
+                }
+            });
         }
     }
 
@@ -107,6 +187,9 @@ document.addEventListener('DOMContentLoaded', function() {
             function() { selectColor(this); }
         );
     }
+
+    // Initialize active thumbnail on page load
+    initializeActiveThumbnail();
 });
 
 function selectSize(btn) {
