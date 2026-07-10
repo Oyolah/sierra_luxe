@@ -1,32 +1,42 @@
 {% load static %}
 <!-- Reusable Modal Component -->
 <!-- Usage: Include this template with modal_id parameter -->
+<!-- Optional parameters: modal_title, modal_body, modal_size (sm, md, lg, xl), modal_icon, modal_type (success, danger, warning, info) -->
 
 <div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-labelledby="{{ modal_id }}Label" aria-hidden="true" data-modal-id="{{ modal_id }}">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+    <div class="modal-dialog modal-dialog-centered modal-{{ modal_size|default:'md' }}">
+        <div class="modal-content admin-modal">
             <!-- Modal Header -->
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="{{ modal_id }}Label">
-                    {{ modal_title|default:"Confirmation" }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    {% if modal_icon %}
+                    <div class="modal-icon modal-icon-{{ modal_type|default:'info' }}">
+                        <i class="fas fa-{{ modal_icon }}"></i>
+                    </div>
+                    {% endif %}
+                    <h5 class="modal-title" id="{{ modal_id }}Label">
+                        {{ modal_title|default:"Confirmation" }}
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
             <!-- Modal Body -->
-            <div class="modal-body py-4">
-                <p class="mb-0" id="{{ modal_id }}Body">
-                    {{ modal_body|default:"Are you sure?" }}
-                </p>
+            <div class="modal-body">
+                <div id="{{ modal_id }}Body">
+                    {{ modal_body|default:"Are you sure you want to proceed?" }}
+                </div>
             </div>
             
             <!-- Modal Footer -->
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
-                    Cancel
+            <div class="modal-footer">
+                <button type="button" class="btn btn-admin-outline" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
                 </button>
-                <button type="button" class="btn btn-primary rounded-pill px-4" id="{{ modal_id }}Confirm" data-modal-confirm="{{ modal_id }}">
-                    OK
+                <button type="button" class="btn btn-admin" id="{{ modal_id }}Confirm">
+                    <i class="fas fa-check me-2"></i>Confirm
                 </button>
             </div>
         </div>

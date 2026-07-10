@@ -73,7 +73,14 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Images (multiple)</label>
-                        <input type="file" name="images" class="form-control form-control-admin" accept="image/*" multiple id="imageFiles">
+                        <div class="file-upload-area" id="imageUploadArea">
+                            <input type="file" name="images" class="file-input" accept="image/*" multiple id="imageFiles">
+                            <div class="file-upload-content">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                <p class="mb-0">Click or drag images here</p>
+                                <small class="text-muted">Supports multiple files</small>
+                            </div>
+                        </div>
                         <div class="mt-2">
                             <p class="small text-muted mb-1">Preview:</p>
                             <div id="imageFilesPreview" class="row g-2">
@@ -139,5 +146,6 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="{% static 'css/admin_dashboard/product_images.css' %}">
 <script src="{% static 'js/admin_dashboard/product_images.js' %}"></script>
 {% endblock %}
