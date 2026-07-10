@@ -1,0 +1,38 @@
+/* Modal Backdrop */
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+/* Modal Animation */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: scale(0.9);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Modal Buttons */
+.modal-content .btn-primary {
+    background: #4F46E5;
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+}
+
+.modal-content .btn-primary:hover {
+    background: #4338CA;
+}
+
+.modal-content .btn-light {
+    background: #F3F4F6;
+    border: none;
+    color: #374151;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+}
+
+.modal-content .btn-light:hover {
+    background: #E5E7EB;
+}

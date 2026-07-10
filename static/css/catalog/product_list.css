@@ -1,0 +1,49 @@
+.product-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.product-image {
+    height: 300px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.filter-section {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.filter-section h5 {
+    color: #d4a017;
+    margin-bottom: 15px;
+}
+
+.filter-btn {
+    background: linear-gradient(45deg, #d4a017, #f4d03f);
+    border: none;
+    color: #1a1a2e;
+    font-weight: bold;
+}
+
+.filter-btn:hover {
+    background: linear-gradient(45deg, #c49417, #e4d02f);
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.loading-spinner.active {
+    display: block;
+}
