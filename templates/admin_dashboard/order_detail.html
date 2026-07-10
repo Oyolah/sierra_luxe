@@ -46,12 +46,29 @@
                             <td>{{ currency_symbol }}{{ item.subtotal|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
-                        <tr class="bg-light">
-                            <td colspan="5" class="text-end fw-bold">Total:</td>
-                            <td class="fw-bold">{{ currency_symbol }}{{ order.total_amount|floatformat:2 }}</td>
-                        </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="page-card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal (Items)</span>
+                    <span>{{ currency_symbol }}{{ order.total_amount|floatformat:2 }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Shipping</span>
+                    <span>{{ currency_symbol }}{{ order.shipping_cost|floatformat:2 }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fw-bold">
+                    <span>Total</span>
+                    <span>{{ currency_symbol }}{{ order.total_amount|add:order.shipping_cost|floatformat:2 }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -83,26 +100,39 @@
             </div>
         </div>
         
-        <div class="page-card">
+        <div class="page-card mb-4">
             <div class="page-card-header">
                 <h5 class="mb-0">Customer Information</h5>
             </div>
             <div class="page-card-body">
                 <p class="mb-2"><strong>Username:</strong> {{ order.customer.username }}</p>
                 <p class="mb-2"><strong>Email:</strong> {{ order.customer.email }}</p>
-                <p class="mb-2"><strong>Phone:</strong> {{ order.phone|default:"-" }}</p>
-                <hr>
+                <p class="mb-0"><strong>Phone:</strong> {{ order.phone|default:"-" }}</p>
+            </div>
+        </div>
+        
+        <div class="page-card mb-4">
+            <div class="page-card-header">
+                <h5 class="mb-0">Shipping Information</h5>
+            </div>
+            <div class="page-card-body">
                 <p class="mb-2"><strong>Shipping Address:</strong></p>
                 <p class="mb-1">{{ order.shipping_address }}</p>
                 <p class="mb-1">{{ order.shipping_city }}, {{ order.shipping_postal_code }}</p>
                 <p class="mb-0">{{ order.shipping_country }}</p>
-                {% if order.notes %}
-                <hr>
-                <p class="mb-2"><strong>Notes:</strong></p>
-                <p class="mb-0 text-muted">{{ order.notes }}</p>
-                {% endif %}
             </div>
         </div>
+        
+        {% if order.notes %}
+        <div class="page-card">
+            <div class="page-card-header">
+                <h5 class="mb-0">Order Notes</h5>
+            </div>
+            <div class="page-card-body">
+                <p class="mb-0 text-muted">{{ order.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

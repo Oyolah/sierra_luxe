@@ -261,12 +261,18 @@ def checkout(request):
         # Simulate order creation
         from orders.models import Order, OrderItem
         
-        # Create order
+        # Create order with shipping information
         order = Order.objects.create(
             customer=request.user,
             total_amount=cart.get_total() + Decimal('7.95'),
             shipping_cost=Decimal('7.95'),
-            status='pending'
+            status='pending',
+            shipping_address=request.POST.get('address', ''),
+            shipping_city=request.POST.get('city', ''),
+            shipping_country=request.POST.get('country', ''),
+            shipping_postal_code=request.POST.get('postal_code', ''),
+            phone=request.POST.get('phone', ''),
+            notes=request.POST.get('notes', '')
         )
         
         # Create order items from active cart items only
