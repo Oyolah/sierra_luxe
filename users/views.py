@@ -73,7 +73,7 @@ def user_logout(request):
     
     # Check if logout was due to session timeout
     if request.GET.get('session_timeout') == 'true':
-        return redirect('users:login') + '?session_timeout=true'
+        return redirect('users:login', session_timeout='true')
     
     messages.info(request, 'You have been logged out.')
     return redirect('catalog:home')
