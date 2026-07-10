@@ -1,4 +1,5 @@
 {% extends 'admin_dashboard/base.html' %}
+{% load static %}
 {% load ratings_review_tags %}
 
 {% block title %}Users{% endblock %}
@@ -81,21 +82,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function applyFilters() {
-    const params = new URLSearchParams();
-    const search = document.querySelector('#searchInput').value;
-    const role = document.querySelector('#roleFilter').value;
-    
-    if (search) params.set('search', search);
-    if (role) params.set('role', role);
-    
-    window.location.href = '{% url 'admin_dashboard:user_list' %}' + (params.toString() ? '?' + params.toString() : '');
-}
-
-document.querySelector('#searchInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') applyFilters();
-});
-document.querySelector('#roleFilter').addEventListener('change', applyFilters);
-</script>
+<script src="{% static 'js/admin_dashboard/user_list.js' %}"></script>
 {% endblock %}

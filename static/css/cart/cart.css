@@ -1,0 +1,98 @@
+.cart-item-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+}
+
+.cart-summary {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    position: sticky;
+    top: 20px;
+}
+
+.quantity-control {
+    display: inline-flex;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.quantity-control button {
+    background: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.quantity-control button:hover {
+    background: #f8f9fa;
+}
+
+.quantity-control input {
+    border: none;
+    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    width: 60px;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.checkout-btn {
+    background: #2d2d2d;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.checkout-btn:hover {
+    background: #1a1a1a;
+    color: white;
+}
+
+.payment-icons img {
+    height: 32px;
+    margin-right: 8px;
+}
+
+.remove-btn {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.remove-btn:hover {
+    color: #dc3545;
+}
+
+.save-for-later-btn {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.save-for-later-btn:hover {
+    color: #0d6efd;
+}
+
+.product-thumbnail {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.saved-item-card {
+    border: 1px dashed #dee2e6;
+}

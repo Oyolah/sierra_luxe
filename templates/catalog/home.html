@@ -114,7 +114,7 @@
                     </div>
                     <div class="col-md-6" style="position: relative; min-height: 300px;">
                         {% if featured_products and featured_products.0.main_image %}
-                        <img src="{{ featured_products.0.main_image }}" alt="New Collection" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                        <img src="{{ featured_products.0.main_image|image_url }}" alt="New Collection" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
                         {% else %}
                         <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/African Lace Maxi Dress 1.webp" alt="New Collection" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
                         {% endif %}

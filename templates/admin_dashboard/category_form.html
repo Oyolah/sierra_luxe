@@ -1,4 +1,5 @@
 {% extends 'admin_dashboard/base.html' %}
+{% load static %}
 
 {% block title %}{{ action }} Category{% endblock %}
 {% block page_title %}{{ action }} Category{% endblock %}
@@ -58,37 +59,5 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.querySelector('#categoryImage');
-    const imagePreview = document.querySelector('#imagePreview');
-    
-    if (imageInput && imagePreview) {
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="max-height: 150px;">
-                    `;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                {% if category.image %}
-                imagePreview.innerHTML = `
-                    <img src="{{ category.image.url }}" alt="Current image" class="img-fluid rounded" style="max-height: 150px;">
-                `;
-                {% else %}
-                imagePreview.innerHTML = `
-                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
-                        <span class="text-muted small">No image selected</span>
-                    </div>
-                `;
-                {% endif %}
-            }
-        });
-    }
-});
-</script>
+<script src="{% static 'js/admin_dashboard/category_form.js' %}"></script>
 {% endblock %}

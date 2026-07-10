@@ -5,96 +5,11 @@
 {% block title %}Your Cart - Sierra Luxe{% endblock %}
 
 {% block extra_css %}
-<style>
-    .cart-item-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
-        padding: 1.5rem;
-    }
-    .cart-summary {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        padding: 1.5rem;
-        position: sticky;
-        top: 20px;
-    }
-    .quantity-control {
-        display: inline-flex;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        overflow: hidden;
-    }
-    .quantity-control button {
-        background: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .quantity-control button:hover {
-        background: #f8f9fa;
-    }
-    .quantity-control input {
-        border: none;
-        border-left: 1px solid #dee2e6;
-        border-right: 1px solid #dee2e6;
-        width: 60px;
-        text-align: center;
-        padding: 0.5rem;
-    }
-    .checkout-btn {
-        background: #2d2d2d;
-        color: white;
-        border: none;
-        padding: 1rem;
-        border-radius: 50px;
-        font-weight: 600;
-        width: 100%;
-        transition: background 0.3s;
-    }
-    .checkout-btn:hover {
-        background: #1a1a1a;
-        color: white;
-    }
-    .payment-icons img {
-        height: 32px;
-        margin-right: 8px;
-    }
-    .remove-btn {
-        color: #6c757d;
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: color 0.2s;
-    }
-    .remove-btn:hover {
-        color: #dc3545;
-    }
-    .save-for-later-btn {
-        color: #6c757d;
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: color 0.2s;
-    }
-    .save-for-later-btn:hover {
-        color: #0d6efd;
-    }
-    .product-thumbnail {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-    .saved-item-card {
-        border: 1px dashed #dee2e6;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/cart/cart.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-4" data-currency-symbol="{{ currency_symbol }}">
     <h1 class="mb-4">Your cart</h1>
     
     {% if cart_items or saved_items %}
@@ -163,14 +78,14 @@
                             <a href="#" 
                                class="remove-btn"
                                data-item-id="{{ item.id }}"
-                               onclick="return confirmRemove({{ item.id }})">
+                               data-action="remove-cart">
                                 <i class="fas fa-trash-alt me-1"></i> Remove
                             </a>
                             <span class="text-muted">|</span>
                             <a href="#" 
                                class="save-for-later-btn"
                                data-item-id="{{ item.id }}"
-                               onclick="return saveForLater({{ item.id }})">
+                               data-action="save-for-later">
                                 <i class="fas fa-bookmark me-1"></i> Save for later
                             </a>
                         </div>
@@ -274,15 +189,13 @@
                             <h5 class="mb-0">{{ currency_symbol }}{{ item.get_subtotal|floatformat:2 }}</h5>
                         </div>
                         <div class="d-flex align-items-center gap-3 mt-3">
-                            <button class="btn btn-dark btn-sm rounded-pill move-to-cart-btn"
-                                    data-item-id="{{ item.id }}"
-                                    onclick="return moveToCart({{ item.id }})">
+                            <button type="button" class="btn btn-dark btn-sm rounded-pill move-to-cart-btn" data-item-id="{{ item.id }}">
                                 <i class="fas fa-shopping-cart me-1"></i> Add to cart
                             </button>
                             <a href="#" 
                                class="remove-btn"
                                data-item-id="{{ item.id }}"
-                               onclick="return confirmRemoveSaved({{ item.id }})">
+                               data-action="remove-saved">
                                 <i class="fas fa-trash-alt me-1"></i> Remove
                             </a>
                         </div>
@@ -309,204 +222,7 @@
 
 {% csrf_token %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    // Quantity buttons
-    document.querySelectorAll('.quantity-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const itemId = this.dataset.itemId;
-            const action = this.dataset.action;
-            const input = document.querySelector(`#qty-${itemId}`);
-            let quantity = parseInt(input.value);
-            
-            if (action === 'increase') {
-                quantity++;
-            } else if (action === 'decrease' && quantity > 1) {
-                quantity--;
-            }
-            
-            input.value = quantity;
-            updateCartItem(itemId, quantity);
-        });
-    });
-    
-    function updateCartItem(itemId, quantity) {
-        fetch(`/cart/update/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: `quantity=${quantity}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector(`#item-subtotal-${itemId}`).textContent = `{{ currency_symbol }}${data.subtotal.toFixed(2)}`;
-                document.querySelector('#subtotal-amount').textContent = `{{ currency_symbol }}${data.cart_total.toFixed(2)}`;
-                document.querySelector('#total-amount').textContent = `{{ currency_symbol }}${data.total.toFixed(2)}`;
-                updateCartCount(data.cart_count);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    window.confirmRemove = function(itemId) {
-        showModal(
-            'confirmModal',
-            'Remove Item',
-            'Remove this item from cart?',
-            function() {
-                removeCartItem(itemId);
-            }
-        );
-        return false;
-    };
-    
-    function removeCartItem(itemId) {
-        fetch(`/cart/remove/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const itemElement = document.querySelector(`#cart-item-${itemId}`);
-                itemElement.remove();
-                
-                document.querySelector('#subtotal-amount').textContent = `{{ currency_symbol }}${data.cart_total.toFixed(2)}`;
-                document.querySelector('#total-amount').textContent = `{{ currency_symbol }}${data.total.toFixed(2)}`;
-                
-                updateCartCount(data.cart_count);
-                
-                if (data.cart_count === 0) {
-                    location.reload();
-                }
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    window.saveForLater = function(itemId) {
-        showModal(
-            'confirmModal',
-            'Save for Later',
-            'Save this item for later? It will be removed from your active cart.',
-            function() {
-                moveToSavedForLater(itemId);
-            }
-        );
-        return false;
-    };
-    
-    function moveToSavedForLater(itemId) {
-        fetch(`/cart/save-for-later/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    window.moveToCart = function(itemId) {
-        fetch(`/cart/move-to-cart/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-        return false;
-    };
-    
-    window.confirmRemoveSaved = function(itemId) {
-        showModal(
-            'confirmModal',
-            'Remove Saved Item',
-            'Remove this item from saved for later?',
-            function() {
-                removeSavedItem(itemId);
-            }
-        );
-        return false;
-    };
-    
-    function removeSavedItem(itemId) {
-        fetch(`/cart/remove-saved/${itemId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const itemElement = document.querySelector(`#saved-item-${itemId}`);
-                itemElement.remove();
-                
-                updateCartCount(data.cart_count);
-                
-                if (data.saved_count === 0) {
-                    location.reload();
-                }
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    function updateCartCount(count) {
-        let cartBadge = document.querySelector('.cart-count');
-        const cartDropdown = document.querySelector('#cartDropdown');
-        
-        if (!cartBadge && cartDropdown && count > 0) {
-            // Create badge if it doesn't exist
-            cartBadge = document.createElement('span');
-            cartBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count';
-            cartDropdown.appendChild(cartBadge);
-        }
-        
-        if (cartBadge) {
-            cartBadge.textContent = count;
-            if (count === 0) {
-                cartBadge.classList.add('d-none');
-            } else {
-                cartBadge.classList.remove('d-none');
-            }
-        }
-        
-        // Reload cart dropdown preview if function exists
-        if (typeof loadCartPreview === 'function') {
-            loadCartPreview();
-        }
-    }
-});
-</script>
+<script src="{% static 'js/cart/cart.js' %}"></script>
 
 <!-- Include Reusable Modal -->
 {% include 'components/modal.html' with modal_id='confirmModal' %}

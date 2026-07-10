@@ -1,0 +1,44 @@
+.checkout-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.order-summary-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    position: sticky;
+    top: 20px;
+}
+
+.checkout-btn {
+    background: #2d2d2d;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.checkout-btn:hover {
+    background: #1a1a1a;
+}
+
+.payment-icons img {
+    height: 32px;
+    margin-right: 8px;
+}
+
+.simulation-notice {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
