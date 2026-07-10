@@ -1,9 +1,14 @@
 {% extends 'admin_dashboard/base.html' %}
-{% load static %}
 {% load ratings_review_tags %}
 
 {% block title %}Users{% endblock %}
 {% block page_title %}Users{% endblock %}
+
+{% block breadcrumbs %}
+{% with breadcrumbs=breadcrumbs %}
+{% include 'components/admin_breadcrumb.html' %}
+{% endwith %}
+{% endblock %}
 
 {% block content %}
 <div class="page-card">

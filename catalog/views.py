@@ -2,17 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import Category, Product, Store
 from users.models import RecentlyViewed
+from reviews.views import get_product_rating_data
 
-
-def get_product_rating_data(product):
-    """Get average rating and review count for a product"""
-    reviews = product.reviews.filter(is_approved=True)
-    count = reviews.count()
-    if count > 0:
-        average = sum(r.rating for r in reviews) / count
-    else:
-        average = 0
-    return round(average, 1), count
 
 def home(request):
     categories = Category.objects.filter(is_active=True)
@@ -57,7 +48,7 @@ def product_list(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         products_data = []
         for product in products:
-            avg, count = get_product_rating_data(product)
+            rating_data = get_product_rating_data(product)
             products_data.append({
                 'id': product.id,
                 'name': product.name,
@@ -66,8 +57,8 @@ def product_list(request):
                 'discount_price': str(product.discount_price) if product.discount_price else None,
                 'description': product.description[:80],
                 'image': product.main_image if product.main_image else None,
-                'average_rating': avg,
-                'review_count': count,
+                'average_rating': rating_data['average'],
+                'review_count': rating_data['count'],
             })
         return JsonResponse({
             'products': products_data,
@@ -103,7 +94,9 @@ def product_detail(request, slug):
     
     # Get review and rating data
     reviews = product.reviews.filter(is_approved=True).select_related('customer')
-    average_rating, review_count = get_product_rating_data(product)
+    rating_data = get_product_rating_data(product)
+    average_rating = rating_data['average']
+    review_count = rating_data['count']
     user_has_reviewed = False
     if request.user.is_authenticated:
         user_has_reviewed = product.reviews.filter(customer=request.user).exists()

@@ -3,6 +3,12 @@
 {% block title %}{{ action }} User{% endblock %}
 {% block page_title %}{{ action }} User{% endblock %}
 
+{% block breadcrumbs %}
+{% with breadcrumbs=breadcrumbs %}
+{% include 'components/admin_breadcrumb.html' %}
+{% endwith %}
+{% endblock %}
+
 {% block content %}
 <div class="page-card">
     <div class="page-card-header">

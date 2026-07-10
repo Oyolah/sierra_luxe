@@ -3,6 +3,12 @@
 {% block title %}Dashboard{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 
+{% block breadcrumbs %}
+{% with breadcrumbs=breadcrumbs %}
+{% include 'components/admin_breadcrumb.html' %}
+{% endwith %}
+{% endblock %}
+
 {% block content %}
 <div class="row g-4 mb-4">
     <div class="col-md-3">

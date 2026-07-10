@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Sum, Q
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from decimal import Decimal
+from django.urls import reverse
 from sierra_luxe.decorators import login_admin_required, admin_required
+from sierra_luxe.utils import get_breadcrumbs
 from catalog.models import Category, Product, ProductImage
 from orders.models import Order
 from users.models import User
@@ -57,6 +58,9 @@ def dashboard(request):
         'recent_orders': recent_orders,
         'recent_users': recent_users,
         'low_stock_products': low_stock_products,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', None, 'fas fa-tachometer-alt')
+        ),
     }
     return render(request, 'admin_dashboard/dashboard.html', context)
 
@@ -85,6 +89,10 @@ def product_list(request):
     context = {
         'products': products,
         'categories': Category.objects.all(),
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Products', None, 'fas fa-box')
+        ),
     }
     return render(request, 'admin_dashboard/product_list.html', context)
 
@@ -134,6 +142,11 @@ def product_create(request):
     context = {
         'categories': categories,
         'action': 'Create',
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Products', reverse('admin_dashboard:product_list'), 'fas fa-box'),
+            ('Create Product', None, 'fas fa-plus')
+        ),
     }
     return render(request, 'admin_dashboard/product_form.html', context)
 
@@ -174,6 +187,11 @@ def product_edit(request, product_id):
         'product': product,
         'categories': categories,
         'action': 'Edit',
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Products', reverse('admin_dashboard:product_list'), 'fas fa-box'),
+            (f'Edit {product.name}', None, 'fas fa-edit')
+        ),
     }
     return render(request, 'admin_dashboard/product_form.html', context)
 
@@ -257,6 +275,11 @@ def product_images(request, product_id):
     context = {
         'product': product,
         'images': images,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Products', reverse('admin_dashboard:product_list'), 'fas fa-box'),
+            (f'{product.name} - Images', None, 'fas fa-images')
+        ),
     }
     return render(request, 'admin_dashboard/product_images.html', context)
 
@@ -264,7 +287,14 @@ def product_images(request, product_id):
 def category_list(request):
     """List all categories"""
     categories = Category.objects.annotate(product_count=Count('products'))
-    return render(request, 'admin_dashboard/category_list.html', {'categories': categories})
+    context = {
+        'categories': categories,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Categories', None, 'fas fa-tags')
+        ),
+    }
+    return render(request, 'admin_dashboard/category_list.html', context)
 
 @login_admin_required
 def category_create(request):
@@ -287,7 +317,15 @@ def category_create(request):
         except Exception as e:
             messages.error(request, f'Error creating category: {str(e)}')
     
-    return render(request, 'admin_dashboard/category_form.html', {'action': 'Create'})
+    context = {
+        'action': 'Create',
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Categories', reverse('admin_dashboard:category_list'), 'fas fa-tags'),
+            ('Create Category', None, 'fas fa-plus')
+        ),
+    }
+    return render(request, 'admin_dashboard/category_form.html', context)
 
 @login_admin_required
 def category_edit(request, category_id):
@@ -309,10 +347,16 @@ def category_edit(request, category_id):
         except Exception as e:
             messages.error(request, f'Error updating category: {str(e)}')
     
-    return render(request, 'admin_dashboard/category_form.html', {
+    context = {
         'category': category,
-        'action': 'Edit'
-    })
+        'action': 'Edit',
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Categories', reverse('admin_dashboard:category_list'), 'fas fa-tags'),
+            (f'Edit {category.name}', None, 'fas fa-edit')
+        ),
+    }
+    return render(request, 'admin_dashboard/category_form.html', context)
 
 @login_admin_required
 @require_POST
@@ -349,10 +393,15 @@ def user_list(request):
             Q(last_name__icontains=search_query)
         )
     
-    return render(request, 'admin_dashboard/user_list.html', {
+    context = {
         'users': users,
         'role_choices': User.ROLE_CHOICES,
-    })
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Users', None, 'fas fa-users')
+        ),
+    }
+    return render(request, 'admin_dashboard/user_list.html', context)
 
 @login_admin_required
 def user_create(request):
@@ -395,6 +444,11 @@ def user_create(request):
         'action': 'Create',
         'role_choices': User.ROLE_CHOICES,
         'permissions': get_available_permissions(),
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Users', reverse('admin_dashboard:user_list'), 'fas fa-users'),
+            ('Create User', None, 'fas fa-plus')
+        ),
     }
     return render(request, 'admin_dashboard/user_form.html', context)
 
@@ -435,6 +489,11 @@ def user_edit(request, user_id):
         'role_choices': User.ROLE_CHOICES,
         'permissions': get_available_permissions(),
         'selected_permissions': set(user.user_permissions.values_list('id', flat=True)),
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Users', reverse('admin_dashboard:user_list'), 'fas fa-users'),
+            (f'Edit {user.username}', None, 'fas fa-edit')
+        ),
     }
     return render(request, 'admin_dashboard/user_form.html', context)
 
@@ -464,6 +523,10 @@ def order_list(request):
     context = {
         'orders': orders,
         'status_choices': Order.STATUS_CHOICES,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Orders', None, 'fas fa-shopping-bag')
+        ),
     }
     return render(request, 'admin_dashboard/order_list.html', context)
 
@@ -471,10 +534,16 @@ def order_list(request):
 def order_detail(request, order_id):
     """View order details"""
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'admin_dashboard/order_detail.html', {
+    context = {
         'order': order,
         'status_choices': Order.STATUS_CHOICES,
-    })
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Orders', reverse('admin_dashboard:order_list'), 'fas fa-shopping-bag'),
+            (f'Order #{order.order_number}', None, 'fas fa-file-invoice')
+        ),
+    }
+    return render(request, 'admin_dashboard/order_detail.html', context)
 
 @login_admin_required
 @require_POST

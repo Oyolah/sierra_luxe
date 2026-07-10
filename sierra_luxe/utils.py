@@ -23,3 +23,22 @@ def calculate_discount_percentage(original_price, discount_price):
     if discount_price and original_price > discount_price:
         return int(((original_price - discount_price) / original_price) * 100)
     return 0
+
+def get_breadcrumbs(*items):
+    """
+    Generate breadcrumbs from a list of (label, url, icon) tuples.
+    Last item should have url=None for current page.
+    """
+    breadcrumbs = []
+    for item in items:
+        if len(item) == 2:
+            label, url = item
+            icon = None
+        else:
+            label, url, icon = item
+        breadcrumbs.append({
+            'label': label,
+            'url': url,
+            'icon': icon
+        })
+    return breadcrumbs
