@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Forbidden - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/errors/error_pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h1 class="error-code">403</h1>
+        <h2 class="error-title">Access Denied</h2>
+        <p class="error-message">
+            You don't have permission to access this resource. This might be because:
+        </p>
+        <ul class="error-details">
+            <li>You need to log in to access this page</li>
+            <li>Your account doesn't have the required permissions</li>
+            <li>This resource is restricted to administrators</li>
+        </ul>
+        <div class="error-actions">
+            {% if user.is_authenticated %}
+            <a href="{% url 'catalog:home' %}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Return to Home
+            </a>
+            {% else %}
+            <a href="{% url 'users:auth' %}" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt me-2"></i>Log In
+            </a>
+            {% endif %}
+            <button onclick="history.back()" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

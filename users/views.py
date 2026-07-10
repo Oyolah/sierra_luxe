@@ -5,9 +5,15 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
+from django.db import DatabaseError
+import logging
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, UserUpdateForm
 from sierra_luxe.decorators import admin_required, customer_required
+from sierra_luxe.api_responses import success_response, error_response, validation_error_response
+from sierra_luxe.exceptions import ValidationException, DatabaseException
 from .models import RecentlyViewed
+
+logger = logging.getLogger(__name__)
 
 
 def auth_page(request):
@@ -46,39 +52,63 @@ def rate_limit(max_attempts=5, timeout=300):
 
 @rate_limit(max_attempts=5, timeout=300)
 def register(request):
+    """Handle user registration with proper error handling"""
     if request.user.is_authenticated:
         return redirect('catalog:home')
     
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            
-            # Handle AJAX requests
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'message': f'Account created for {username}! You can now log in.'
-                })
-            
-            messages.success(request, f'Account created for {username}! You can now log in.')
-            return redirect('users:login')
+    try:
+        if request.method == 'POST':
+            form = UserRegistrationForm(request.POST)
+            if form.is_valid():
+                user = form.save()
+                username = form.cleaned_data.get('username')
+                
+                # Handle AJAX requests
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return success_response(
+                        data={'username': username},
+                        message=f'Account created for {username}! You can now log in.'
+                    )
+                
+                messages.success(request, f'Account created for {username}! You can now log in.')
+                return redirect('users:auth')
+            else:
+                # Handle AJAX requests with errors
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return validation_error_response(
+                        errors=dict(form.errors),
+                        message='Registration failed. Please check your input.'
+                    )
         else:
-            # Handle AJAX requests with errors
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Registration failed. Please check your input.',
-                    'errors': form.errors
-                })
-    else:
-        form = UserRegistrationForm()
+            form = UserRegistrationForm()
+        
+        return render(request, 'users/auth.html', {'form': form})
     
-    return render(request, 'users/auth.html', {'form': form})
+    except DatabaseError as e:
+        logger.error(f"Database error during registration: {str(e)}")
+        messages.error(request, 'A database error occurred. Please try again.')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return error_response(
+                error='DatabaseError',
+                message='A database error occurred. Please try again later.',
+                status_code=500
+            )
+        return render(request, 'users/auth.html', {'form': form})
+    
+    except Exception as e:
+        logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
+        messages.error(request, 'An unexpected error occurred. Please try again.')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return error_response(
+                error='InternalServerError',
+                message='An unexpected error occurred. Please try again later.',
+                status_code=500
+            )
+        return render(request, 'users/auth.html', {'form': form})
 
 @rate_limit(max_attempts=5, timeout=300)
 def user_login(request):
+    """Handle user login with proper error handling"""
     if request.user.is_authenticated:
         return redirect('catalog:home')
     
@@ -86,39 +116,68 @@ def user_login(request):
     if request.GET.get('session_timeout') == 'true':
         messages.warning(request, 'You were logged out due to inactivity. Please log in again.')
     
-    if request.method == 'POST':
-        form = UserLoginForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                
-                # Handle AJAX requests
+    try:
+        if request.method == 'POST':
+            form = UserLoginForm(request, data=request.POST)
+            if form.is_valid():
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password')
+                user = authenticate(username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    
+                    # Handle AJAX requests
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        next_page = request.GET.get('next', reverse('catalog:home'))
+                        return success_response(
+                            data={'redirect': next_page},
+                            message=f'Welcome back, {username}!'
+                        )
+                    
+                    messages.success(request, f'Welcome back, {username}!')
+                    next_page = request.GET.get('next', 'catalog:home')
+                    return redirect(next_page)
+                else:
+                    # Handle AJAX requests with errors
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return error_response(
+                            error='AuthenticationError',
+                            message='Invalid username or password.',
+                            status_code=401
+                        )
+            else:
+                # Handle AJAX requests with errors
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    next_page = request.GET.get('next', reverse('catalog:home'))
-                    return JsonResponse({
-                        'success': True,
-                        'message': f'Welcome back, {username}!',
-                        'redirect': next_page
-                    })
-                
-                messages.success(request, f'Welcome back, {username}!')
-                next_page = request.GET.get('next', 'catalog:home')
-                return redirect(next_page)
+                    return validation_error_response(
+                        errors=dict(form.errors),
+                        message='Invalid login credentials.'
+                    )
         else:
-            # Handle AJAX requests with errors
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Invalid username or password.',
-                    'errors': form.errors
-                })
-    else:
-        form = UserLoginForm()
+            form = UserLoginForm()
+        
+        return render(request, 'users/auth.html', {'form': form})
     
-    return render(request, 'users/auth.html', {'form': form})
+    except DatabaseError as e:
+        logger.error(f"Database error during login: {str(e)}")
+        messages.error(request, 'A database error occurred. Please try again.')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return error_response(
+                error='DatabaseError',
+                message='A database error occurred. Please try again later.',
+                status_code=500
+            )
+        return render(request, 'users/auth.html', {'form': form})
+    
+    except Exception as e:
+        logger.error(f"Unexpected error during login: {str(e)}", exc_info=True)
+        messages.error(request, 'An unexpected error occurred. Please try again.')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return error_response(
+                error='InternalServerError',
+                message='An unexpected error occurred. Please try again later.',
+                status_code=500
+            )
+        return render(request, 'users/auth.html', {'form': form})
 
 def user_logout(request):
     logout(request)
@@ -140,26 +199,36 @@ def profile(request):
 @login_required
 @customer_required
 def profile_edit(request):
-    # Data isolation: users can only edit their own profile
-    # Using request.user ensures they can only modify their own data
-    if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
+    """Handle profile editing with proper error handling"""
+    try:
+        if request.method == 'POST':
+            user_form = UserUpdateForm(request.POST, instance=request.user)
+            profile_form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
+            
+            if user_form.is_valid() and profile_form.is_valid():
+                user_form.save()
+                profile_form.save()
+                messages.success(request, 'Your profile has been updated!')
+                return redirect('users:profile')
+        else:
+            user_form = UserUpdateForm(instance=request.user)
+            profile_form = UserProfileForm(instance=request.user.profile)
         
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Your profile has been updated!')
-            return redirect('users:profile')
-    else:
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = UserProfileForm(instance=request.user.profile)
+        context = {
+            'user_form': user_form,
+            'profile_form': profile_form
+        }
+        return render(request, 'users/profile_edit.html', context)
     
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form
-    }
-    return render(request, 'users/profile_edit.html', context)
+    except DatabaseError as e:
+        logger.error(f"Database error during profile edit: {str(e)}")
+        messages.error(request, 'A database error occurred. Please try again.')
+        return redirect('users:profile')
+    
+    except Exception as e:
+        logger.error(f"Unexpected error during profile edit: {str(e)}", exc_info=True)
+        messages.error(request, 'An unexpected error occurred. Please try again.')
+        return redirect('users:profile')
 
 @login_required
 def recently_viewed(request):
