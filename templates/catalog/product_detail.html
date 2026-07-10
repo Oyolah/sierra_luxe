@@ -367,7 +367,7 @@
             <a href="{% url 'catalog:product_detail' related.slug %}" class="text-decoration-none">
                 <div class="card h-100 shadow-sm">
                     {% if related.main_image %}
-                    <img src="{{ related.main_image }}" alt="{{ related.name }}" class="card-img-top img-h-200 img-cover">
+                    <img src="{{ related.main_image|image_url }}" alt="{{ related.name }}" class="card-img-top img-h-200 img-cover">
                     {% endif %}
                     <div class="card-body">
                         <h6 class="card-title">{{ related.name }}</h6>
