@@ -285,6 +285,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+        'console_errors': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
         'django': {
@@ -293,12 +298,12 @@ LOGGING = {
             'propagate': False,
         },
         'django.request': {
-            'handlers': ['console'],
+            'handlers': ['console', 'console_errors'],
             'level': 'ERROR',
             'propagate': False,
         },
         'django.security': {
-            'handlers': ['console'],
+            'handlers': ['console', 'console_errors'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -308,7 +313,7 @@ LOGGING = {
             'propagate': False,
         },
         'sierra_luxe': {
-            'handlers': ['console'],
+            'handlers': ['console', 'console_errors'],
             'level': 'INFO',
             'propagate': False,
         },

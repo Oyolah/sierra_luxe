@@ -58,13 +58,12 @@ def custom_page_not_found(request, exception=None):
 def custom_server_error(request):
     """
     Custom handler for 500 Internal Server Error.
-    Logs the error and renders a user-friendly error page.
+    Logs the error with full traceback and renders a user-friendly error page.
     """
-    logger.error(
-        "Internal Server Error: %s - Path: %s - User: %s",
+    logger.exception(
+        "Internal Server Error - Method: %s - Path: %s - User: %s",
         request.method,
         request.path,
-        request.user if request.user.is_authenticated else "Anonymous",
-        exc_info=True
+        request.user if request.user.is_authenticated else "Anonymous"
     )
     return render(request, 'errors/500.html', status=500)

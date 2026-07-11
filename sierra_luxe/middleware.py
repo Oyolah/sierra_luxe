@@ -30,15 +30,14 @@ class GlobalExceptionHandlerMiddleware:
         Handle unhandled exceptions from views.
         Returns appropriate response based on exception type and request format.
         """
-        # Log the exception
-        logger.error(
-            f"Unhandled exception: {type(exception).__name__} - {str(exception)}",
-            exc_info=True,
-            extra={
-                'request_method': request.method,
-                'request_path': request.path,
-                'user': str(request.user) if request.user.is_authenticated else "Anonymous",
-            }
+        # Log the exception with full traceback
+        logger.exception(
+            "Unhandled exception - Type: %s - Message: %s - Method: %s - Path: %s - User: %s",
+            type(exception).__name__,
+            str(exception),
+            request.method,
+            request.path,
+            str(request.user) if request.user.is_authenticated else "Anonymous"
         )
         
         # Check if request expects JSON response
