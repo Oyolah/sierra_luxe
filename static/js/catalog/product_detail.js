@@ -353,12 +353,12 @@ if (addToCartForm) {
                 // Update cart count in navbar
                 updateCartCount(data.cart_count);
             } else {
-                alert(data.message || 'Error adding to cart. Please try again.');
+                showErrorMessage(data.message || 'Error adding to cart. Please try again.');
             }
         })
         .catch(error => {
             console.error('Error adding to cart:', error);
-            alert('Error adding to cart. Please try again.');
+            showErrorMessage('Error adding to cart. Please try again.');
         });
     });
 }
@@ -382,6 +382,27 @@ function showSuccessMessage(message) {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+// Show error message
+function showErrorMessage(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-danger position-fixed';
+    toast.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+    toast.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <div class="flex-grow-1">${message}</div>
+            <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
 }
 
 // Update cart count in navbar
@@ -444,12 +465,12 @@ window.toggleLike = function(productId) {
             // Show success message
             showSuccessMessage(data.message);
         } else {
-            alert('Error updating like. Please try again.');
+            showErrorMessage(data.error || 'Error updating like. Please try again.');
         }
     })
     .catch(error => {
         console.error('Error toggling like:', error);
-        alert('Error updating like. Please try again.');
+        showErrorMessage('Error updating like. Please try again.');
     });
 };
 
