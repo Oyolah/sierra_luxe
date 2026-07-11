@@ -70,26 +70,69 @@ def apply_common_filters(request, queryset, filter_config):
 @login_admin_required
 def dashboard(request):
     """Admin dashboard home with statistics"""
-    total_products = Product.objects.count()
-    total_categories = Category.objects.count()
-    total_users = User.objects.filter(role='CUSTOMER').count()
-    total_orders = Order.objects.count()
+    try:
+        total_products = Product.objects.count()
+    except:
+        total_products = 0
     
-    recent_orders = Order.objects.select_related('customer').order_by('-created_at')[:5]
-    recent_users = User.objects.filter(role='CUSTOMER').order_by('-date_joined')[:5]
-    low_stock_products = Product.objects.filter(stock__lt=10).order_by('stock')[:5]
+    try:
+        total_categories = Category.objects.count()
+    except:
+        total_categories = 0
+    
+    try:
+        total_users = User.objects.filter(role='CUSTOMER').count()
+    except:
+        total_users = 0
+    
+    try:
+        total_orders = Order.objects.count()
+    except:
+        total_orders = 0
+    
+    try:
+        recent_orders = Order.objects.select_related('customer').order_by('-created_at')[:5]
+    except:
+        recent_orders = []
+    
+    try:
+        recent_users = User.objects.filter(role='CUSTOMER').order_by('-date_joined')[:5]
+    except:
+        recent_users = []
+    
+    try:
+        low_stock_products = Product.objects.filter(stock__lt=10).order_by('stock')[:5]
+    except:
+        low_stock_products = []
     
     # Sales stats
-    total_sales = Order.objects.filter(status__in=['SHIPPED', 'DELIVERED']).aggregate(
-        total=Sum('total_amount')
-    )['total'] or Decimal('0')
+    try:
+        total_sales = Order.objects.filter(status__in=['SHIPPED', 'DELIVERED']).aggregate(
+            total=Sum('total_amount')
+        )['total'] or Decimal('0')
+    except:
+        total_sales = Decimal('0')
     
-    pending_orders = Order.objects.filter(status='PENDING').count()
+    try:
+        pending_orders = Order.objects.filter(status='PENDING').count()
+    except:
+        pending_orders = 0
     
     # Reviews and Likes stats
-    total_reviews = Review.objects.count()
-    approved_reviews = Review.objects.filter(is_approved=True).count()
-    pending_reviews = Review.objects.filter(is_approved=False).count()
+    try:
+        total_reviews = Review.objects.count()
+    except:
+        total_reviews = 0
+    
+    try:
+        approved_reviews = Review.objects.filter(is_approved=True).count()
+    except:
+        approved_reviews = 0
+    
+    try:
+        pending_reviews = Review.objects.filter(is_approved=False).count()
+    except:
+        pending_reviews = 0
     
     # Handle Like model - may not exist in production yet
     try:
@@ -97,14 +140,19 @@ def dashboard(request):
     except:
         total_likes = 0
     
-    # Recent reviews
-    recent_reviews = Review.objects.select_related('customer', 'product').filter(is_approved=True).order_by('-created_at')[:5]
+    try:
+        recent_reviews = Review.objects.select_related('customer', 'product').filter(is_approved=True).order_by('-created_at')[:5]
+    except:
+        recent_reviews = []
     
     # Top rated products
-    top_rated_products = Product.objects.annotate(
-        avg_rating=Avg('reviews__rating'),
-        review_count=Count('reviews')
-    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
+    try:
+        top_rated_products = Product.objects.annotate(
+            avg_rating=Avg('reviews__rating'),
+            review_count=Count('reviews')
+        ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
+    except:
+        top_rated_products = []
     
     # Most liked products
     try:
