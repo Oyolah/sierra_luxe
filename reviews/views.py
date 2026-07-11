@@ -52,37 +52,44 @@ def get_product_like_data(product, user=None):
 @login_required
 def toggle_like(request, product_id):
     """Toggle like/unlike for a product (AJAX)"""
-    product = get_object_or_404(Product, id=product_id)
-    
-    # Validate that product exists and is active
-    if not product.is_active:
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Validate that product exists and is active
+        if not product.is_active:
+            return JsonResponse({
+                'success': False,
+                'error': 'This product is not available.'
+            }, status=400)
+        
+        like, created = Like.objects.get_or_create(
+            product=product,
+            user=request.user
+        )
+        
+        if not created:
+            # User already liked, so unlike
+            like.delete()
+            is_liked = False
+            message = 'Product unliked'
+        else:
+            is_liked = True
+            message = 'Product liked'
+        
+        like_data = get_product_like_data(product, request.user)
+        
+        return JsonResponse({
+            'success': True,
+            'is_liked': is_liked,
+            'like_count': like_data['like_count'],
+            'message': message,
+        })
+    except:
+        # Like table doesn't exist yet in production
         return JsonResponse({
             'success': False,
-            'error': 'This product is not available.'
-        }, status=400)
-    
-    like, created = Like.objects.get_or_create(
-        product=product,
-        user=request.user
-    )
-    
-    if not created:
-        # User already liked, so unlike
-        like.delete()
-        is_liked = False
-        message = 'Product unliked'
-    else:
-        is_liked = True
-        message = 'Product liked'
-    
-    like_data = get_product_like_data(product, request.user)
-    
-    return JsonResponse({
-        'success': True,
-        'is_liked': is_liked,
-        'like_count': like_data['like_count'],
-        'message': message,
-    })
+            'error': 'Like feature not available yet.'
+        }, status=503)
 
 
 def product_reviews_api(request, product_id):

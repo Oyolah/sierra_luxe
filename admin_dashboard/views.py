@@ -188,7 +188,10 @@ def dashboard(request):
 @login_admin_required
 def product_list(request):
     """List all products with search and filter"""
-    products = Product.objects.select_related('category').all()
+    try:
+        products = Product.objects.select_related('category').all()
+    except:
+        products = Product.objects.none()
     
     search_query = request.GET.get('search')
     if search_query:
@@ -207,9 +210,14 @@ def product_list(request):
     elif status == 'inactive':
         products = products.filter(is_active=False)
     
+    try:
+        categories = list(Category.objects.all())
+    except:
+        categories = []
+    
     context = {
         'products': products,
-        'categories': Category.objects.all(),
+        'categories': categories,
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
             ('Products', None, 'fas fa-box')
@@ -627,7 +635,10 @@ def user_delete(request, user_id):
 @login_admin_required
 def order_list(request):
     """List all orders"""
-    orders = Order.objects.select_related('customer').order_by('-created_at')
+    try:
+        orders = Order.objects.select_related('customer').order_by('-created_at')
+    except:
+        orders = Order.objects.none()
     
     status = request.GET.get('status')
     if status:
@@ -849,25 +860,36 @@ def review_bulk_action(request):
 @login_admin_required
 def like_list(request):
     """List all likes with search and filter"""
-    likes = Like.objects.select_related('user', 'product').all()
+    try:
+        likes = Like.objects.select_related('user', 'product').all()
+        
+        # Apply filters
+        likes = apply_common_filters(request, likes, {
+            'search_fields': ['user__username', 'product__name'],
+            'product_filter': True,
+        })
+        
+        # Pagination
+        paginator = Paginator(likes, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        # Statistics
+        total_likes = Like.objects.count()
+    except:
+        # Like model not available
+        page_obj = Paginator([], 20).get_page(1)
+        total_likes = 0
+        likes = Like.objects.none()
     
-    # Apply filters
-    likes = apply_common_filters(request, likes, {
-        'search_fields': ['user__username', 'product__name'],
-        'product_filter': True,
-    })
-    
-    # Pagination
-    paginator = Paginator(likes, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    # Statistics
-    total_likes = Like.objects.count()
+    try:
+        products = list(Product.objects.all())
+    except:
+        products = []
     
     context = {
         'page_obj': page_obj,
-        'products': Product.objects.all(),
+        'products': products,
         'total_likes': total_likes,
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
