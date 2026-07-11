@@ -1,13 +1,14 @@
 {
   "version": 2,
-  "buildCommand": "bash build.sh",
   "builds": [
     {
       "src": "sierra_luxe/wsgi.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.12"
+        "runtime": "python3.12",
+        "installCommand": "pip install -r requirements.txt",
+        "buildCommand": "bash build.sh"
       }
     },
     {
