@@ -52,6 +52,9 @@ def get_product_like_data(product, user=None):
 @login_required
 def toggle_like(request, product_id):
     """Toggle like/unlike for a product (AJAX)"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
         product = get_object_or_404(Product, id=product_id)
         
@@ -84,7 +87,10 @@ def toggle_like(request, product_id):
             'like_count': like_data['like_count'],
             'message': message,
         })
-    except:
+    except Exception as e:
+        # Log the actual error for debugging
+        logger.exception(f"Like toggle failed for product {product_id}: {str(e)}")
+        
         # Like table doesn't exist yet in production
         return JsonResponse({
             'success': False,
