@@ -91,17 +91,17 @@ def dashboard(request):
         total_orders = 0
     
     try:
-        recent_orders = Order.objects.select_related('customer').order_by('-created_at')[:5]
+        recent_orders = list(Order.objects.select_related('customer').order_by('-created_at')[:5])
     except:
         recent_orders = []
     
     try:
-        recent_users = User.objects.filter(role='CUSTOMER').order_by('-date_joined')[:5]
+        recent_users = list(User.objects.filter(role='CUSTOMER').order_by('-date_joined')[:5])
     except:
         recent_users = []
     
     try:
-        low_stock_products = Product.objects.filter(stock__lt=10).order_by('stock')[:5]
+        low_stock_products = list(Product.objects.filter(stock__lt=10).order_by('stock')[:5])
     except:
         low_stock_products = []
     
@@ -141,24 +141,24 @@ def dashboard(request):
         total_likes = 0
     
     try:
-        recent_reviews = Review.objects.select_related('customer', 'product').filter(is_approved=True).order_by('-created_at')[:5]
+        recent_reviews = list(Review.objects.select_related('customer', 'product').filter(is_approved=True).order_by('-created_at')[:5])
     except:
         recent_reviews = []
     
     # Top rated products
     try:
-        top_rated_products = Product.objects.annotate(
+        top_rated_products = list(Product.objects.annotate(
             avg_rating=Avg('reviews__rating'),
             review_count=Count('reviews')
-        ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
+        ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5])
     except:
         top_rated_products = []
     
     # Most liked products
     try:
-        most_liked_products = Product.objects.annotate(
+        most_liked_products = list(Product.objects.annotate(
             like_count=Count('likes')
-        ).filter(like_count__gt=0).order_by('-like_count')[:5]
+        ).filter(like_count__gt=0).order_by('-like_count')[:5])
     except:
         most_liked_products = []
     
