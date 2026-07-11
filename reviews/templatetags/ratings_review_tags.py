@@ -79,3 +79,12 @@ def status_badge_class(status, type='default'):
     elif type == 'user_active':
         return 'success' if status else 'danger'
     return 'primary'
+
+
+@register.filter
+def like_count(product):
+    """Get like count for a product with error handling"""
+    try:
+        return product.likes.count()
+    except:
+        return 0
