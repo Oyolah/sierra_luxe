@@ -30,10 +30,22 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-qul)bs3v$5*llr8^em(3ya^g)c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
+# Configure ALLOWED_HOSTS for Vercel and local development
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
-# Add Vercel domains for deployment (main domain and preview URLs)
-ALLOWED_HOSTS.append('sierra-luxe.vercel.app')
-ALLOWED_HOSTS.append('*.vercel.app')
+
+# Add Vercel domains
+if os.getenv('VERCEL'):
+    # Production domain
+    ALLOWED_HOSTS.append('sierra-luxe.vercel.app')
+    # Support all Vercel preview domains
+    ALLOWED_HOSTS.append('*.vercel.app')
+    # Add the specific Vercel URL if available
+    vercel_url = os.getenv('VERCEL_URL')
+    if vercel_url:
+        ALLOWED_HOSTS.append(vercel_url)
+else:
+    # Local development
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
 
 # Application definition

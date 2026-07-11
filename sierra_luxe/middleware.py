@@ -31,13 +31,14 @@ class GlobalExceptionHandlerMiddleware:
         Returns appropriate response based on exception type and request format.
         """
         # Log the exception with full traceback
+        user = getattr(request, 'user', None)
         logger.exception(
             "Unhandled exception - Type: %s - Message: %s - Method: %s - Path: %s - User: %s",
             type(exception).__name__,
             str(exception),
             request.method,
             request.path,
-            str(request.user) if request.user.is_authenticated else "Anonymous"
+            str(user) if user and hasattr(user, 'is_authenticated') and user.is_authenticated else "Anonymous"
         )
         
         # Check if request expects JSON response
