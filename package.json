@@ -1,0 +1,7 @@
+{
+  "name": "sierra-luxe",
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "bash build.sh"
+  }
+}
