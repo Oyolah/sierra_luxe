@@ -31,14 +31,21 @@ def get_product_rating_data(product):
 
 def get_product_like_data(product, user=None):
     """Get like count and user's like status for a product"""
-    like_count = product.likes.count()
-    is_liked = False
-    if user and user.is_authenticated:
-        is_liked = product.likes.filter(user=user).exists()
-    return {
-        'like_count': like_count,
-        'is_liked': is_liked,
-    }
+    try:
+        like_count = product.likes.count()
+        is_liked = False
+        if user and user.is_authenticated:
+            is_liked = product.likes.filter(user=user).exists()
+        return {
+            'like_count': like_count,
+            'is_liked': is_liked,
+        }
+    except:
+        # Like table doesn't exist yet in production
+        return {
+            'like_count': 0,
+            'is_liked': False,
+        }
 
 
 @require_POST

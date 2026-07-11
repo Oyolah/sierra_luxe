@@ -90,7 +90,12 @@ def dashboard(request):
     total_reviews = Review.objects.count()
     approved_reviews = Review.objects.filter(is_approved=True).count()
     pending_reviews = Review.objects.filter(is_approved=False).count()
-    total_likes = Like.objects.count()
+    
+    # Handle Like model - may not exist in production yet
+    try:
+        total_likes = Like.objects.count()
+    except:
+        total_likes = 0
     
     # Recent reviews
     recent_reviews = Review.objects.select_related('customer', 'product').filter(is_approved=True).order_by('-created_at')[:5]
@@ -102,9 +107,12 @@ def dashboard(request):
     ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
     
     # Most liked products
-    most_liked_products = Product.objects.annotate(
-        like_count=Count('likes')
-    ).filter(like_count__gt=0).order_by('-like_count')[:5]
+    try:
+        most_liked_products = Product.objects.annotate(
+            like_count=Count('likes')
+        ).filter(like_count__gt=0).order_by('-like_count')[:5]
+    except:
+        most_liked_products = []
     
     context = {
         'total_products': total_products,
