@@ -32,6 +32,41 @@ def delete_model_instance(request, model_class, instance_id, redirect_url, name_
     messages.success(request, f'{model_class.__name__} "{instance_name}" deleted successfully.')
     return redirect(redirect_url)
 
+def apply_common_filters(request, queryset, filter_config):
+    """Apply common filters to queryset based on configuration"""
+    # Search
+    if 'search_fields' in filter_config:
+        search_query = request.GET.get('search')
+        if search_query:
+            search_fields = filter_config['search_fields']
+            q_objects = Q()
+            for field in search_fields:
+                q_objects |= Q(**{f'{field}__icontains': search_query})
+            queryset = queryset.filter(q_objects)
+    
+    # Product filter
+    if filter_config.get('product_filter'):
+        product_id = request.GET.get('product')
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+    
+    # Rating filter
+    if filter_config.get('rating_filter'):
+        rating = request.GET.get('rating')
+        if rating:
+            queryset = queryset.filter(rating=rating)
+    
+    # Status filter
+    if 'status_filter' in filter_config:
+        status = request.GET.get('status')
+        status_field = filter_config['status_filter']
+        if status == 'approved':
+            queryset = queryset.filter(**{status_field: True})
+        elif status == 'pending':
+            queryset = queryset.filter(**{status_field: False})
+    
+    return queryset
+
 @login_admin_required
 def dashboard(request):
     """Admin dashboard home with statistics"""
@@ -644,32 +679,13 @@ def review_list(request):
     """List all reviews with search and filter"""
     reviews = Review.objects.select_related('customer', 'product').all()
     
-    # Search
-    search_query = request.GET.get('search')
-    if search_query:
-        reviews = reviews.filter(
-            Q(customer__username__icontains=search_query) |
-            Q(product__name__icontains=search_query) |
-            Q(title__icontains=search_query) |
-            Q(comment__icontains=search_query)
-        )
-    
-    # Filter by product
-    product_id = request.GET.get('product')
-    if product_id:
-        reviews = reviews.filter(product_id=product_id)
-    
-    # Filter by rating
-    rating = request.GET.get('rating')
-    if rating:
-        reviews = reviews.filter(rating=rating)
-    
-    # Filter by status
-    status = request.GET.get('status')
-    if status == 'approved':
-        reviews = reviews.filter(is_approved=True)
-    elif status == 'pending':
-        reviews = reviews.filter(is_approved=False)
+    # Apply filters
+    reviews = apply_common_filters(request, reviews, {
+        'search_fields': ['customer__username', 'product__name', 'title', 'comment'],
+        'product_filter': True,
+        'rating_filter': True,
+        'status_filter': 'is_approved',
+    })
     
     # Pagination
     paginator = Paginator(reviews, 20)
@@ -779,18 +795,11 @@ def like_list(request):
     """List all likes with search and filter"""
     likes = Like.objects.select_related('user', 'product').all()
     
-    # Search
-    search_query = request.GET.get('search')
-    if search_query:
-        likes = likes.filter(
-            Q(user__username__icontains=search_query) |
-            Q(product__name__icontains=search_query)
-        )
-    
-    # Filter by product
-    product_id = request.GET.get('product')
-    if product_id:
-        likes = likes.filter(product_id=product_id)
+    # Apply filters
+    likes = apply_common_filters(request, likes, {
+        'search_fields': ['user__username', 'product__name'],
+        'product_filter': True,
+    })
     
     # Pagination
     paginator = Paginator(likes, 20)
@@ -816,10 +825,7 @@ def like_list(request):
 @require_POST
 def like_delete(request, like_id):
     """Delete a like"""
-    like = get_object_or_404(Like, id=like_id)
-    like.delete()
-    messages.success(request, 'Like deleted successfully.')
-    return redirect('admin_dashboard:like_list')
+    return delete_model_instance(request, Like, like_id, 'admin_dashboard:like_list', 'id')
 
 
 @login_admin_required

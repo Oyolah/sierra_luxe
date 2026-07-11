@@ -518,10 +518,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Handle review modal open
+    const reviewModal = document.querySelector('#reviewModal');
+    if (reviewModal) {
+        reviewModal.addEventListener('shown.bs.modal', function() {
+            // Initialize star rating display based on current value
+            const ratingInput = document.querySelector('#review-rating');
+            const stars = document.querySelectorAll('#star-rating-input i');
+            const currentRating = parseInt(ratingInput.value) || 0;
+            
+            stars.forEach(star => {
+                const starValue = parseInt(star.getAttribute('data-value'));
+                if (starValue <= currentRating) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        });
+    }
+    
     // Handle review form submission
     const reviewForm = document.querySelector('#review-form');
     if (reviewForm) {
         reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
             const ratingInput = document.querySelector('#review-rating');
             const errorDiv = document.querySelector('#rating-error');
             const titleInput = document.querySelector('#review-title');
@@ -551,7 +573,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (hasError) {
-                e.preventDefault();
                 return false;
             }
             

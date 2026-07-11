@@ -97,9 +97,9 @@ def product_detail(request, slug):
     rating_data = get_product_rating_data(product)
     average_rating = rating_data['average']
     review_count = rating_data['count']
-    user_has_reviewed = False
+    user_review = None
     if request.user.is_authenticated:
-        user_has_reviewed = product.reviews.filter(customer=request.user).exists()
+        user_review = product.reviews.filter(customer=request.user).first()
     
     # Get like data
     from reviews.views import get_product_like_data
@@ -128,7 +128,7 @@ def product_detail(request, slug):
         'reviews': reviews,
         'average_rating': average_rating,
         'review_count': review_count,
-        'user_has_reviewed': user_has_reviewed,
+        'user_review': user_review,
         'like_count': like_count,
         'is_liked': is_liked,
         'store': store,

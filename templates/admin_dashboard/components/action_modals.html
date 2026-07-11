@@ -1,0 +1,97 @@
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content reject-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">Reject Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="rejectModalMessage">Are you sure you want to reject this review? It will no longer be visible to customers.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="rejectModalConfirm">Reject Review</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content approve-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveModalLabel">Approve Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to approve this review? It will become visible to customers.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="approveModalConfirm">Approve Review</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.reject-modal {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.reject-modal .modal-header {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+    border-bottom: 1px solid #ffeaa7;
+    border-radius: 16px 16px 0 0;
+    padding: 1.5rem;
+}
+
+.reject-modal .modal-title {
+    color: #856404;
+    font-weight: 600;
+}
+
+.reject-modal .modal-body {
+    padding: 1.5rem;
+    color: #856404;
+}
+
+.reject-modal .modal-footer {
+    border-top: 1px solid #ffeaa7;
+    padding: 1.5rem;
+    border-radius: 0 0 16px 16px;
+}
+
+.approve-modal {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.approve-modal .modal-header {
+    background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+    border-bottom: 1px solid #c3e6cb;
+    border-radius: 16px 16px 0 0;
+    padding: 1.5rem;
+}
+
+.approve-modal .modal-title {
+    color: #155724;
+    font-weight: 600;
+}
+
+.approve-modal .modal-body {
+    padding: 1.5rem;
+    color: #155724;
+}
+
+.approve-modal .modal-footer {
+    border-top: 1px solid #c3e6cb;
+    padding: 1.5rem;
+    border-radius: 0 0 16px 16px;
+}
+</style>

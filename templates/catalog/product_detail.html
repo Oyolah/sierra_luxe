@@ -332,10 +332,10 @@
             <!-- Review Alert -->
             <div class="alert alert-info mt-4">
                 <i class="fas fa-info-circle me-2"></i>
-                {% if user.is_authenticated and not user_has_reviewed %}
+                {% if user.is_authenticated and not user_review %}
                 Want to review this product? <a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal" class="alert-link">Click here to submit a review</a>.
-                {% elif user.is_authenticated and user_has_reviewed %}
-                You have already reviewed this product.
+                {% elif user.is_authenticated and user_review %}
+                You have already reviewed this product. <a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal" class="alert-link">Click here to edit your review</a>.
                 {% else %}
                 Please <a href="{% url 'users:auth' %}?next={{ request.path }}" class="alert-link">log in</a> to write a review.
                 {% endif %}
@@ -346,11 +346,11 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="reviewModalLabel">Review {{ product.name }}</h5>
+                            <h5 class="modal-title" id="reviewModalLabel">{% if user_review %}Edit Your Review{% else %}Review {{ product.name }}{% endif %}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="review-form" method="post" action="{% url 'reviews:add_review' product.id %}">
+                            <form id="review-form" method="post" action="{% if user_review %}{% url 'reviews:update_review' product.id %}{% else %}{% url 'reviews:add_review' product.id %}{% endif %}">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label">Your Rating</label>
@@ -361,18 +361,18 @@
                                         <i class="fas fa-star" data-value="4"></i>
                                         <i class="fas fa-star" data-value="5"></i>
                                     </div>
-                                    <input type="hidden" name="rating" id="review-rating" value="0">
+                                    <input type="hidden" name="rating" id="review-rating" value="{% if user_review %}{{ user_review.rating }}{% else %}0{% endif %}">
                                     <div class="invalid-feedback" id="rating-error">Please select a rating.</div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label" for="review-title">Review Title</label>
-                                    <input type="text" name="title" class="form-control" id="review-title" placeholder="Summarize your experience" required>
+                                    <input type="text" name="title" class="form-control" id="review-title" placeholder="Summarize your experience" value="{% if user_review %}{{ user_review.title }}{% endif %}" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label" for="review-comment">Review</label>
-                                    <textarea name="comment" class="form-control" id="review-comment" rows="4" placeholder="Share your thoughts about the product" required></textarea>
+                                    <textarea name="comment" class="form-control" id="review-comment" rows="4" placeholder="Share your thoughts about the product" required>{% if user_review %}{{ user_review.comment }}{% endif %}</textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                                <button type="submit" class="btn btn-primary">{% if user_review %}Update Review{% else %}Submit Review{% endif %}</button>
                             </form>
                         </div>
                     </div>
