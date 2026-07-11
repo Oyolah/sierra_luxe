@@ -113,7 +113,7 @@ if os.getenv('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
+            conn_max_age=60,  # Reduced from 600 to prevent connection pool exhaustion
             conn_health_checks=True,
             ssl_require=True
         )
@@ -121,6 +121,7 @@ if os.getenv('DATABASE_URL'):
     # Additional SSL options for Supabase
     DATABASES['default']['OPTIONS'] = {
         'sslmode': 'require',
+        'connect_timeout': 10,  # Timeout for establishing connection
     }
 else:
     DATABASES = {
