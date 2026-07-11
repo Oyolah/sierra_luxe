@@ -88,8 +88,10 @@ def toggle_like(request, product_id):
         # Like table doesn't exist yet in production
         return JsonResponse({
             'success': False,
-            'error': 'Like feature not available yet.'
-        }, status=503)
+            'error': 'Like feature is temporarily unavailable.',
+            'like_count': 0,
+            'is_liked': False,
+        }, status=200)
 
 
 def product_reviews_api(request, product_id):
