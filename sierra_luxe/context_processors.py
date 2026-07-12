@@ -22,3 +22,12 @@ def cart_count(request):
             return {'cart_count': 0}
     return {'cart_count': 0}
 
+def categories_context(request):
+    """Provide active categories to all templates"""
+    from catalog.models import Category
+    try:
+        categories = Category.objects.filter(is_active=True)
+        return {'nav_categories': categories}
+    except:
+        return {'nav_categories': []}
+

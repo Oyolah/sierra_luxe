@@ -96,6 +96,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'sierra_luxe.context_processors.site_settings',
                 'sierra_luxe.context_processors.cart_count',
+                'sierra_luxe.context_processors.categories_context',
             ],
         },
     },

@@ -103,56 +103,31 @@
             </div>
             <div class="modal-body">
                 <div class="row g-4">
+                    {% load ratings_review_tags %}
+                    {% for category in nav_categories %}
                     <div class="col-md-4">
-                        <a href="{% url 'catalog:product_list' %}?category=women" class="text-decoration-none">
+                        <a href="{% url 'catalog:product_list' %}?category={{ category.slug }}" class="text-decoration-none">
                             <div class="card h-100">
-                                <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/African Lace Maxi Dress 1.webp" alt="Women" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% with category_image=category|category_image %}
+                                {% if category_image %}
+                                <img src="{{ category_image }}" alt="{{ category.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                {% else %}
+                                <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary" style="height: 250px;">
+                                    <h5 class="text-white">{{ category.name }}</h5>
+                                </div>
+                                {% endif %}
+                                {% endwith %}
                                 <div class="card-body text-center">
-                                    <h6 class="text-dark mb-0">Women</h6>
+                                    <h6 class="text-dark mb-0">{{ category.name }}</h6>
                                 </div>
                             </div>
                         </a>
                     </div>
-                    <div class="col-md-4">
-                        <a href="{% url 'catalog:product_list' %}?category=men" class="text-decoration-none">
-                            <div class="card h-100">
-                                <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/luxurious-aso-oke-with-embroidered-agbada-for-groom-1.avif" alt="Men" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                <div class="card-body text-center">
-                                    <h6 class="text-dark mb-0">Men</h6>
-                                </div>
-                            </div>
-                        </a>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-muted text-center">No categories available.</p>
                     </div>
-                    <div class="col-md-4">
-                        <a href="{% url 'catalog:product_list' %}?category=kids" class="text-decoration-none">
-                            <div class="card h-100">
-                                <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/baby-girl-ankara-ball-gown-dress-1.webp" alt="Kids" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                <div class="card-body text-center">
-                                    <h6 class="text-dark mb-0">Kids</h6>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="{% url 'catalog:product_list' %}?category=wedding" class="text-decoration-none">
-                            <div class="card h-100">
-                                <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/aso-oke-couple-outfits-1.webp" alt="Wedding" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                <div class="card-body text-center">
-                                    <h6 class="text-dark mb-0">Wedding</h6>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="{% url 'catalog:product_list' %}?category=traditional" class="text-decoration-none">
-                            <div class="card h-100">
-                                <img src="https://res.cloudinary.com/dvcnxfxfu/image/upload/v1/sierra_luxe/products/red-beaded-african-dress-1.webp" alt="Traditional" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                <div class="card-body text-center">
-                                    <h6 class="text-dark mb-0">Traditional</h6>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

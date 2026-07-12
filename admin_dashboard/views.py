@@ -435,12 +435,26 @@ def category_create(request):
         is_active = get_bool_from_post(request, 'is_active')
         
         try:
-            category = Category.objects.create(
-                name=name,
-                description=description,
-                image=image,
-                is_active=is_active
-            )
+            # Upload image with explicit folder if provided
+            if image:
+                import cloudinary
+                upload_result = cloudinary.uploader.upload(
+                    image,
+                    folder='sierra_luxe/category_images',
+                    resource_type='image'
+                )
+                category = Category.objects.create(
+                    name=name,
+                    description=description,
+                    image=upload_result['public_id'],
+                    is_active=is_active
+                )
+            else:
+                category = Category.objects.create(
+                    name=name,
+                    description=description,
+                    is_active=is_active
+                )
             messages.success(request, f'Category "{category.name}" created successfully.')
             return redirect('admin_dashboard:category_list')
         except Exception as e:
@@ -466,7 +480,23 @@ def category_edit(request, category_id):
         category.description = request.POST.get('description', '')
         image = request.FILES.get('image')
         if image:
-            category.image = image
+            # Delete old image from Cloudinary if it exists
+            if category.image:
+                try:
+                    import cloudinary
+                    public_id = getattr(category.image, 'public_id', None)
+                    if public_id:
+                        cloudinary.uploader.destroy(public_id, resource_type='image')
+                except:
+                    pass
+            # Upload new image with explicit folder
+            import cloudinary
+            upload_result = cloudinary.uploader.upload(
+                image,
+                folder='sierra_luxe/category_images',
+                resource_type='image'
+            )
+            category.image = upload_result['public_id']
         category.is_active = get_bool_from_post(request, 'is_active')
         
         try:
