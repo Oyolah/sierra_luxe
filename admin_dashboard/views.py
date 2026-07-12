@@ -433,6 +433,8 @@ def category_create(request):
         description = request.POST.get('description', '')
         image = request.FILES.get('image')
         is_active = get_bool_from_post(request, 'is_active')
+        show_on_homepage = get_bool_from_post(request, 'show_on_homepage')
+        show_in_navbar = get_bool_from_post(request, 'show_in_navbar')
         
         try:
             # Upload image with explicit folder if provided
@@ -447,13 +449,17 @@ def category_create(request):
                     name=name,
                     description=description,
                     image=upload_result['public_id'],
-                    is_active=is_active
+                    is_active=is_active,
+                    show_on_homepage=show_on_homepage,
+                    show_in_navbar=show_in_navbar
                 )
             else:
                 category = Category.objects.create(
                     name=name,
                     description=description,
-                    is_active=is_active
+                    is_active=is_active,
+                    show_on_homepage=show_on_homepage,
+                    show_in_navbar=show_in_navbar
                 )
             messages.success(request, f'Category "{category.name}" created successfully.')
             return redirect('admin_dashboard:category_list')
@@ -498,6 +504,8 @@ def category_edit(request, category_id):
             )
             category.image = upload_result['public_id']
         category.is_active = get_bool_from_post(request, 'is_active')
+        category.show_on_homepage = get_bool_from_post(request, 'show_on_homepage')
+        category.show_in_navbar = get_bool_from_post(request, 'show_in_navbar')
         
         try:
             category.save()

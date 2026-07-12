@@ -6,7 +6,7 @@ from reviews.views import get_product_rating_data
 
 
 def home(request):
-    categories = Category.objects.filter(is_active=True)
+    categories = Category.objects.filter(is_active=True, show_on_homepage=True)
     featured_products = Product.objects.filter(is_active=True, is_featured=True)[:8]
     return render(request, 'catalog/home.html', {
         'categories': categories,

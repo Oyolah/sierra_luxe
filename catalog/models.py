@@ -23,6 +23,8 @@ class Category(SlugModel):
     description = models.TextField(blank=True)
     image = CloudinaryField('category_images', asset_folder='sierra_luxe/category_images', blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    show_on_homepage = models.BooleanField(default=True, help_text='Display in homepage Shop by Category section')
+    show_in_navbar = models.BooleanField(default=True, help_text='Display in navbar category menu')
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

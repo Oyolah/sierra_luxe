@@ -26,7 +26,7 @@ def categories_context(request):
     """Provide active categories to all templates"""
     from catalog.models import Category
     try:
-        categories = Category.objects.filter(is_active=True)
+        categories = Category.objects.filter(is_active=True, show_in_navbar=True)
         return {'nav_categories': categories}
     except:
         return {'nav_categories': []}
