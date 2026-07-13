@@ -46,7 +46,7 @@ class User(AbstractUser):
         """Return list of dashboard permission codes for this user"""
         if self.is_superuser:
             from admin_dashboard.models import DASHBOARD_PERMISSIONS
-            return [code for code, _ in DASHBOARD_PERMISSIONS]
+            return [code for code, _, _ in DASHBOARD_PERMISSIONS]
         if not self.is_staff or not self.staff_role:
             return []
         return self.staff_role.get_permission_codes()

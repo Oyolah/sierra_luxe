@@ -1214,10 +1214,15 @@ def staff_profile(request):
     permission_details = []
     if permissions:
         from .models import DASHBOARD_PERMISSIONS
-        perm_dict = dict(DASHBOARD_PERMISSIONS)
+        # Create dict mapping code to (name, category)
+        perm_dict = {code: (name, category) for code, name, category in DASHBOARD_PERMISSIONS}
         for perm_code in permissions:
             if perm_code in perm_dict:
-                permission_details.append(perm_dict[perm_code])
+                permission_details.append({
+                    'code': perm_code,
+                    'name': perm_dict[perm_code][0],
+                    'category': perm_dict[perm_code][1]
+                })
     
     context = {
         'user': user,
