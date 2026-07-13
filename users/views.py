@@ -1,17 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
 from django.db import DatabaseError
+from django.db.models import Count, Q
 import logging
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, UserUpdateForm
 from sierra_luxe.decorators import admin_required, customer_required
 from sierra_luxe.api_responses import success_response, error_response, validation_error_response
 from sierra_luxe.exceptions import ValidationException, DatabaseException
-from .models import RecentlyViewed
+from .models import RecentlyViewed, BillingAddress
+from orders.models import Order, OrderItem
+from reviews.models import Review, Like
+from catalog.models import Product
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +117,7 @@ def user_login(request):
         # Redirect based on user type if already authenticated
         if request.user.is_staff or request.user.is_superuser:
             return redirect('admin_dashboard:dashboard')
-        return redirect('catalog:home')
+        return redirect('users:customer_dashboard')
     
     # Check if user was logged out due to session timeout
     if request.GET.get('session_timeout') == 'true':
@@ -133,7 +137,7 @@ def user_login(request):
                     if user.is_staff or user.is_superuser:
                         default_redirect = '/admin-dashboard/'
                     else:
-                        default_redirect = '/catalog/'
+                        default_redirect = '/customer-dashboard/'
                     
                     # Handle AJAX requests
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -246,3 +250,199 @@ def recently_viewed(request):
     return render(request, 'users/recently_viewed.html', {
         'recent_items': recent_items
     })
+
+
+# ============ CUSTOMER DASHBOARD VIEWS ============
+
+@login_required
+@customer_required
+def customer_dashboard(request):
+    """Customer dashboard home with overview"""
+    # Security: Always use request.user, never trust user_id from request
+    user = request.user
+    
+    # Get customer's orders
+    orders = Order.objects.filter(customer=user).order_by('-created_at')
+    total_orders = orders.count()
+    pending_orders = orders.filter(status='PENDING').count()
+    completed_orders = orders.filter(status='DELIVERED').count()
+    
+    # Get customer's likes
+    likes = Like.objects.filter(user=user).select_related('product')[:5]
+    
+    # Get customer's reviews
+    reviews = Review.objects.filter(customer=user).select_related('product')[:5]
+    
+    # Get recent orders
+    recent_orders = orders[:5]
+    
+    context = {
+        'user': user,
+        'total_orders': total_orders,
+        'pending_orders': pending_orders,
+        'completed_orders': completed_orders,
+        'likes': likes,
+        'reviews': reviews,
+        'recent_orders': recent_orders,
+    }
+    return render(request, 'users/customer_dashboard.html', context)
+
+
+@login_required
+@customer_required
+def customer_orders(request):
+    """Customer's order history"""
+    # Security: Always use request.user
+    orders = Order.objects.filter(customer=request.user).order_by('-created_at')
+    
+    # Filter by status if provided
+    status_filter = request.GET.get('status')
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    
+    context = {
+        'orders': orders,
+        'status_filter': status_filter,
+    }
+    return render(request, 'users/customer_orders.html', context)
+
+
+@login_required
+@customer_required
+def customer_order_detail(request, order_id):
+    """Customer's order details with IDOR protection"""
+    # Security: Always filter by request.user to prevent IDOR
+    order = get_object_or_404(Order, id=order_id, customer=request.user)
+    items = order.items.select_related('product')
+    
+    context = {
+        'order': order,
+        'items': items,
+    }
+    return render(request, 'users/customer_order_detail.html', context)
+
+
+@login_required
+@customer_required
+def customer_wishlist(request):
+    """Customer's wishlist/liked products"""
+    # Security: Always use request.user
+    likes = Like.objects.filter(user=request.user).select_related('product').order_by('-created_at')
+    
+    context = {
+        'likes': likes,
+    }
+    return render(request, 'users/customer_wishlist.html', context)
+
+
+@login_required
+@customer_required
+def customer_reviews(request):
+    """Customer's reviews"""
+    # Security: Always use request.user
+    reviews = Review.objects.filter(customer=request.user).select_related('product').order_by('-created_at')
+    
+    context = {
+        'reviews': reviews,
+    }
+    return render(request, 'users/customer_reviews.html', context)
+
+
+@login_required
+@customer_required
+def customer_billing_address(request):
+    """Customer's billing addresses"""
+    # Security: Always use request.user
+    addresses = BillingAddress.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    
+    context = {
+        'addresses': addresses,
+    }
+    return render(request, 'users/customer_billing_address.html', context)
+
+
+@login_required
+@customer_required
+def customer_billing_address_edit(request):
+    """Add or edit billing address"""
+    # Security: Always use request.user
+    user = request.user
+    
+    if request.method == 'POST':
+        address_id = request.POST.get('address_id')
+        
+        if address_id:
+            # Edit existing address
+            address = get_object_or_404(BillingAddress, id=address_id, user=user)
+            address.full_name = request.POST.get('full_name')
+            address.address_line1 = request.POST.get('address_line1')
+            address.address_line2 = request.POST.get('address_line2', '')
+            address.city = request.POST.get('city')
+            address.state_province = request.POST.get('state_province', '')
+            address.postal_code = request.POST.get('postal_code')
+            address.country = request.POST.get('country')
+            address.phone = request.POST.get('phone')
+            address.is_default = request.POST.get('is_default') == 'on'
+            address.save()
+            messages.success(request, 'Billing address updated successfully.')
+        else:
+            # Create new address
+            BillingAddress.objects.create(
+                user=user,
+                full_name=request.POST.get('full_name'),
+                address_line1=request.POST.get('address_line1'),
+                address_line2=request.POST.get('address_line2', ''),
+                city=request.POST.get('city'),
+                state_province=request.POST.get('state_province', ''),
+                postal_code=request.POST.get('postal_code'),
+                country=request.POST.get('country'),
+                phone=request.POST.get('phone'),
+                is_default=request.POST.get('is_default') == 'on'
+            )
+            messages.success(request, 'Billing address added successfully.')
+        
+        return redirect('users:customer_billing_address')
+    
+    # GET request - show form
+    address_id = request.GET.get('address_id')
+    address = None
+    if address_id:
+        address = get_object_or_404(BillingAddress, id=address_id, user=user)
+    
+    context = {
+        'address': address,
+    }
+    return render(request, 'users/customer_billing_address_edit.html', context)
+
+
+@login_required
+@customer_required
+def customer_change_password(request):
+    """Customer change password"""
+    # Security: Always use request.user
+    user = request.user
+    
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if not user.check_password(old_password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('users:customer_change_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+            return redirect('users:customer_change_password')
+        
+        if len(new_password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            return redirect('users:customer_change_password')
+        
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password changed successfully.')
+        return redirect('users:customer_dashboard')
+    
+    return render(request, 'users/customer_change_password.html')

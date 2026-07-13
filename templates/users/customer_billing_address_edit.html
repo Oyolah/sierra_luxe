@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load ratings_review_tags %}
+
+{% block title %}{% if address %}Edit Address{% else %}Add Address{% endif %} - Sierra Luxe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/customer-sidebar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm customer-sidebar">
+                <div class="user-avatar">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image }}" alt="{{ user.username }}" class="rounded-circle" width="80" height="80">
+                    {% else %}
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                            <span class="text-white fs-4">{{ user.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <h5>{{ user.get_full_name|default:user.username }}</h5>
+                    <p>{{ user.email }}</p>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_dashboard' %}active{% endif %}" href="{% url 'users:customer_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_orders' or request.resolver_match.url_name == 'customer_order_detail' %}active{% endif %}" href="{% url 'users:customer_orders' %}">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_wishlist' %}active{% endif %}" href="{% url 'users:customer_wishlist' %}">
+                        <i class="fas fa-heart"></i> Liked Products
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_reviews' %}active{% endif %}" href="{% url 'users:customer_reviews' %}">
+                        <i class="fas fa-star"></i> My Reviews
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_billing_address' or request.resolver_match.url_name == 'customer_billing_address_edit' %}active{% endif %}" href="{% url 'users:customer_billing_address' %}">
+                        <i class="fas fa-map-marker-alt"></i> Billing Address
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_change_password' %}active{% endif %}" href="{% url 'users:customer_change_password' %}">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <a class="nav-link text-danger" href="{% url 'users:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>{% if address %}Edit Address{% else %}Add New Address{% endif %}</h2>
+                <a href="{% url 'users:customer_billing_address' %}" class="btn btn-customer-outline">Back to Addresses</a>
+            </div>
+            
+            <!-- Address Form -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% if address %}
+                        <input type="hidden" name="address_id" value="{{ address.id }}">
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="full_name" class="form-label">Full Name <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" value="{% if address %}{{ address.full_name }}{% endif %}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="address_line1" class="form-label">Address Line 1 <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" id="address_line1" name="address_line1" value="{% if address %}{{ address.address_line1 }}{% endif %}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="address_line2" class="form-label">Address Line 2</label>
+                                <input type="text" class="form-control" id="address_line2" name="address_line2" value="{% if address %}{{ address.address_line2 }}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" id="city" name="city" value="{% if address %}{{ address.city }}{% endif %}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="state_province" class="form-label">State/Province</label>
+                                <input type="text" class="form-control" id="state_province" name="state_province" value="{% if address %}{{ address.state_province }}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="postal_code" class="form-label">Postal Code <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" value="{% if address %}{{ address.postal_code }}{% endif %}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="country" class="form-label">Country <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" id="country" name="country" value="{% if address %}{{ address.country }}{% endif %}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" id="phone" name="phone" value="{% if address %}{{ address.phone }}{% endif %}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="is_default" name="is_default" {% if address and address.is_default %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_default">
+                                        Set as default address
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-customer">
+                                {% if address %}Update Address{% else %}Add Address{% endif %}
+                            </button>
+                            <a href="{% url 'users:customer_billing_address' %}" class="btn btn-customer-outline">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

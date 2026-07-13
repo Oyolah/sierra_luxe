@@ -66,15 +66,18 @@
                             <i class="fas fa-user"></i> {{ user.username }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'orders:order_history' %}"><i class="fas fa-shopping-bag me-2"></i>Orders</a></li>
-                            <li><a class="dropdown-item" href="{% url 'users:recently_viewed' %}"><i class="fas fa-history me-2"></i>Recently Viewed</a></li>
-                            <li><hr class="dropdown-divider"></li>
                             {% if user.is_staff or user.is_superuser %}
                                 <li><a class="dropdown-item" href="{% url 'admin_dashboard:dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</a></li>
                                 {% if user.is_superuser %}
                                 <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-cog me-2"></i>Django Admin</a></li>
                                 {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{% url 'users:customer_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>My Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:customer_orders' %}"><i class="fas fa-shopping-bag me-2"></i>My Orders</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:customer_wishlist' %}"><i class="fas fa-heart me-2"></i>Liked Products</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:customer_reviews' %}"><i class="fas fa-star me-2"></i>My Reviews</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:customer_billing_address' %}"><i class="fas fa-map-marker-alt me-2"></i>Billing Address</a></li>
                                 <li><hr class="dropdown-divider"></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>

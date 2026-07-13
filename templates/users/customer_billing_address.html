@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load ratings_review_tags %}
+
+{% block title %}Billing Address - Sierra Luxe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/customer-sidebar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm customer-sidebar">
+                <div class="user-avatar">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image }}" alt="{{ user.username }}" class="rounded-circle" width="80" height="80">
+                    {% else %}
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                            <span class="text-white fs-4">{{ user.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <h5>{{ user.get_full_name|default:user.username }}</h5>
+                    <p>{{ user.email }}</p>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_dashboard' %}active{% endif %}" href="{% url 'users:customer_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_orders' or request.resolver_match.url_name == 'customer_order_detail' %}active{% endif %}" href="{% url 'users:customer_orders' %}">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_wishlist' %}active{% endif %}" href="{% url 'users:customer_wishlist' %}">
+                        <i class="fas fa-heart"></i> Liked Products
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_reviews' %}active{% endif %}" href="{% url 'users:customer_reviews' %}">
+                        <i class="fas fa-star"></i> My Reviews
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_billing_address' or request.resolver_match.url_name == 'customer_billing_address_edit' %}active{% endif %}" href="{% url 'users:customer_billing_address' %}">
+                        <i class="fas fa-map-marker-alt"></i> Billing Address
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_change_password' %}active{% endif %}" href="{% url 'users:customer_change_password' %}">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <a class="nav-link text-danger" href="{% url 'users:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Billing Addresses</h2>
+                <a href="{% url 'users:customer_billing_address_edit' %}" class="btn btn-customer">
+                    <i class="fas fa-plus me-2"></i>Add New Address
+                </a>
+            </div>
+            
+            <!-- Addresses List -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {% if addresses %}
+                        <div class="row">
+                            {% for address in addresses %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 {% if address.is_default %}border-warning{% endif %}">
+                                    <div class="card-body">
+                                        {% if address.is_default %}
+                                        <span class="badge badge-customer mb-2">Default</span>
+                                        {% endif %}
+                                        <h6 class="mb-2">{{ address.full_name }}</h6>
+                                        <p class="text-muted mb-1">{{ address.address_line1 }}</p>
+                                        {% if address.address_line2 %}
+                                        <p class="text-muted mb-1">{{ address.address_line2 }}</p>
+                                        {% endif %}
+                                        <p class="text-muted mb-1">{{ address.city }}, {{ address.state_province }}</p>
+                                        <p class="text-muted mb-1">{{ address.postal_code }}</p>
+                                        <p class="text-muted mb-1">{{ address.country }}</p>
+                                        <p class="text-muted mb-3">{{ address.phone }}</p>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'users:customer_billing_address_edit' %}?address_id={{ address.id }}" class="btn btn-sm btn-customer-outline">Edit</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-map-marker-alt text-muted fs-1 mb-3"></i>
+                            <p class="text-muted mb-0">No billing addresses saved</p>
+                            <a href="{% url 'users:customer_billing_address_edit' %}" class="btn btn-customer mt-3">Add Address</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

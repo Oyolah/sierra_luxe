@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from decimal import Decimal
 from .models import Cart, CartItem
 from catalog.models import Product
+from users.models import BillingAddress
 
 @login_required
 def cart_view(request):
@@ -257,9 +258,33 @@ def checkout(request):
         messages.warning(request, 'Your cart is empty.')
         return redirect('catalog:product_list')
     
+    # Get customer's saved addresses
+    saved_addresses = BillingAddress.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    
     if request.method == 'POST':
         # Simulate order creation
         from orders.models import Order, OrderItem
+        
+        # Check if user selected a saved address or entered a new one
+        selected_address_id = request.POST.get('selected_address')
+        
+        if selected_address_id:
+            # Use saved address
+            address = get_object_or_404(BillingAddress, id=selected_address_id, user=request.user)
+            shipping_address = f"{address.address_line1}"
+            if address.address_line2:
+                shipping_address += f", {address.address_line2}"
+            shipping_city = address.city
+            shipping_country = address.country
+            shipping_postal_code = address.postal_code
+            phone = address.phone
+        else:
+            # Use new address from form
+            shipping_address = request.POST.get('address', '')
+            shipping_city = request.POST.get('city', '')
+            shipping_country = request.POST.get('country', '')
+            shipping_postal_code = request.POST.get('postal_code', '')
+            phone = request.POST.get('phone', '')
         
         # Create order with shipping information
         order = Order.objects.create(
@@ -267,11 +292,11 @@ def checkout(request):
             total_amount=cart.get_total() + Decimal('7.95'),
             shipping_cost=Decimal('7.95'),
             status='pending',
-            shipping_address=request.POST.get('address', ''),
-            shipping_city=request.POST.get('city', ''),
-            shipping_country=request.POST.get('country', ''),
-            shipping_postal_code=request.POST.get('postal_code', ''),
-            phone=request.POST.get('phone', ''),
+            shipping_address=shipping_address,
+            shipping_city=shipping_city,
+            shipping_country=shipping_country,
+            shipping_postal_code=shipping_postal_code,
+            phone=phone,
             notes=request.POST.get('notes', '')
         )
         
@@ -296,6 +321,7 @@ def checkout(request):
     context = {
         'cart': cart,
         'cart_items': cart.items.select_related('product').filter(saved_for_later=False),
+        'saved_addresses': saved_addresses,
         'subtotal': cart.get_total(),
         'shipping': Decimal('7.95'),
         'total': cart.get_total() + Decimal('7.95'),

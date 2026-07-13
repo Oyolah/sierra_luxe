@@ -73,6 +73,35 @@ class UserProfile(models.Model):
         verbose_name = 'User Profile'
         verbose_name_plural = 'User Profiles'
 
+class BillingAddress(models.Model):
+    """Customer billing address information"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='billing_addresses')
+    full_name = models.CharField(max_length=200)
+    address_line1 = models.CharField(max_length=255)
+    address_line2 = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100)
+    state_province = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.full_name} - {self.city}, {self.country}"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one default address per user
+        if self.is_default:
+            BillingAddress.objects.filter(user=self.user, is_default=True).update(is_default=False)
+        super().save(*args, **kwargs)
+    
+    class Meta:
+        verbose_name = 'Billing Address'
+        verbose_name_plural = 'Billing Addresses'
+        ordering = ['-is_default', '-created_at']
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load ratings_review_tags %}
+
+{% block title %}Order {{ order.order_number }} - Sierra Luxe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/customer-sidebar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm customer-sidebar">
+                <div class="user-avatar">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image }}" alt="{{ user.username }}" class="rounded-circle" width="80" height="80">
+                    {% else %}
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                            <span class="text-white fs-4">{{ user.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <h5>{{ user.get_full_name|default:user.username }}</h5>
+                    <p>{{ user.email }}</p>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_dashboard' %}active{% endif %}" href="{% url 'users:customer_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_orders' or request.resolver_match.url_name == 'customer_order_detail' %}active{% endif %}" href="{% url 'users:customer_orders' %}">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_wishlist' %}active{% endif %}" href="{% url 'users:customer_wishlist' %}">
+                        <i class="fas fa-heart"></i> Liked Products
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_reviews' %}active{% endif %}" href="{% url 'users:customer_reviews' %}">
+                        <i class="fas fa-star"></i> My Reviews
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_billing_address' or request.resolver_match.url_name == 'customer_billing_address_edit' %}active{% endif %}" href="{% url 'users:customer_billing_address' %}">
+                        <i class="fas fa-map-marker-alt"></i> Billing Address
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_change_password' %}active{% endif %}" href="{% url 'users:customer_change_password' %}">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <a class="nav-link text-danger" href="{% url 'users:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Order {{ order.order_number }}</h2>
+                <a href="{% url 'users:customer_orders' %}" class="btn btn-customer-outline">Back to Orders</a>
+            </div>
+            
+            <!-- Order Status -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+                            <p class="mb-1"><strong>Status:</strong> 
+                                <span class="badge 
+                                    {% if order.status == 'DELIVERED' %}bg-success
+                                    {% elif order.status == 'SHIPPED' %}bg-info
+                                    {% elif order.status == 'PROCESSING' %}bg-warning
+                                    {% elif order.status == 'CANCELLED' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Order Total:</strong> ${{ order.total_amount|floatformat:2 }}</p>
+                            <p class="mb-1"><strong>Shipping Cost:</strong> ${{ order.shipping_cost|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Size</th>
+                                    <th>Color</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.main_image %}
+                                                <img src="{{ item.product.main_image|image_url }}" alt="{{ item.product.name }}" class="rounded me-3" width="50" height="50" style="object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ item.product.name }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>${{ item.price|floatformat:2 }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.size }}</td>
+                                    <td>{{ item.color }}</td>
+                                    <td>${{ item.subtotal|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Shipping Address:</strong></p>
+                            <p class="text-muted">{{ order.shipping_address }}</p>
+                            <p class="text-muted">{{ order.shipping_city }}, {{ order.shipping_country }}</p>
+                            <p class="text-muted">{{ order.shipping_postal_code }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Phone:</strong> {{ order.phone }}</p>
+                            {% if order.notes %}
+                            <p class="mb-1"><strong>Notes:</strong> {{ order.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>${{ order.total_amount|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping:</span>
+                                <span>${{ order.shipping_cost|floatformat:2 }}</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total:</strong>
+                                <strong>${{ order.total_amount|add:order.shipping_cost|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

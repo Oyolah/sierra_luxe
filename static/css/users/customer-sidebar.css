@@ -1,0 +1,145 @@
+:root {
+    --sidebar-width: 260px;
+    --sidebar-bg: #1a1a2e;
+    --sidebar-text: rgba(255,255,255,0.7);
+    --sidebar-text-hover: white;
+    --sidebar-active-bg: rgba(255,255,255,0.05);
+    --sidebar-active-border: #e94560;
+    --secondary-color: #d4af37;
+}
+
+.customer-sidebar {
+    background: var(--sidebar-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.customer-sidebar .user-avatar {
+    text-align: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.customer-sidebar .user-avatar img {
+    border: 3px solid rgba(255,255,255,0.2);
+}
+
+.customer-sidebar .user-avatar h5 {
+    color: white;
+    font-weight: 600;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.customer-sidebar .user-avatar p {
+    color: var(--sidebar-text);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.customer-sidebar .nav {
+    padding: 1rem 0;
+}
+
+.customer-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+    border-radius: 0;
+}
+
+.customer-sidebar .nav-link:hover {
+    color: var(--sidebar-text-hover);
+    background: var(--sidebar-active-bg);
+    border-left-color: rgba(233, 69, 96, 0.5);
+}
+
+.customer-sidebar .nav-link.active {
+    color: white;
+    background: var(--sidebar-active-bg);
+    border-left-color: var(--sidebar-active-border);
+}
+
+.customer-sidebar .nav-link i {
+    width: 24px;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.customer-sidebar .nav-link.text-danger:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    border-left-color: #ff6b6b;
+}
+
+.customer-sidebar .nav-link.text-danger.active {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    border-left-color: #ff6b6b;
+}
+
+/* Customer Dashboard Button Styling */
+.btn-customer {
+    background: #d4af37;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.btn-customer:hover {
+    background: #b8962e;
+    color: white;
+}
+
+.btn-customer-outline {
+    background: transparent;
+    color: #d4af37;
+    border: 1px solid #d4af37;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.btn-customer-outline:hover {
+    background: #d4af37;
+    color: white;
+}
+
+.btn-customer-outline.active {
+    background: #d4af37;
+    color: white;
+}
+
+/* Badge styling with secondary color */
+.badge-customer {
+    background: var(--secondary-color);
+    color: white;
+}
+
+/* User avatar with secondary color */
+.customer-sidebar .user-avatar .rounded-circle.bg-primary {
+    background: var(--secondary-color) !important;
+}
+
+/* Form required field asterisk */
+.required-asterisk {
+    color: #dc3545;
+}
+
+.form-label .required-asterisk {
+    color: #dc3545;
+    margin-left: 2px;
+}

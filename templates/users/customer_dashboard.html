@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load ratings_review_tags %}
+
+{% block title %}My Dashboard - Sierra Luxe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/customer-sidebar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm customer-sidebar">
+                <div class="user-avatar">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image }}" alt="{{ user.username }}" class="rounded-circle" width="80" height="80">
+                    {% else %}
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                            <span class="text-white fs-4">{{ user.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <h5>{{ user.get_full_name|default:user.username }}</h5>
+                    <p>{{ user.email }}</p>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_dashboard' %}active{% endif %}" href="{% url 'users:customer_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_orders' or request.resolver_match.url_name == 'customer_order_detail' %}active{% endif %}" href="{% url 'users:customer_orders' %}">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_wishlist' %}active{% endif %}" href="{% url 'users:customer_wishlist' %}">
+                        <i class="fas fa-heart"></i> Liked Products
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_reviews' %}active{% endif %}" href="{% url 'users:customer_reviews' %}">
+                        <i class="fas fa-star"></i> My Reviews
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_billing_address' or request.resolver_match.url_name == 'customer_billing_address_edit' %}active{% endif %}" href="{% url 'users:customer_billing_address' %}">
+                        <i class="fas fa-map-marker-alt"></i> Billing Address
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'customer_change_password' %}active{% endif %}" href="{% url 'users:customer_change_password' %}">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <a class="nav-link text-danger" href="{% url 'users:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>My Dashboard</h2>
+                <p class="text-muted">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-shopping-bag text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-muted">Total Orders</h6>
+                                    <h3 class="mb-0">{{ total_orders }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-clock text-warning fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-muted">Pending Orders</h6>
+                                    <h3 class="mb-0">{{ pending_orders }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-muted">Completed Orders</h6>
+                                    <h3 class="mb-0">{{ completed_orders }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Orders</h5>
+                        <a href="{% url 'users:customer_orders' %}" class="btn btn-sm btn-customer-outline">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                    <tr>
+                                        <td>{{ order.order_number }}</td>
+                                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if order.status == 'DELIVERED' %}bg-success
+                                                {% elif order.status == 'SHIPPED' %}bg-info
+                                                {% elif order.status == 'PROCESSING' %}bg-warning
+                                                {% elif order.status == 'CANCELLED' %}bg-danger
+                                                {% else %}bg-secondary{% endif %}">
+                                                {{ order.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>${{ order.total_amount|floatformat:2 }}</td>
+                                        <td>
+                                            <a href="{% url 'users:customer_order_detail' order.id %}" class="btn btn-sm btn-customer-outline">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-bag text-muted fs-1 mb-3"></i>
+                            <p class="text-muted mb-0">No orders yet</p>
+                            <a href="{% url 'catalog:home' %}" class="btn btn-customer mt-2">Start Shopping</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Liked Products & Reviews -->
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Liked Products</h5>
+                                <a href="{% url 'users:customer_wishlist' %}" class="btn btn-sm btn-customer-outline">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if likes %}
+                                {% for like in likes %}
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            {% if like.product.main_image %}
+                                                <img src="{{ like.product.main_image|image_url }}" alt="{{ like.product.name }}" class="rounded" width="60" height="60" style="object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ like.product.name }}</h6>
+                                            <p class="text-muted small mb-0">${{ like.product.price|floatformat:2 }}</p>
+                                        </div>
+                                        <a href="{% url 'catalog:product_detail' like.product.slug %}" class="btn btn-sm btn-customer-outline">View</a>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-heart text-muted fs-1 mb-3"></i>
+                                    <p class="text-muted mb-0">No liked products yet</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">My Reviews</h5>
+                                <a href="{% url 'users:customer_reviews' %}" class="btn btn-sm btn-customer-outline">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if reviews %}
+                                {% for review in reviews %}
+                                    <div class="mb-3 pb-3 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="mb-1">{{ review.product.name }}</h6>
+                                            <span class="badge 
+                                                {% if review.is_approved %}bg-success
+                                                {% else %}bg-warning{% endif %}">
+                                                {% if review.is_approved %}Approved{% else %}Pending{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="small text-warning mb-1">
+                                            {% for i in ''|center:review.rating %}★{% endfor %}
+                                        </div>
+                                        <p class="text-muted small mb-0">{{ review.title|truncatewords:10 }}</p>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-star text-muted fs-1 mb-3"></i>
+                                    <p class="text-muted mb-0">No reviews yet</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
