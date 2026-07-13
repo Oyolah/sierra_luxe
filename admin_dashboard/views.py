@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Sum, Q, Avg
 from django.contrib.auth import get_user_model
@@ -10,13 +11,15 @@ from decimal import Decimal
 from django.urls import reverse
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from sierra_luxe.decorators import login_admin_required, admin_required
+from sierra_luxe.decorators import login_admin_required, admin_required, dashboard_permission_required, login_dashboard_required
 from sierra_luxe.utils import get_breadcrumbs
 from catalog.models import Category, Product, ProductImage
 from orders.models import Order
 from users.models import User
+from users.forms import StaffProfileForm, StaffPasswordChangeForm
 from cart.models import Cart
 from reviews.models import Review, Like
+from .models import Role, RolePermission, DASHBOARD_PERMISSIONS
 
 User = get_user_model()
 
@@ -67,7 +70,7 @@ def apply_common_filters(request, queryset, filter_config):
     
     return queryset
 
-@login_admin_required
+@login_dashboard_required
 def dashboard(request):
     """Admin dashboard home with statistics"""
     try:
@@ -185,7 +188,8 @@ def dashboard(request):
     }
     return render(request, 'admin_dashboard/dashboard.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_products')
 def product_list(request):
     """List all products with search and filter"""
     try:
@@ -225,7 +229,8 @@ def product_list(request):
     }
     return render(request, 'admin_dashboard/product_list.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('add_products')
 def product_create(request):
     """Create new product"""
     categories = Category.objects.all()
@@ -279,7 +284,8 @@ def product_create(request):
     }
     return render(request, 'admin_dashboard/product_form.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_products')
 def product_edit(request, product_id):
     """Edit product"""
     product = get_object_or_404(Product, id=product_id)
@@ -324,13 +330,15 @@ def product_edit(request, product_id):
     }
     return render(request, 'admin_dashboard/product_form.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_products')
 @require_POST
 def product_delete(request, product_id):
     """Delete product"""
     return delete_model_instance(request, Product, product_id, 'admin_dashboard:product_list')
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_products')
 @require_POST
 def product_bulk_delete(request):
     """Bulk delete products"""
@@ -346,7 +354,8 @@ def product_bulk_delete(request):
         messages.warning(request, 'No products selected for deletion.')
     return redirect('admin_dashboard:product_list')
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_products')
 def product_images(request, product_id):
     """Manage product images and video"""
     product = get_object_or_404(Product, id=product_id)
@@ -412,7 +421,8 @@ def product_images(request, product_id):
     }
     return render(request, 'admin_dashboard/product_images.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_categories')
 def category_list(request):
     """List all categories"""
     categories = Category.objects.annotate(product_count=Count('products'))
@@ -425,7 +435,8 @@ def category_list(request):
     }
     return render(request, 'admin_dashboard/category_list.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('add_categories')
 def category_create(request):
     """Create category"""
     if request.method == 'POST':
@@ -476,7 +487,8 @@ def category_create(request):
     }
     return render(request, 'admin_dashboard/category_form.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_categories')
 def category_edit(request, category_id):
     """Edit category"""
     category = get_object_or_404(Category, id=category_id)
@@ -525,7 +537,8 @@ def category_edit(request, category_id):
     }
     return render(request, 'admin_dashboard/category_form.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_categories')
 @require_POST
 def category_delete(request, category_id):
     """Delete category"""
@@ -542,14 +555,20 @@ def get_available_permissions():
         grouped[app_label].append(perm)
     return grouped
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_users')
 def user_list(request):
-    """List all users"""
+    """List all users with account type filtering"""
     users = User.objects.all().order_by('-date_joined')
     
-    role_filter = request.GET.get('role')
-    if role_filter:
-        users = users.filter(role=role_filter)
+    account_type_filter = request.GET.get('account_type')
+    if account_type_filter:
+        if account_type_filter == 'SuperAdmin':
+            users = users.filter(is_superuser=True)
+        elif account_type_filter == 'Staff':
+            users = users.filter(is_staff=True, is_superuser=False)
+        elif account_type_filter == 'Customer':
+            users = users.filter(is_staff=False, is_superuser=False)
     
     search_query = request.GET.get('search')
     if search_query:
@@ -563,6 +582,8 @@ def user_list(request):
     context = {
         'users': users,
         'role_choices': User.ROLE_CHOICES,
+        'can_add_staff': request.user.is_superuser or request.user.has_dashboard_permission('add_staff'),
+        'can_manage_roles': request.user.is_superuser or request.user.has_dashboard_permission('manage_roles'),
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
             ('Users', None, 'fas fa-users')
@@ -570,9 +591,64 @@ def user_list(request):
     }
     return render(request, 'admin_dashboard/user_list.html', context)
 
+@login_dashboard_required
+@dashboard_permission_required('add_staff')
+def staff_create(request):
+    """Create new staff user"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        staff_role_id = request.POST.get('staff_role')
+        is_active = get_bool_from_post(request, 'is_active')
+        
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('admin_dashboard:staff_create')
+        
+        try:
+            from .models import Role
+            staff_role = Role.objects.get(id=staff_role_id) if staff_role_id else None
+            
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                role='STAFF',
+                is_active=is_active,
+                is_staff=True,
+                is_superuser=False,
+                staff_role=staff_role
+            )
+            
+            messages.success(request, f'Staff user "{user.username}" created successfully.')
+            return redirect('admin_dashboard:user_list')
+        except Role.DoesNotExist:
+            messages.error(request, 'Invalid role selected.')
+        except Exception as e:
+            messages.error(request, f'Error creating staff user: {str(e)}')
+    
+    from .models import Role
+    context = {
+        'action': 'Create Staff',
+        'roles': Role.objects.all(),
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Users', reverse('admin_dashboard:user_list'), 'fas fa-users'),
+            ('Create Staff', None, 'fas fa-plus')
+        ),
+    }
+    return render(request, 'admin_dashboard/staff_form.html', context)
+
+
 @login_admin_required
 def user_create(request):
-    """Create new user"""
+    """Create new user (legacy - kept for customer creation)"""
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -619,20 +695,55 @@ def user_create(request):
     }
     return render(request, 'admin_dashboard/user_form.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_staff')
 def user_edit(request, user_id):
-    """Edit user"""
+    """Edit user - account type aware"""
     user = get_object_or_404(User, id=user_id)
+    
+    # SuperAdmin protection
+    if user.is_superuser:
+        # Prevent SuperAdmin from being modified by non-superusers
+        if not request.user.is_superuser:
+            messages.error(request, 'You do not have permission to edit SuperAdmin accounts.')
+            return redirect('admin_dashboard:user_list')
+        
+        # Prevent self-deactivation or privilege removal
+        if user == request.user:
+            if request.method == 'POST':
+                new_is_active = get_bool_from_post(request, 'is_active')
+                new_is_superuser = get_bool_from_post(request, 'is_superuser')
+                if not new_is_active or not new_is_superuser:
+                    messages.error(request, 'You cannot deactivate or remove SuperAdmin status from your own account.')
+                    return redirect('admin_dashboard:user_edit', user_id=user.id)
     
     if request.method == 'POST':
         user.username = request.POST.get('username')
         user.first_name = request.POST.get('first_name', '')
         user.last_name = request.POST.get('last_name', '')
         user.email = request.POST.get('email', '')
-        user.role = request.POST.get('role', 'CUSTOMER')
-        user.is_active = get_bool_from_post(request, 'is_active')
-        user.is_staff = get_bool_from_post(request, 'is_staff')
-        user.is_superuser = get_bool_from_post(request, 'is_superuser')
+        
+        # Only allow role changes for non-superusers
+        if not user.is_superuser:
+            user.role = request.POST.get('role', user.role)
+            user.is_active = get_bool_from_post(request, 'is_active')
+            
+            # Handle staff role assignment
+            if user.role == 'STAFF':
+                from .models import Role
+                staff_role_id = request.POST.get('staff_role')
+                if staff_role_id:
+                    try:
+                        user.staff_role = Role.objects.get(id=staff_role_id)
+                        user.is_staff = True
+                    except Role.DoesNotExist:
+                        messages.error(request, 'Invalid role selected.')
+                else:
+                    user.staff_role = None
+                    user.is_staff = False
+            else:
+                user.staff_role = None
+                user.is_staff = False
         
         password = request.POST.get('password')
         if password:
@@ -640,37 +751,50 @@ def user_edit(request, user_id):
         
         try:
             user.save()
-            
-            # Update permissions
-            selected_perms = request.POST.getlist('permissions')
-            user.user_permissions.set(selected_perms)
-            
             messages.success(request, f'User "{user.username}" updated successfully.')
             return redirect('admin_dashboard:user_list')
         except Exception as e:
             messages.error(request, f'Error updating user: {str(e)}')
     
+    from .models import Role
+    account_type = user.get_account_type()
+    
     context = {
         'user': user,
         'action': 'Edit',
+        'account_type': account_type,
         'role_choices': User.ROLE_CHOICES,
-        'permissions': get_available_permissions(),
-        'selected_permissions': set(user.user_permissions.values_list('id', flat=True)),
+        'roles': Role.objects.all(),
+        'is_self': user == request.user,
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
             ('Users', reverse('admin_dashboard:user_list'), 'fas fa-users'),
             (f'Edit {user.username}', None, 'fas fa-edit')
         ),
     }
-    return render(request, 'admin_dashboard/user_form.html', context)
+    return render(request, 'admin_dashboard/user_edit.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_staff')
 @require_POST
 def user_delete(request, user_id):
-    """Delete user"""
+    """Delete user with SuperAdmin protection"""
+    user = get_object_or_404(User, id=user_id)
+    
+    # Prevent deletion of SuperAdmin accounts
+    if user.is_superuser:
+        messages.error(request, 'Cannot delete SuperAdmin accounts.')
+        return redirect('admin_dashboard:user_list')
+    
+    # Prevent self-deletion
+    if user == request.user:
+        messages.error(request, 'You cannot delete your own account.')
+        return redirect('admin_dashboard:user_list')
+    
     return delete_model_instance(request, User, user_id, 'admin_dashboard:user_list', 'username')
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_orders')
 def order_list(request):
     """List all orders"""
     try:
@@ -700,7 +824,8 @@ def order_list(request):
     }
     return render(request, 'admin_dashboard/order_list.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_orders')
 def order_detail(request, order_id):
     """View order details"""
     order = get_object_or_404(Order, id=order_id)
@@ -715,7 +840,8 @@ def order_detail(request, order_id):
     }
     return render(request, 'admin_dashboard/order_detail.html', context)
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('update_order_status')
 @require_POST
 def order_status_update(request, order_id):
     """Update order status"""
@@ -732,7 +858,8 @@ def order_status_update(request, order_id):
     return redirect('admin_dashboard:order_detail', order_id=order.id)
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_products')
 def featured_products(request):
     """Manage featured products"""
     featured = Product.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
@@ -745,7 +872,8 @@ def featured_products(request):
     return render(request, 'admin_dashboard/featured_products.html', context)
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_products')
 @require_POST
 def add_featured(request, product_id):
     """Add product to featured"""
@@ -761,7 +889,8 @@ def add_featured(request, product_id):
     return redirect('admin_dashboard:featured_products')
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_products')
 @require_POST
 def remove_featured(request, product_id):
     """Remove product from featured"""
@@ -779,7 +908,8 @@ def remove_featured(request, product_id):
 
 # ============ REVIEWS MANAGEMENT ============
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_reviews')
 def review_list(request):
     """List all reviews with search and filter"""
     reviews = Review.objects.select_related('customer', 'product').all()
@@ -816,7 +946,8 @@ def review_list(request):
     return render(request, 'admin_dashboard/review_list.html', context)
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_reviews')
 def review_detail(request, review_id):
     """View review details"""
     review = get_object_or_404(Review.objects.select_related('customer', 'product'), id=review_id)
@@ -832,7 +963,8 @@ def review_detail(request, review_id):
     return render(request, 'admin_dashboard/review_detail.html', context)
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_reviews')
 @require_POST
 def review_approve(request, review_id):
     """Approve a review"""
@@ -843,7 +975,8 @@ def review_approve(request, review_id):
     return redirect('admin_dashboard:review_list')
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_reviews')
 @require_POST
 def review_reject(request, review_id):
     """Reject a review"""
@@ -854,7 +987,8 @@ def review_reject(request, review_id):
     return redirect('admin_dashboard:review_list')
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_reviews')
 @require_POST
 def review_delete(request, review_id):
     """Delete a review"""
@@ -864,7 +998,8 @@ def review_delete(request, review_id):
     return redirect('admin_dashboard:review_list')
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('edit_reviews')
 @require_POST
 def review_bulk_action(request):
     """Bulk action for reviews (approve, reject, delete)"""
@@ -893,9 +1028,107 @@ def review_bulk_action(request):
     return redirect('admin_dashboard:review_list')
 
 
+# ============ ROLES MANAGEMENT ============
+
+@login_dashboard_required
+@dashboard_permission_required('view_roles')
+def role_list(request):
+    """List all roles"""
+    roles = Role.objects.all().annotate(user_count=Count('staff_users'))
+    context = {
+        'roles': roles,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Roles', None, 'fas fa-user-shield')
+        ),
+    }
+    return render(request, 'admin_dashboard/role_list.html', context)
+
+
+@login_dashboard_required
+@dashboard_permission_required('add_roles')
+def role_create(request):
+    """Create new role"""
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        selected_permissions = request.POST.getlist('permissions')
+        
+        try:
+            role = Role.objects.create(name=name, description=description)
+            if selected_permissions:
+                role.permissions.set(selected_permissions)
+            messages.success(request, f'Role "{role.name}" created successfully.')
+            return redirect('admin_dashboard:role_list')
+        except Exception as e:
+            messages.error(request, f'Error creating role: {str(e)}')
+    
+    context = {
+        'action': 'Create',
+        'permissions': RolePermission.objects.all(),
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Roles', reverse('admin_dashboard:role_list'), 'fas fa-user-shield'),
+            ('Create Role', None, 'fas fa-plus')
+        ),
+    }
+    return render(request, 'admin_dashboard/role_form.html', context)
+
+
+@login_dashboard_required
+@dashboard_permission_required('edit_roles')
+def role_edit(request, role_id):
+    """Edit role"""
+    role = get_object_or_404(Role, id=role_id)
+    
+    if request.method == 'POST':
+        role.name = request.POST.get('name')
+        role.description = request.POST.get('description', '')
+        selected_permissions = request.POST.getlist('permissions')
+        
+        try:
+            role.save()
+            role.permissions.set(selected_permissions)
+            messages.success(request, f'Role "{role.name}" updated successfully.')
+            return redirect('admin_dashboard:role_list')
+        except Exception as e:
+            messages.error(request, f'Error updating role: {str(e)}')
+    
+    context = {
+        'role': role,
+        'action': 'Edit',
+        'permissions': RolePermission.objects.all(),
+        'selected_permissions': set(role.permissions.values_list('id', flat=True)),
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('Roles', reverse('admin_dashboard:role_list'), 'fas fa-user-shield'),
+            (f'Edit {role.name}', None, 'fas fa-edit')
+        ),
+    }
+    return render(request, 'admin_dashboard/role_form.html', context)
+
+
+@login_dashboard_required
+@dashboard_permission_required('delete_roles')
+@require_POST
+def role_delete(request, role_id):
+    """Delete role"""
+    role = get_object_or_404(Role, id=role_id)
+    
+    # Check if role has users
+    if role.user_count() > 0:
+        messages.error(request, f'Cannot delete role "{role.name}" because it has {role.user_count()} staff user(s).')
+        return redirect('admin_dashboard:role_list')
+    
+    role.delete()
+    messages.success(request, f'Role "{role.name}" deleted successfully.')
+    return redirect('admin_dashboard:role_list')
+
+
 # ============ LIKES MANAGEMENT ============
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('view_likes')
 def like_list(request):
     """List all likes with search and filter"""
     try:
@@ -937,14 +1170,16 @@ def like_list(request):
     return render(request, 'admin_dashboard/like_list.html', context)
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_likes')
 @require_POST
 def like_delete(request, like_id):
     """Delete a like"""
     return delete_model_instance(request, Like, like_id, 'admin_dashboard:like_list', 'id')
 
 
-@login_admin_required
+@login_dashboard_required
+@dashboard_permission_required('delete_likes')
 @require_POST
 def like_bulk_delete(request):
     """Bulk delete likes"""
@@ -960,3 +1195,84 @@ def like_bulk_delete(request):
     messages.success(request, f'{count} like(s) deleted successfully.')
     
     return redirect('admin_dashboard:like_list')
+
+
+@login_dashboard_required
+def staff_profile(request):
+    """Staff profile page - view and edit own profile"""
+    # Security: Always use request.user, never accept user_id parameter
+    user = request.user
+    
+    # Get dashboard permissions for display
+    permissions = user.get_dashboard_permissions()
+    permission_details = []
+    if permissions:
+        from .models import DASHBOARD_PERMISSIONS
+        perm_dict = dict(DASHBOARD_PERMISSIONS)
+        for perm_code in permissions:
+            if perm_code in perm_dict:
+                permission_details.append(perm_dict[perm_code])
+    
+    context = {
+        'user': user,
+        'permissions': permission_details,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('My Profile', None, 'fas fa-user')
+        ),
+    }
+    return render(request, 'admin_dashboard/staff_profile.html', context)
+
+
+@login_dashboard_required
+def staff_profile_edit(request):
+    """Staff edit their own profile"""
+    # Security: Always use request.user
+    user = request.user
+    
+    if request.method == 'POST':
+        form = StaffProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('admin_dashboard:staff_profile')
+    else:
+        form = StaffProfileForm(instance=user)
+    
+    context = {
+        'form': form,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('My Profile', reverse('admin_dashboard:staff_profile'), 'fas fa-user'),
+            ('Edit Profile', None, 'fas fa-edit')
+        ),
+    }
+    return render(request, 'admin_dashboard/staff_profile_edit.html', context)
+
+
+@login_dashboard_required
+def staff_change_password(request):
+    """Staff change their own password"""
+    # Security: Always use request.user
+    user = request.user
+    
+    if request.method == 'POST':
+        form = StaffPasswordChangeForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            # Update session to keep user logged in
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password has been changed successfully.')
+            return redirect('admin_dashboard:staff_profile')
+    else:
+        form = StaffPasswordChangeForm(user)
+    
+    context = {
+        'form': form,
+        'breadcrumbs': get_breadcrumbs(
+            ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
+            ('My Profile', reverse('admin_dashboard:staff_profile'), 'fas fa-user'),
+            ('Change Password', None, 'fas fa-key')
+        ),
+    }
+    return render(request, 'admin_dashboard/staff_change_password.html', context)

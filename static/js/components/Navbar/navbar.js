@@ -79,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('Cart preview data:', data);
                 const cartItemsPreview = document.querySelector('#cart-items-preview');
                 const cartDropdownTotal = document.querySelector('#cart-dropdown-total');
                 

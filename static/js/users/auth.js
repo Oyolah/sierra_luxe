@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Handle login form submission
     const loginForm = document.getElementById('loginForm');
+    
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -19,7 +20,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = data.redirect || '/';
+                    // Use window.location.replace instead of href for proper redirect
+                    window.location.replace(data.redirect || '/');
                 } else {
                     showAlert('error', data.message || 'Login failed. Please try again.');
                 }

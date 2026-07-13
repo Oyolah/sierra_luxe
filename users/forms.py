@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
 from .models import User, UserProfile
 
@@ -59,3 +59,39 @@ class UserUpdateForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+class StaffProfileForm(forms.ModelForm):
+    """Form for staff to update their personal information"""
+    email = forms.EmailField()
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Check if email is unique (excluding current user)
+        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise ValidationError('This email is already in use.')
+        return email
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Check if username is unique (excluding current user)
+        if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise ValidationError('This username is already in use.')
+        return username
+
+class StaffPasswordChangeForm(PasswordChangeForm):
+    """Form for staff to change their password"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})

@@ -97,6 +97,7 @@ TEMPLATES = [
                 'sierra_luxe.context_processors.site_settings',
                 'sierra_luxe.context_processors.cart_count',
                 'sierra_luxe.context_processors.categories_context',
+                'sierra_luxe.context_processors.dashboard_permissions',
             ],
         },
     },
@@ -196,7 +197,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Login/Logout URLs
 LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = 'catalog:home'
+LOGIN_REDIRECT_URL = 'admin_dashboard:dashboard'
 LOGOUT_REDIRECT_URL = 'catalog:home'
 
 # Default primary key field type

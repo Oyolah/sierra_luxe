@@ -20,7 +20,12 @@ $(document).ready(function() {
     
     // Smooth scroll for anchor links
     $('a[href^="#"]').on('click', function(event) {
-        var target = $(this.getAttribute('href'));
+        var href = this.getAttribute('href');
+        // Skip if href is just "#" or empty
+        if (href === '#' || href === '') {
+            return;
+        }
+        var target = $(href);
         if (target.length) {
             event.preventDefault();
             $('html, body').stop().animate({

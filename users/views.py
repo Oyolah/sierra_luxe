@@ -110,6 +110,9 @@ def register(request):
 def user_login(request):
     """Handle user login with proper error handling"""
     if request.user.is_authenticated:
+        # Redirect based on user type if already authenticated
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('admin_dashboard:dashboard')
         return redirect('catalog:home')
     
     # Check if user was logged out due to session timeout
@@ -126,16 +129,22 @@ def user_login(request):
                 if user is not None:
                     login(request, user)
                     
+                    # Determine redirect based on user type
+                    if user.is_staff or user.is_superuser:
+                        default_redirect = '/admin-dashboard/'
+                    else:
+                        default_redirect = '/catalog/'
+                    
                     # Handle AJAX requests
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                        next_page = request.GET.get('next', reverse('catalog:home'))
+                        next_page = request.GET.get('next', default_redirect)
                         return success_response(
                             data={'redirect': next_page},
                             message=f'Welcome back, {username}!'
                         )
                     
                     messages.success(request, f'Welcome back, {username}!')
-                    next_page = request.GET.get('next', 'catalog:home')
+                    next_page = request.GET.get('next', default_redirect)
                     return redirect(next_page)
                 else:
                     # Handle AJAX requests with errors

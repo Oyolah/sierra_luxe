@@ -345,7 +345,6 @@ if (addToCartForm) {
             return response.json();
         })
         .then(data => {
-            console.log('Add to cart response:', data);
             if (data.success) {
                 // Show success message
                 showSuccessMessage(data.message);

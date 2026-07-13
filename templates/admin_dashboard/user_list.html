@@ -20,15 +20,24 @@
                 <input type="text" class="form-control" placeholder="Search users..." id="searchInput" value="{{ request.GET.search }}">
             </div>
             <select class="form-select width-auto" id="roleFilter">
-                <option value="">All Roles</option>
-                {% for value, label in role_choices %}
-                <option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
+                <option value="">All Account Types</option>
+                <option value="SuperAdmin" {% if request.GET.account_type == 'SuperAdmin' %}selected{% endif %}>SuperAdmin</option>
+                <option value="Staff" {% if request.GET.account_type == 'Staff' %}selected{% endif %}>Staff</option>
+                <option value="Customer" {% if request.GET.account_type == 'Customer' %}selected{% endif %}>Customer</option>
             </select>
         </div>
-        <a href="{% url 'admin_dashboard:user_create' %}" class="btn-admin">
-            <i class="fas fa-plus me-2"></i>Add User
-        </a>
+        <div class="d-flex gap-2">
+            {% if can_add_staff %}
+            <a href="{% url 'admin_dashboard:staff_create' %}" class="btn-admin">
+                <i class="fas fa-user-plus me-2"></i>Create Staff
+            </a>
+            {% endif %}
+            {% if can_manage_roles %}
+            <a href="{% url 'admin_dashboard:role_list' %}" class="btn btn-sm btn-admin-outline">
+                <i class="fas fa-user-shield me-2"></i>Manage Roles
+            </a>
+            {% endif %}
+        </div>
     </div>
     <div class="page-card-body p-0">
         <table class="table table-admin mb-0">
@@ -37,6 +46,7 @@
                     <th>Username</th>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Account Type</th>
                     <th>Role</th>
                     <th>Joined</th>
                     <th>Status</th>
@@ -45,6 +55,7 @@
             </thead>
             <tbody>
                 {% for user in users %}
+                {% with account_type=user.get_account_type %}
                 <tr>
                     <td>
                         <h6 class="mb-0">{{ user.username }}</h6>
@@ -52,9 +63,26 @@
                     <td>{{ user.get_full_name|default:"-" }}</td>
                     <td>{{ user.email }}</td>
                     <td>
-                        <span class="status-badge bg-{{ user.role|status_badge_class:'user_role' }}-subtle text-{{ user.role|status_badge_class:'user_role' }}">
-                            {{ user.get_role_display }}
+                        {% if account_type == 'SuperAdmin' %}
+                        <span class="status-badge bg-danger-subtle text-danger">
+                            <i class="fas fa-crown me-1"></i>SuperAdmin
                         </span>
+                        {% elif account_type == 'Staff' %}
+                        <span class="status-badge bg-primary-subtle text-primary">
+                            <i class="fas fa-user-tie me-1"></i>Staff
+                        </span>
+                        {% else %}
+                        <span class="status-badge bg-success-subtle text-success">
+                            <i class="fas fa-user me-1"></i>Customer
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if account_type == 'Staff' and user.staff_role %}
+                        <span class="badge bg-info">{{ user.staff_role.name }}</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
                     </td>
                     <td>{{ user.date_joined|date:"M d, Y" }}</td>
                     <td>
@@ -67,22 +95,42 @@
                             <a href="{% url 'admin_dashboard:user_edit' user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            {% if account_type != 'SuperAdmin' and user != request.user %}
                             <form method="post" action="{% url 'admin_dashboard:user_delete' user.id %}" class="d-inline" id="deleteForm-{{ user.id }}">
                                 {% csrf_token %}
                                 <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="showDeleteModal('deleteForm-{{ user.id }}', 'Delete this user?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
+                {% endwith %}
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-5">No users found</td>
+                    <td colspan="8" class="text-center text-muted py-5">No users found</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleFilter = document.getElementById('roleFilter');
+    if (roleFilter) {
+        roleFilter.addEventListener('change', function() {
+            const url = new URL(window.location);
+            if (this.value) {
+                url.searchParams.set('account_type', this.value);
+            } else {
+                url.searchParams.delete('account_type');
+            }
+            window.location = url.toString();
+        });
+    }
+});
+</script>
 {% endblock %}

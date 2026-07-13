@@ -26,41 +26,62 @@
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
             </li>
+            {% if user.is_superuser or can_view_products %}
             <li class="nav-item">
                 <a class="nav-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:product_list' %}">
                     <i class="fas fa-box"></i> Products
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_products %}
             <li class="nav-item">
                 <a class="nav-link {% if 'featured' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:featured_products' %}">
                     <i class="fas fa-star"></i> Featured Products
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_categories %}
             <li class="nav-item">
                 <a class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:category_list' %}">
                     <i class="fas fa-tags"></i> Categories
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_orders %}
             <li class="nav-item">
                 <a class="nav-link {% if 'order' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:order_list' %}">
                     <i class="fas fa-shopping-bag"></i> Orders
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_reviews %}
             <li class="nav-item">
                 <a class="nav-link {% if 'review' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:review_list' %}">
                     <i class="fas fa-star"></i> Reviews
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_likes %}
             <li class="nav-item">
                 <a class="nav-link {% if 'like' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:like_list' %}">
                     <i class="fas fa-heart"></i> Likes
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_users %}
             <li class="nav-item">
                 <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:user_list' %}">
                     <i class="fas fa-users"></i> Users
                 </a>
             </li>
+            {% endif %}
+            {% if user.is_superuser or can_view_roles %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'role' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_dashboard:role_list' %}">
+                    <i class="fas fa-user-shield"></i> Roles
+                </a>
+            </li>
+            {% endif %}
             <li class="nav-item mt-4">
                 <a class="nav-link" href="{% url 'catalog:home' %}">
                     <i class="fas fa-store"></i> View Store
@@ -81,12 +102,24 @@
                 <span class="text-muted">Welcome, {{ user.username }}</span>
                 <div class="dropdown">
                     <a class="btn btn-light dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i> Admin
+                        <i class="fas fa-user-circle me-1"></i> 
+                        {% if user.is_superuser %}
+                            SuperAdmin
+                        {% elif user.is_staff %}
+                            Staff
+                        {% else %}
+                            Customer
+                        {% endif %}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'admin_dashboard:staff_profile' %}"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'admin_dashboard:staff_change_password' %}"><i class="fas fa-key me-2"></i>Change Password</a></li>
+                        {% if user.is_staff and user.staff_role %}
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a></li>
+                        <li><span class="dropdown-item-text text-muted">Role: {{ user.staff_role.name }}</span></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -97,7 +130,7 @@
             
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>

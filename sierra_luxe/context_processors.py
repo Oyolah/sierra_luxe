@@ -31,3 +31,36 @@ def categories_context(request):
     except:
         return {'nav_categories': []}
 
+def dashboard_permissions(request):
+    """Provide dashboard permission checks as context variables"""
+    if not request.user.is_authenticated:
+        return {}
+    
+    if request.user.is_superuser:
+        # SuperAdmin has all permissions
+        return {
+            'can_view_dashboard': True,
+            'can_view_products': True,
+            'can_view_categories': True,
+            'can_view_orders': True,
+            'can_view_reviews': True,
+            'can_view_likes': True,
+            'can_view_users': True,
+            'can_view_roles': True,
+            'can_manage_roles': True,
+        }
+    
+    if not request.user.is_staff:
+        return {}
+    
+    return {
+        'can_view_dashboard': request.user.has_dashboard_permission('view_dashboard'),
+        'can_view_products': request.user.has_dashboard_permission('view_products'),
+        'can_view_categories': request.user.has_dashboard_permission('view_categories'),
+        'can_view_orders': request.user.has_dashboard_permission('view_orders'),
+        'can_view_reviews': request.user.has_dashboard_permission('view_reviews'),
+        'can_view_likes': request.user.has_dashboard_permission('view_likes'),
+        'can_view_users': request.user.has_dashboard_permission('view_users'),
+        'can_view_roles': request.user.has_dashboard_permission('view_roles'),
+        'can_manage_roles': request.user.has_dashboard_permission('manage_roles'),
+    }

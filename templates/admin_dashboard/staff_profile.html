@@ -1,0 +1,162 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image }}" alt="{{ user.username }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; margin: 0 auto;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <h4>{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted">@{{ user.username }}</p>
+                <span class="badge bg-primary">{{ user.get_account_type }}</span>
+                {% if user.staff_role %}
+                <span class="badge bg-info">{{ user.staff_role.name }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Account Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Status:</span>
+                    <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Staff:</span>
+                    <span class="badge {% if user.is_staff %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if user.is_staff %}Yes{% else %}No{% endif %}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>SuperAdmin:</span>
+                    <span class="badge {% if user.is_superuser %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if user.is_superuser %}Yes{% else %}No{% endif %}
+                    </span>
+                </div>
+                <hr>
+                <div class="mb-2">
+                    <small class="text-muted">Member since:</small><br>
+                    <strong>{{ user.date_joined|date:"F d, Y" }}</strong>
+                </div>
+                <div>
+                    <small class="text-muted">Last login:</small><br>
+                    <strong>{{ user.last_login|date:"F d, Y, H:i" }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'admin_dashboard:staff_profile_edit' %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                    <a href="{% url 'admin_dashboard:staff_change_password' %}" class="btn btn-warning">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">Username</label>
+                        <p class="mb-0"><strong>{{ user.username }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">Email</label>
+                        <p class="mb-0"><strong>{{ user.email }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">First Name</label>
+                        <p class="mb-0"><strong>{{ user.first_name|default:"-" }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">Last Name</label>
+                        <p class="mb-0"><strong>{{ user.last_name|default:"-" }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">Phone</label>
+                        <p class="mb-0"><strong>{{ user.profile.phone|default:"-" }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">City</label>
+                        <p class="mb-0"><strong>{{ user.profile.city|default:"-" }}</strong></p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="text-muted">Address</label>
+                        <p class="mb-0"><strong>{{ user.profile.address|default:"-" }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">Country</label>
+                        <p class="mb-0"><strong>{{ user.profile.country|default:"-" }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted">Postal Code</label>
+                        <p class="mb-0"><strong>{{ user.profile.postal_code|default:"-" }}</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if user.staff_role %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Staff Role</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ user.staff_role.name }}</h6>
+                {% if user.staff_role.description %}
+                <p class="text-muted">{{ user.staff_role.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Dashboard Permissions</h5>
+            </div>
+            <div class="card-body">
+                {% if permissions %}
+                <div class="row">
+                    {% for perm in permissions %}
+                    <div class="col-md-6 mb-2">
+                        <span class="badge bg-secondary">{{ perm }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No specific permissions assigned.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

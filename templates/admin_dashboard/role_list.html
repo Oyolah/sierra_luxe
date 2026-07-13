@@ -1,0 +1,68 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Roles{% endblock %}
+{% block page_title %}Roles{% endblock %}
+
+{% block breadcrumbs %}
+{% with breadcrumbs=breadcrumbs %}
+{% include 'components/admin_breadcrumb.html' %}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="page-card-header">
+        <h5 class="mb-0">Roles</h5>
+        <a href="{% url 'admin_dashboard:role_create' %}" class="btn-admin">
+            <i class="fas fa-plus me-2"></i>Create Role
+        </a>
+    </div>
+    <div class="page-card-body p-0">
+        <table class="table table-admin mb-0">
+            <thead>
+                <tr>
+                    <th>Role Name</th>
+                    <th>Description</th>
+                    <th>Staff Count</th>
+                    <th>Permissions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                <tr>
+                    <td>
+                        <h6 class="mb-0">{{ role.name }}</h6>
+                    </td>
+                    <td>{{ role.description|default:"-"|truncatewords:10 }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ role.user_count }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ role.permissions.count }}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_dashboard:role_edit' role.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" action="{% url 'admin_dashboard:role_delete' role.id %}" class="d-inline" id="deleteForm-{{ role.id }}">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="showDeleteModal('deleteForm-{{ role.id }}', 'Delete this role?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">No roles found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

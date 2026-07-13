@@ -8,13 +8,48 @@ from catalog.models import Product
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('CUSTOMER', 'Customer'),
+        ('STAFF', 'Staff'),
         ('ADMIN', 'Admin'),
     )
     
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='CUSTOMER')
+    staff_role = models.ForeignKey(
+        'admin_dashboard.Role',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='staff_users',
+        help_text='Role assigned to staff users'
+    )
     
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
+    
+    def get_account_type(self):
+        """Return account type: SuperAdmin, Staff, or Customer"""
+        if self.is_superuser:
+            return 'SuperAdmin'
+        elif self.is_staff:
+            return 'Staff'
+        else:
+            return 'Customer'
+    
+    def has_dashboard_permission(self, permission_code):
+        """Check if user has a specific dashboard permission"""
+        if self.is_superuser:
+            return True
+        if not self.is_staff or not self.staff_role:
+            return False
+        return self.staff_role.permissions.filter(code=permission_code).exists()
+    
+    def get_dashboard_permissions(self):
+        """Return list of dashboard permission codes for this user"""
+        if self.is_superuser:
+            from admin_dashboard.models import DASHBOARD_PERMISSIONS
+            return [code for code, _ in DASHBOARD_PERMISSIONS]
+        if not self.is_staff or not self.staff_role:
+            return []
+        return self.staff_role.get_permission_codes()
     
     class Meta:
         verbose_name = 'User'
