@@ -353,7 +353,11 @@ def customer_reviews(request):
 def customer_billing_address(request):
     """Customer's billing addresses"""
     # Security: Always use request.user
-    addresses = BillingAddress.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    try:
+        addresses = BillingAddress.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    except Exception:
+        # Handle case where BillingAddress table doesn't exist yet (migration not applied)
+        addresses = []
     
     context = {
         'addresses': addresses,
@@ -367,6 +371,14 @@ def customer_billing_address_edit(request):
     """Add or edit billing address"""
     # Security: Always use request.user
     user = request.user
+    
+    # Check if BillingAddress table exists
+    try:
+        BillingAddress.objects.count()
+    except Exception:
+        # Table doesn't exist yet, redirect with message
+        messages.error(request, 'Billing address feature is not available yet. Please try again later.')
+        return redirect('users:customer_billing_address')
     
     if request.method == 'POST':
         address_id = request.POST.get('address_id')
