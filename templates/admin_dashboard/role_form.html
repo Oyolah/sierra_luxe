@@ -19,7 +19,7 @@
         <form method="post">
             {% csrf_token %}
             <div class="mb-3">
-                <label class="form-label fw-bold">Role Name</label>
+                <label class="form-label fw-bold">Role Name <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control form-control-admin" value="{{ role.name|default:'' }}" required>
             </div>
             
