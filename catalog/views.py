@@ -5,6 +5,10 @@ from users.models import RecentlyViewed
 from reviews.views import get_product_rating_data
 
 
+def project_report(request):
+    return render(request, 'catalog/project_report.html')
+
+
 def home(request):
     categories = Category.objects.filter(is_active=True, show_on_homepage=True)
     featured_products = Product.objects.filter(is_active=True, is_featured=True)[:8]

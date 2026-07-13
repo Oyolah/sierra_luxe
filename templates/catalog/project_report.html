@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Report - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-5">Project Report</h1>
+            <h2 class="text-center mb-4">Sierra Luxe - African Fashion E-Commerce Platform</h2>
+        </div>
+    </div>
+
+    <!-- Project Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-3">Project Overview</h3>
+                    <p>Sierra Luxe is a modern e-commerce platform designed to showcase and sell authentic African fashion. The platform provides a seamless shopping experience for customers while offering robust management tools for administrators.</p>
+                    <p>This project was developed as part of the ITC4214 Internet Programming course, demonstrating full-stack web development skills using modern technologies and best practices.</p>
+                    <div class="mt-4">
+                        <h5 class="mb-3">Project Links:</h5>
+                        <div class="d-flex gap-3">
+                            <a href="https://github.com/Oyolah/sierra_luxe" target="_blank" class="btn btn-dark">
+                                <i class="fab fa-github me-2"></i>GitHub Repository
+                            </a>
+                            <a href="https://sierra-luxe.vercel.app/" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt me-2"></i>Live Deployment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">Technology Stack</h3>
+        </div>
+    </div>
+
+    <!-- Django -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-primary mb-3">Django</h4>
+                    <p><strong>What it is:</strong> Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design.</p>
+                    <p><strong>Why we chose it:</strong></p>
+                    <ul>
+                        <li>Built-in admin panel for easy content management</li>
+                        <li>Robust security features (CSRF protection, SQL injection prevention)</li>
+                        <li>ORM (Object-Relational Mapping) for database operations</li>
+                        <li>Large community and extensive documentation</li>
+                        <li>Perfect for e-commerce applications with complex data models</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vercel -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-primary mb-3">Vercel Hosting</h4>
+                    <p><strong>What it is:</strong> Vercel is a cloud platform for static sites and serverless functions that enables developers to host web projects with ease.</p>
+                    <p><strong>Why we chose it:</strong></p>
+                    <ul>
+                        <li>Automatic deployments from Git repositories</li>
+                        <li>Global CDN for fast content delivery worldwide</li>
+                        <li>Free SSL certificates for secure connections</li>
+                        <li>Excellent performance and uptime</li>
+                        <li>Seamless integration with Django through serverless functions</li>
+                        <li>Easy scaling as the application grows</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supabase -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-primary mb-3">Supabase</h4>
+                    <p><strong>What it is:</strong> Supabase is an open-source Firebase alternative that provides a PostgreSQL database, authentication, and real-time subscriptions.</p>
+                    <p><strong>Why we chose it:</strong></p>
+                    <ul>
+                        <li>PostgreSQL database with full SQL capabilities</li>
+                        <li>Built-in authentication system (email/password, OAuth)</li>
+                        <li>Real-time data synchronization</li>
+                        <li>Row-level security for data protection</li>
+                        <li>Free tier with generous limits for development</li>
+                        <li>Easy integration with Django applications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cloudinary -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-primary mb-3">Cloudinary</h4>
+                    <p><strong>What it is:</strong> Cloudinary is a cloud-based image and video management service that provides storage, optimization, and delivery of media assets.</p>
+                    <p><strong>Why we chose it:</strong></p>
+                    <ul>
+                        <li>Automatic image optimization and compression</li>
+                        <li>On-the-fly image transformations (resize, crop, format)</li>
+                        <li>CDN delivery for fast image loading</li>
+                        <li>Secure image storage with access controls</li>
+                        <li>Generous free tier for small to medium projects</li>
+                        <li>Easy Django integration for seamless media management</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Functionalities -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">Key Functionalities</h3>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">User Authentication</h5>
+                    <ul>
+                        <li>User registration and login</li>
+                        <li>Password reset functionality</li>
+                        <li>Session management with timeout</li>
+                        <li>Profile management</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Product Catalog</h5>
+                    <ul>
+                        <li>Category-based browsing</li>
+                        <li>Product search and filtering</li>
+                        <li>Detailed product pages</li>
+                        <li>Featured products showcase</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Shopping Cart</h5>
+                    <ul>
+                        <li>Add/remove products</li>
+                        <li>Quantity adjustment</li>
+                        <li>Cart persistence</li>
+                        <li>Real-time cart updates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Order Management</h5>
+                    <ul>
+                        <li>Checkout process</li>
+                        <li>Order history tracking</li>
+                        <li>Order status updates</li>
+                        <li>Payment integration ready</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Review System</h5>
+                    <ul>
+                        <li>Product ratings and reviews</li>
+                        <li>Review approval workflow</li>
+                        <li>Like functionality</li>
+                        <li>Shop-wide reviews display</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Admin Dashboard</h5>
+                    <ul>
+                        <li>Product management</li>
+                        <li>Order management</li>
+                        <li>User management</li>
+                        <li>Review moderation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-3">System Architecture</h3>
+                    <p>The application follows a Model-View-Controller (MVC) pattern implemented through Django's MVT (Model-View-Template) architecture:</p>
+                    <ul>
+                        <li><strong>Models:</strong> Define the database structure (Products, Categories, Users, Orders, Reviews)</li>
+                        <li><strong>Views:</strong> Handle business logic and user requests</li>
+                        <li><strong>Templates:</strong> Render HTML pages with dynamic content</li>
+                        <li><strong>URLs:</strong> Route incoming requests to appropriate views</li>
+                    </ul>
+                    <p class="mt-3">The frontend uses Bootstrap 5 for responsive design, jQuery for DOM manipulation, and custom JavaScript for interactive features like carousels and modals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-3">Conclusion</h3>
+                    <p>Sierra Luxe demonstrates a complete e-commerce solution built with modern web technologies. The combination of Django's robust backend, Vercel's scalable hosting, Supabase's database and authentication, and Cloudinary's media management creates a powerful and maintainable platform.</p>
+                    <p>The project showcases skills in full-stack development, database design, API integration, and responsive web design, meeting the requirements of the ITC4214 Internet Programming course.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
