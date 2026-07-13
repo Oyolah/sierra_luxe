@@ -115,7 +115,7 @@ if os.getenv('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
-            conn_max_age=60,  # Reduced from 600 to prevent connection pool exhaustion
+            conn_max_age=0,  # Disable persistent connections to prevent pool exhaustion
             conn_health_checks=True,
             ssl_require=True
         )
