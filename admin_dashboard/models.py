@@ -3,54 +3,76 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-# Dashboard permission constants - organized by module
+# Dashboard permission constants - organized by module with categories
 DASHBOARD_PERMISSIONS = [
     # Dashboard
-    ('view_dashboard', 'View Dashboard'),
+    ('view_dashboard', 'View Dashboard', 'Dashboard'),
     
     # Products
-    ('view_products', 'View Products'),
-    ('add_products', 'Add Products'),
-    ('edit_products', 'Edit Products'),
-    ('delete_products', 'Delete Products'),
-    ('manage_featured', 'Manage Featured Products'),
+    ('view_products', 'View Products', 'Products'),
+    ('add_products', 'Add Products', 'Products'),
+    ('edit_products', 'Edit Products', 'Products'),
+    ('delete_products', 'Delete Products', 'Products'),
+    ('manage_featured', 'Manage Featured Products', 'Products'),
     
     # Categories
-    ('view_categories', 'View Categories'),
-    ('add_categories', 'Add Categories'),
-    ('edit_categories', 'Edit Categories'),
-    ('delete_categories', 'Delete Categories'),
+    ('view_categories', 'View Categories', 'Categories'),
+    ('add_categories', 'Add Categories', 'Categories'),
+    ('edit_categories', 'Edit Categories', 'Categories'),
+    ('delete_categories', 'Delete Categories', 'Categories'),
     
     # Orders
-    ('view_orders', 'View Orders'),
-    ('edit_orders', 'Edit Orders'),
-    ('delete_orders', 'Delete Orders'),
-    ('update_order_status', 'Update Order Status'),
+    ('view_orders', 'View Orders', 'Orders'),
+    ('edit_orders', 'Edit Orders', 'Orders'),
+    ('delete_orders', 'Delete Orders', 'Orders'),
+    ('update_order_status', 'Update Order Status', 'Orders'),
     
     # Reviews
-    ('view_reviews', 'View Reviews'),
-    ('edit_reviews', 'Edit Reviews'),
-    ('delete_reviews', 'Delete Reviews'),
-    ('approve_reviews', 'Approve Reviews'),
+    ('view_reviews', 'View Reviews', 'Reviews'),
+    ('edit_reviews', 'Edit Reviews', 'Reviews'),
+    ('delete_reviews', 'Delete Reviews', 'Reviews'),
+    ('approve_reviews', 'Approve Reviews', 'Reviews'),
     
     # Likes
-    ('view_likes', 'View Likes'),
-    ('delete_likes', 'Delete Likes'),
+    ('view_likes', 'View Likes', 'Likes'),
+    ('delete_likes', 'Delete Likes', 'Likes'),
     
     # Users
-    ('view_users', 'View Users'),
-    ('add_staff', 'Add Staff'),
-    ('edit_staff', 'Edit Staff'),
-    ('delete_staff', 'Delete Staff'),
-    ('activate_users', 'Activate/Deactivate Users'),
+    ('view_users', 'View Users', 'Users'),
+    ('add_staff', 'Add Staff', 'Users'),
+    ('edit_staff', 'Edit Staff', 'Users'),
+    ('delete_staff', 'Delete Staff', 'Users'),
+    ('activate_users', 'Activate/Deactivate Users', 'Users'),
     
-    # Roles
-    ('view_roles', 'View Roles'),
-    ('add_roles', 'Add Roles'),
-    ('edit_roles', 'Edit Roles'),
-    ('delete_roles', 'Delete Roles'),
-    ('manage_role_permissions', 'Manage Role Permissions'),
+    # Roles & Permissions
+    ('view_roles', 'View Roles', 'Roles & Permissions'),
+    ('add_roles', 'Add Roles', 'Roles & Permissions'),
+    ('edit_roles', 'Edit Roles', 'Roles & Permissions'),
+    ('delete_roles', 'Delete Roles', 'Roles & Permissions'),
+    ('manage_role_permissions', 'Manage Role Permissions', 'Roles & Permissions'),
 ]
+
+# Helper function to get permissions grouped by category
+def get_permissions_by_category():
+    """Return permissions grouped by category from database"""
+    grouped = {}
+    # Get permissions from database to ensure they exist
+    db_permissions = RolePermission.objects.all()
+    
+    if db_permissions.exists():
+        # Use database permissions if they exist
+        for perm in db_permissions:
+            if perm.category not in grouped:
+                grouped[perm.category] = []
+            grouped[perm.category].append((perm.code, perm.name))
+    else:
+        # Fallback to constant if database is empty (shouldn't happen after seeding)
+        for code, name, category in DASHBOARD_PERMISSIONS:
+            if category not in grouped:
+                grouped[category] = []
+            grouped[category].append((code, name))
+    
+    return grouped
 
 class Role(models.Model):
     """Role model for staff users"""
@@ -78,13 +100,14 @@ class Role(models.Model):
 
 class RolePermission(models.Model):
     """Custom dashboard permissions"""
-    code = models.CharField(max_length=50, unique=True, choices=DASHBOARD_PERMISSIONS)
+    code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=100)
+    category = models.CharField(max_length=50, default='General')
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ['code']
+        ordering = ['category', 'code']
         verbose_name = 'Role Permission'
         verbose_name_plural = 'Role Permissions'
     

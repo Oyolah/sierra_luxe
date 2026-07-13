@@ -1057,15 +1057,18 @@ def role_create(request):
         try:
             role = Role.objects.create(name=name, description=description)
             if selected_permissions:
-                role.permissions.set(selected_permissions)
+                # Convert permission codes to RolePermission objects
+                permission_objects = RolePermission.objects.filter(code__in=selected_permissions)
+                role.permissions.set(permission_objects)
             messages.success(request, f'Role "{role.name}" created successfully.')
             return redirect('admin_dashboard:role_list')
         except Exception as e:
             messages.error(request, f'Error creating role: {str(e)}')
     
+    from .models import get_permissions_by_category
     context = {
         'action': 'Create',
-        'permissions': RolePermission.objects.all(),
+        'permissions_by_category': get_permissions_by_category(),
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
             ('Roles', reverse('admin_dashboard:role_list'), 'fas fa-user-shield'),
@@ -1088,17 +1091,20 @@ def role_edit(request, role_id):
         
         try:
             role.save()
-            role.permissions.set(selected_permissions)
+            # Convert permission codes to RolePermission objects
+            permission_objects = RolePermission.objects.filter(code__in=selected_permissions)
+            role.permissions.set(permission_objects)
             messages.success(request, f'Role "{role.name}" updated successfully.')
             return redirect('admin_dashboard:role_list')
         except Exception as e:
             messages.error(request, f'Error updating role: {str(e)}')
     
+    from .models import get_permissions_by_category
     context = {
         'role': role,
         'action': 'Edit',
-        'permissions': RolePermission.objects.all(),
-        'selected_permissions': set(role.permissions.values_list('id', flat=True)),
+        'permissions_by_category': get_permissions_by_category(),
+        'selected_permissions': set(role.permissions.values_list('code', flat=True)),
         'breadcrumbs': get_breadcrumbs(
             ('Dashboard', reverse('admin_dashboard:dashboard'), 'fas fa-tachometer-alt'),
             ('Roles', reverse('admin_dashboard:role_list'), 'fas fa-user-shield'),
