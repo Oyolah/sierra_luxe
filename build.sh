@@ -12,6 +12,15 @@ if [ $? -ne 0 ]; then
 fi
 echo "Migrations completed successfully"
 
+# Populate dashboard permissions
+echo "Populating dashboard permissions..."
+python manage.py populate_permissions
+if [ $? -ne 0 ]; then
+    echo "Permission population failed!"
+    exit 1
+fi
+echo "Permissions populated successfully"
+
 # Collect static files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
