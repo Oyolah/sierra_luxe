@@ -23,7 +23,7 @@ echo "Permissions populated successfully"
 
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput --clear
 if [ $? -ne 0 ]; then
     echo "Static file collection failed!"
     exit 1
