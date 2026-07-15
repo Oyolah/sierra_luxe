@@ -3,12 +3,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: var(--bg-body);
     padding: 2rem 1rem;
 }
 
 .auth-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
@@ -43,7 +43,7 @@
 
 .auth-tabs {
     border: none;
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     padding: 0.5rem;
     margin: 0;
 }
@@ -55,7 +55,7 @@
 
 .auth-tabs .nav-link {
     border: none;
-    color: #6c757d;
+    color: var(--text-secondary);
     padding: 1rem;
     font-weight: 600;
     border-radius: 10px;
@@ -94,22 +94,24 @@
 
 .auth-content .form-label {
     font-weight: 600;
-    color: #495057;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
 .auth-content .input-group-text {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    color: #6c757d;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-light);
+    color: var(--text-secondary);
     border-right: none;
 }
 
 .auth-content .form-control {
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--border-light);
     border-left: none;
     padding: 0.75rem 1rem;
     transition: all 0.3s ease;
+    background: var(--bg-input);
+    color: var(--text-primary);
 }
 
 .auth-content .form-control:focus {
@@ -118,24 +120,24 @@
 }
 
 .auth-content .input-group:focus-within .input-group-text {
-    border-color: rgba(var(--bs-dark-rgb), 1);
-    background: white;
+    border-color: var(--primary-color);
+    background: var(--bg-input);
 }
 
 .auth-content .btn-outline-secondary {
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--border-light);
     border-left: none;
-    color: #6c757d;
+    color: var(--text-secondary);
     transition: all 0.3s ease;
 }
 
 .auth-content .btn-outline-secondary:hover {
-    background: #f8f9fa;
-    color: rgba(var(--bs-dark-rgb), 1);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .auth-content .form-check-input {
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--border-light);
     width: 1.2em;
     height: 1.2em;
 }
@@ -169,9 +171,9 @@
 
 .auth-footer {
     padding: 1.5rem 2rem;
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     text-align: center;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--border-light);
 }
 
 .auth-footer a {

@@ -197,7 +197,7 @@
     top: 100%;
     z-index: 1050;
     min-width: 350px;
-    background: white;
+    background: var(--bg-dropdown);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     margin-top: 0.5rem;
@@ -224,7 +224,8 @@
 /* Global Styles */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
 }
 
 /* Navbar Styles */
@@ -237,6 +238,7 @@ body {
 .card {
     border: none;
     border-radius: 10px;
+    background-color: var(--bg-card);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -282,11 +284,16 @@ footer {
 .form-control {
     border-radius: 5px;
     padding: 12px;
+    background-color: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 .form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem var(--focus-ring);
+    background-color: var(--bg-input);
+    color: var(--text-primary);
 }
 
 /* Alert Styles */
@@ -304,7 +311,7 @@ footer {
 .price {
     font-size: 1.25rem;
     font-weight: bold;
-    color: #0d6efd;
+    color: var(--primary-color);
 }
 
 .discount-price {
@@ -332,14 +339,14 @@ footer {
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--border-color);
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: var(--text-muted);
 }

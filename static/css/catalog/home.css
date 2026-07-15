@@ -78,6 +78,7 @@
     margin-bottom: 30px;
     position: relative;
     display: inline-block;
+    color: var(--text-primary);
 }
 
 .section-title::after {

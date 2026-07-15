@@ -29,6 +29,11 @@
             </form>
             
             <ul class="navbar-nav">
+                <li class="nav-item">
+                    <button class="nav-link theme-toggle btn btn-link text-white border-0" type="button" title="Toggle Theme">
+                        <i class="fas fa-sun theme-toggle-icon"></i>
+                    </button>
+                </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item position-relative" id="cart-dropdown">
                         <a class="nav-link position-relative" href="{% url 'cart:cart_view' %}" id="cartDropdown">

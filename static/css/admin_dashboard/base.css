@@ -5,7 +5,7 @@
     --accent-color: #0f3460;
     --highlight: #e94560;
     --sidebar-bg: #1a1a2e;
-    --content-bg: #f8f9fa;
+    --content-bg: var(--bg-body);
 }
 
 * {
@@ -15,6 +15,7 @@
 body {
     background: var(--content-bg);
     overflow-x: hidden;
+    color: var(--text-primary);
 }
 
 .admin-sidebar {

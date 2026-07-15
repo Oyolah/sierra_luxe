@@ -17,18 +17,18 @@
 }
 
 .filter-section {
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     border-radius: 15px;
     padding: 20px;
 }
 
 .filter-section h5 {
-    color: #d4a017;
+    color: var(--accent-color);
     margin-bottom: 15px;
 }
 
 .filter-btn {
-    background: linear-gradient(45deg, #d4a017, #f4d03f);
+    background: linear-gradient(45deg, var(--accent-color), #f4d03f);
     border: none;
     color: #1a1a2e;
     font-weight: bold;
